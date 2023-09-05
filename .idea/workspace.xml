@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/shujuku/mystatics/images/1681130761.646044webbs-jupiter-images-showcase-auroras-hazes_52303684090_o.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/shujuku/mytemplate/mymodule/regist_module.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/shujuku/tornadodb.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/shujuku/util/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/shujuku/util/myutil.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/todo/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog/shujuku/mytemplate/mymodule/login_module.html" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/mytemplate/mymodule/login_module.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog/shujuku/mytemplate/regist.html" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/mytemplate/regist.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mytornado/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="NodePackageJsonFileManager">
+    <packageJsonPaths />
+  </component>
+  <component name="ProjectId" id="2TXnLZN3fLXAgOZH4Vqffxr1RpR" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "last_opened_file_path": "/Users/SJX/Desktop/python_program",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="" />
+      <created>1691198240254</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1691198240254</updated>
+      <workItem from="1691198241501" duration="126000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
