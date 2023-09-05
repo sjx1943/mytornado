@@ -20,7 +20,7 @@ class IndexHandler(RequestHandler):
         r=''
         msg = self.get_query_argument('msg', None)
         if msg:
-            r = '用户名或密码错误'
+            r = '用户名or密码错误'
         self.render('login.html',result=r)
 
 
