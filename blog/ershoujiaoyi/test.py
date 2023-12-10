@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from shujuku.tool import my_print
+from ershoujiaoyi.tool import my_print
 
 
 class A():

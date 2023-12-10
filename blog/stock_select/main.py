@@ -11,7 +11,7 @@ from tornado.options import define, parse_config_file, options
 from tornado.web import Application, RequestHandler, UIModule
 import pymysql
 
-from shujuku.util.myutil import mymd5
+from ershoujiaoyi.util.myutil import mymd5
 
 
 class IndexHandler(RequestHandler):
@@ -64,9 +64,10 @@ class LoginHandler(RequestHandler):
 
 
 
-class BlogHandler(RequestHandler):
+class StockHandler(RequestHandler):
     def get(self, *args, **kwargs):
-        self.render('blog.html')
+        context = {'code':'ABBNY'}
+        self.render('index.html', **context)
 
     def post(self,*args,**kwargs):
         pass
@@ -171,7 +172,7 @@ class Blogmodule(UIModule):
                         'count': 9
                     },{
                         'author':'John',
-                        'avatar': 'b.png',
+                        'avatar': 'fevicon.png',
                         'title':'what is chatgpt',
                         'content':'chatgpt is xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
                         'tags':'IT',
@@ -185,11 +186,12 @@ class Blogmodule(UIModule):
                         'count': 3
                     }])
 app = Application(handlers=[('/',IndexHandler),
+                            ('/stock',StockHandler),
                             ('/login',LoginHandler),
-                            ('/blog',BlogHandler),
                             ('/regist',RegistHandler)],
                   template_path = 'mytemplate',
                   static_path = 'mystatics',
+                  static_url_prefix='/static',
                   ui_modules={'loginmodule':Loginmodule,
                               'blogmodule':Blogmodule,
                               'registmodule':Registmodule},)

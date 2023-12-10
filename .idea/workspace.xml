@@ -1,19 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/shujuku/mystatics/images/1681130761.646044webbs-jupiter-images-showcase-auroras-hazes_52303684090_o.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/shujuku/mytemplate/mymodule/regist_module.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/shujuku/tornadodb.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/shujuku/util/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/shujuku/util/myutil.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/todo/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/shujuku/mytemplate/mymodule/login_module.html" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/mytemplate/mymodule/login_module.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/shujuku/mytemplate/regist.html" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/mytemplate/regist.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mytornado/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/a.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/banner-bg.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/banner-img.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/client-img1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/client-img2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/default_avatar.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/fevicon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/quick-icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/base.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/blog.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/login.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/blog_module.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/contact.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/login_module.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/regist_module.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/regist.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/resptemplate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/tool.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/util/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/blog/stock_select/util/myutil.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog/shujuku/resptemplate.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/resptemplate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog/shujuku/tornadodb.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/tornadodb.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog/yibu/resp.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/yibu/resp.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,10 +64,121 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "true",
+    "WebServerToolWindowPanel.toolwindow.highlight.mappings": "true",
+    "WebServerToolWindowPanel.toolwindow.highlight.symlinks": "true",
+    "WebServerToolWindowPanel.toolwindow.show.date": "false",
+    "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
+    "WebServerToolWindowPanel.toolwindow.show.size": "false",
     "last_opened_file_path": "/Users/SJX/Desktop/python_program",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RunManager" selected="Python.kelly_formula">
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <module name="python_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="kelly_formula" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="python_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.7 (webpy_project)" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python_learning/practice/application" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python_learning/practice/application/kelly_formula.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="koutu" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="python_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.7 (webpy_project)" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python_learning/practice/application" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python_learning/practice/application/koutu.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docs" factoryName="Docutils task">
+      <module name="python_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="docutils_input_file" value="" />
+      <option name="docutils_output_file" value="" />
+      <option name="docutils_params" value="" />
+      <option name="docutils_task" value="" />
+      <option name="docutils_open_in_browser" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docs" factoryName="Sphinx task">
+      <module name="python_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="docutils_input_file" value="" />
+      <option name="docutils_output_file" value="" />
+      <option name="docutils_params" value="" />
+      <option name="docutils_task" value="" />
+      <option name="docutils_open_in_browser" value="false" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.kelly_formula" />
+        <item itemvalue="Python.koutu" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -49,14 +188,21 @@
       <option name="presentableId" value="Default" />
       <updated>1691198240254</updated>
       <workItem from="1691198241501" duration="126000" />
+      <workItem from="1696047900373" duration="1233000" />
+      <workItem from="1696051118883" duration="9482000" />
+      <workItem from="1700119419886" duration="1547000" />
+      <workItem from="1700391212905" duration="53000" />
+      <workItem from="1702186227462" duration="1463000" />
+      <workItem from="1702187801127" duration="754000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
+    <SUITE FILE_PATH="coverage/python_program$kelly_formula.coverage" NAME="kelly_formula 覆盖结果" MODIFIED="1700119542959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
   </component>
   <component name="masterDetails">
     <states>

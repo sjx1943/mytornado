@@ -5,7 +5,7 @@ import json
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.options import define, parse_config_file, options
-from tornado.web import Application, RequestHandler, UIModule
+from tornado.web import Application, RequestHandler
 
 
 class IndexHandler(RequestHandler):
@@ -59,30 +59,8 @@ class LoginHandler(RequestHandler):
 
 class BlogHandler(RequestHandler):
     def get(self, *args, **kwargs):
-        self.render('blog.html')
-
-    def post(self,*args,**kwargs):
-        pass
-
-class Loginmodule(UIModule):
-    def render(self,*args,**kwargs):
-        # return 'zifuchuan'
-        # print(self.request)
-        # print(self.request.uri)
-        # print(self.request.path)
-        # print(self.request.query)
-        r=''
-        if self.request.query:
-            r = '用户名或密码错误'
-        return self.render_string('mymodule/login_module.html',result=r)
-
-class RegistHandler(RequestHandler):
-    def get(self,*args,**kwargs):
-        self.render('regist.html')
-
-class Blogmodule(UIModule):
-    def render(self,*args,**kwargs):
-        return self.render_string('mymodule/blog_module.html',blogs = [{
+        self.render('blog.html',
+                    blogs = [{
                         'author':'Tom',
                         'avatar':'a.jpeg',
                         'title':'living',
@@ -91,7 +69,7 @@ class Blogmodule(UIModule):
                         'count': 9
                     },{
                         'author':'John',
-                        'avatar': 'b.png',
+                        'avatar': 'fevicon.png',
                         'title':'what is chatgpt',
                         'content':'chatgpt is xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
                         'tags':'IT',
@@ -104,14 +82,16 @@ class Blogmodule(UIModule):
                         'tags':'bio',
                         'count': 3
                     }])
+
+    def post(self,*args,**kwargs):
+        pass
+
+
 app = Application(handlers=[('/',IndexHandler),
                             ('/login',LoginHandler),
-                            ('/blog',BlogHandler),
-                            ('/regist',RegistHandler)],
+                            ('/blog',BlogHandler)],
                   template_path = 'mytemplate',
-                  static_path = 'mystatics',
-                  ui_modules={'loginmodule':Loginmodule,
-                              'blogmodule':Blogmodule},)
+                  static_path = 'mystatics')
 
 
 define('duankou',type=int,default = 8888)
