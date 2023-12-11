@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
+import os
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -11,13 +12,7 @@ from tornado.web import Application, RequestHandler, UIModule
 class IndexHandler(RequestHandler):
 
     def get(self, *args, **kwargs):
-        r=''
-        msg = self.get_query_argument('msg', None)
-        if msg:
-            r = '用户名或密码错误'
-        self.render('login.html',result=r)
-
-
+        self.render('login.html')
 
     def post(self, *args, **kwargs):
         pass
@@ -27,34 +22,33 @@ class LoginHandler(RequestHandler):
         pass
     def post(self, *args, **kwargs):
         ua = self.get_body_argument('username', None)
-        ps = self.get_body_argument('password', None)
-        if ua == 'abc' and ps =='123':
-            #如果用户上传了文件，把上传的文件保存到服务器
-            #self.request是RequestHandler的一个属性，引用HttpServerRequest对象
-            #该对象中封装了与请求相关的所有内容
-            print(self.request)
-            #HttpServerRequest对象的files属性引用着用户通过表单上传的文件
-            #如果用户没有上传文件，files属性是空字典{}
-            #如果上传了文件
-            # {'avatar:[{
-            # 'filename':上传者本地图像名称}，
-            # 'body': 二进制格式标表示图像内容，
-            # 'content_type': 'images/jpeg',
-            # {},
-            # {}......]}
-            print(self.request.files)
-            if self.request.files:
-                avs = self.request.files['avatar']
-                for a in avs:
-                    body = a['body']
-                    writer = open('upload/%s'%a['filename'],'wb')
-                    writer.write(body)
-                    writer.close()
-            self.redirect('/blog?username='+ua)
-        else:
-            #跳转回登陆界面
-            self.redirect('/?msg=fail')
+        #通用方法get_argument
+        ps = self.get_argument('password', None)
+        favs = self.get_body_arguments('fav',None)
 
+        if ua == 'admin' and ps == '123456':
+            self.write(u'登录成功')
+        else:
+            self.write(u'登录失败')
+        # #输出到页面显示
+        # self.write('username is %s, password is %s, favs is %s' % (ua, ps, favs))
+
+class UploadHandler(RequestHandler):
+    def get(self, *args, **kwargs):
+        self.render('upload.html')
+    def post(self, *args, **kwargs):
+        #获取上传文件的信息
+        #[{filename:xxx, body:xxx, content_type:xxx},{}}]
+
+        img1 = self.request.files['img1']
+        for img in img1:
+            body = img['body']
+            content_type = img['content_type']
+            filename = img['filename']
+        with open(os.path.join(os.getcwd(),'files',filename),'wb') as f:
+            f.write(body)
+        self.set_header('Content-Type',content_type)
+        self.write(body)
 
 
 class BlogHandler(RequestHandler):
@@ -106,6 +100,7 @@ class Blogmodule(UIModule):
                     }])
 app = Application(handlers=[('/',IndexHandler),
                             ('/login',LoginHandler),
+                            ('/upload',UploadHandler),
                             ('/blog',BlogHandler),
                             ('/regist',RegistHandler)],
                   template_path = 'mytemplate',
