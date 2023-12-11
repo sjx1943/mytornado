@@ -1,12 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from ershoujiaoyi.tool import my_print
+import asyncio
+import tornado
 
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Hello, world")
 
-class A():
-    def test1(self,n):
-        my_print(n)
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+    ])
 
-a=A()
-a.test1(5)
+async def main():
+    app = make_app()
+    app.listen(18888)
+    await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    asyncio.run(main())
