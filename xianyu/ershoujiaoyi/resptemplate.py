@@ -45,15 +45,27 @@ class UploadHandler(RequestHandler):
             body = img['body']
             content_type = img['content_type']
             filename = img['filename']
+        print(content_type)
         with open(os.path.join(os.getcwd(),'files',filename),'wb') as f:
             f.write(body)
+        #告诉浏览器如何解析,本例是图片image/png
         self.set_header('Content-Type',content_type)
         self.write(body)
 
 
-class BlogHandler(RequestHandler):
+class GetRequestInfo(RequestHandler):
     def get(self, *args, **kwargs):
-        self.render('blog.html')
+        protocol = self.request.protocol
+        method = self.request.method
+        uri = self.request.uri
+        ua = self.request.headers['User-Agent']
+        # self.write('%s,%s,%s,%s' % (protocol,ua,uri,method))
+        # 重定向
+        # self.set_status(302)
+        # self.set_header('location', 'https://www.baidu.com')
+        #设置响应
+        # self.set_status(666)
+        self.set_header('Server','sggServer')
 
     def post(self,*args,**kwargs):
         pass
@@ -101,7 +113,7 @@ class Blogmodule(UIModule):
 app = Application(handlers=[('/',IndexHandler),
                             ('/login',LoginHandler),
                             ('/upload',UploadHandler),
-                            ('/blog',BlogHandler),
+                            ('/re',GetRequestInfo),
                             ('/regist',RegistHandler)],
                   template_path = 'mytemplate',
                   static_path = 'mystatics',
