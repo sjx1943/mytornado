@@ -7,7 +7,29 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.options import define, parse_config_file, options
 from tornado.web import Application, RequestHandler, UIModule
+import pymysql
+"""
+host – Host where the database server is located
+user – Username to log in as
+password – Password to use.
+database – Database to use, None to not use a particular one.
+port – MySQL port to use, default is usually OK. (default: 3306)
+unix_socket – Optionally, you can use a unix socket rather than TCP/IP.
+charset – Charset you want to use.
+sql_mode – Default SQL_MODE to use.
+read_default_file – Specifies my.cnf file to read these parameters from under the [client] section.
+conv –
+"""
 
+def _getConn():
+    settings = {"host": "127.0.0.1",
+                "port": 3306,
+                "user": "root",
+                "password": "19910403",
+                "database": "xianyu_db",
+                "charset": "utf8"
+                }
+    return pymysql.connect(**settings)
 
 class IndexHandler(RequestHandler):
 
@@ -19,7 +41,7 @@ class IndexHandler(RequestHandler):
 
 class LoginHandler(RequestHandler):
     def get(self, *args, **kwargs):
-        pass
+        self.render('login.html')
     def post(self, *args, **kwargs):
         ua = self.get_body_argument('username', None)
         #通用方法get_argument
@@ -82,9 +104,44 @@ class Loginmodule(UIModule):
             r = '用户名或密码错误'
         return self.render_string('mymodule/login_module.html',result=r)
 
+class Registmodule(UIModule):
+    def render(self, *args,**kwargs):
+        print('regist_query---->', self.request.query)
+        r = ''
+        if self.request.query:
+            err = self.request.query.split("=")[1]
+            if err == 'empty':
+                r = '请输入完整'
+            if err == 'duplicate%20error':
+                r = '已有该用户'
+            if err == 'other dberror':
+                r = '其他数据库错误'
+        return self.render_string('mymodule/regist_module.html',result=r)
 class RegistHandler(RequestHandler):
+
+    def initialize(self,conn):
+        self.conn = conn
+
+
     def get(self,*args,**kwargs):
         self.render('regist.html')
+    def post(self,*args,**kwargs):
+        uname = self.get_argument('username')
+        pwd = self.get_argument('password')
+        city = self.get_argument('city',None)
+        cursor = self.conn.cursor()
+        sql = 'insert into tb_user values(null,"%s","%s",NULL,"%s",now(),null)'%(uname,pwd,city)
+
+        # params = (uname, pwd, city)
+        try:
+            cursor.execute(sql)
+            # cursor.connection.commit()
+            # cursor.execute('insert into tb_user values(NULL,"%s","%s",NULL,"%s",now(),NULL'%(uname,pwd,city))
+            self.conn.commit()
+            self.write("success!")
+        except Exception as e:
+            self.conn.rollback()
+            self.write("fail!")
 
 class Blogmodule(UIModule):
     def render(self,*args,**kwargs):
@@ -114,11 +171,15 @@ app = Application(handlers=[('/',IndexHandler),
                             ('/login',LoginHandler),
                             ('/upload',UploadHandler),
                             ('/re',GetRequestInfo),
-                            ('/regist',RegistHandler)],
+                            ('/regist',RegistHandler,{'conn':_getConn()})],
                   template_path = 'mytemplate',
                   static_path = 'mystatics',
                   ui_modules={'loginmodule':Loginmodule,
-                              'blogmodule':Blogmodule},)
+                              'blogmodule':Blogmodule,
+                              'registmodule':Registmodule})
+
+
+
 
 
 define('duankou',type=int,default = 8888)
