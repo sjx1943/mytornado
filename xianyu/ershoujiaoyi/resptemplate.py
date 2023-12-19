@@ -6,7 +6,7 @@ import os
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.options import define, parse_config_file, options
-from tornado.web import Application, RequestHandler, UIModule
+from tornado.web import Application, RequestHandler, UIModule, RedirectHandler
 import pymysql
 """
 host – Host where the database server is located
@@ -34,7 +34,13 @@ def _getConn():
 class IndexHandler(RequestHandler):
 
     def get(self, *args, **kwargs):
-        self.render('login.html')
+        # 重定向1
+        self.set_status(302)
+        self.set_header('location', 'https://www.baidu.com')
+        # self.render('login.html')
+        # 重定向2
+        # self.redirect('https://www.jd.com')
+
 
     def post(self, *args, **kwargs):
         pass
@@ -82,9 +88,7 @@ class GetRequestInfo(RequestHandler):
         uri = self.request.uri
         ua = self.request.headers['User-Agent']
         # self.write('%s,%s,%s,%s' % (protocol,ua,uri,method))
-        # 重定向
-        # self.set_status(302)
-        # self.set_header('location', 'https://www.baidu.com')
+
         #设置响应
         # self.set_status(666)
         self.set_header('Server','sggServer')
@@ -167,7 +171,8 @@ class Blogmodule(UIModule):
                         'tags':'bio',
                         'count': 3
                     }])
-app = Application(handlers=[('/',IndexHandler),
+app = Application(handlers=[('/index',IndexHandler),
+                            ('/index2',RedirectHandler,{'url':'https://www.taobao.com'}),
                             ('/login',LoginHandler),
                             ('/upload',UploadHandler),
                             ('/re',GetRequestInfo),

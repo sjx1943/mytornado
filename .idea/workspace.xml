@@ -4,94 +4,86 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/a.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/banner-bg.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/banner-img.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/client-img1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/client-img2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/default_avatar.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/fevicon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mystatics/images/quick-icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/blog.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/blog_module.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/contact.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/login_module.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/regist_module.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/mytemplate/regist.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/resptemplate.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/tool.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/util/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/blog/stock_select/util/myutil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="P5 05">
+      <change afterPath="$PROJECT_DIR$/.idea/python_project.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/shujuku/resptemplate.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/resptemplate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/shujuku/tornadodb.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/shujuku/tornadodb.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/yibu/resp.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/yibu/resp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/ershoujiaoyi/resptemplate.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/ershoujiaoyi/resptemplate.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="NodePackageJsonFileManager">
     <packageJsonPaths />
   </component>
   <component name="ProjectId" id="2TXnLZN3fLXAgOZH4Vqffxr1RpR" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "true",
     "WebServerToolWindowPanel.toolwindow.highlight.mappings": "true",
     "WebServerToolWindowPanel.toolwindow.highlight.symlinks": "true",
     "WebServerToolWindowPanel.toolwindow.show.date": "false",
     "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
     "WebServerToolWindowPanel.toolwindow.show.size": "false",
-    "last_opened_file_path": "/Users/SJX/Desktop/python_program",
+    "last_opened_file_path": "C:/Users/sjx19/PycharmProjects/mytornado/xianyu/ershoujiaoyi/mytemplate",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ]
   }
 }]]></component>
-  <component name="RunManager" selected="Python.kelly_formula">
-    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
-      <module name="python_project" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="ADDITIONAL_ARGS" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\ershoujiaoyi\mytemplate" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.resptemplate">
     <configuration name="kelly_formula" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -100,7 +92,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.7 (webpy_project)" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python_learning/practice/application" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -123,7 +114,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.7 (webpy_project)" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python_learning/practice/application" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -138,42 +128,54 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration default="true" type="docs" factoryName="Docutils task">
+    <configuration name="resptemplate" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="docutils_input_file" value="" />
-      <option name="docutils_output_file" value="" />
-      <option name="docutils_params" value="" />
-      <option name="docutils_task" value="" />
-      <option name="docutils_open_in_browser" value="false" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/ershoujiaoyi/resptemplate.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration default="true" type="docs" factoryName="Sphinx task">
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="docutils_input_file" value="" />
-      <option name="docutils_output_file" value="" />
-      <option name="docutils_params" value="" />
-      <option name="docutils_task" value="" />
-      <option name="docutils_open_in_browser" value="false" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/ershoujiaoyi/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.resptemplate" />
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.kelly_formula" />
         <item itemvalue="Python.koutu" />
       </list>
@@ -194,13 +196,57 @@
       <workItem from="1700391212905" duration="53000" />
       <workItem from="1702186227462" duration="1463000" />
       <workItem from="1702187801127" duration="754000" />
+      <workItem from="1702276631630" duration="53000" />
+      <workItem from="1702277272970" duration="15099000" />
+      <workItem from="1702881852938" duration="5504000" />
     </task>
+    <task id="LOCAL-00001" summary="test update">
+      <created>1702277878055</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1702277878055</updated>
+    </task>
+    <task id="LOCAL-00002" summary="P4 04">
+      <created>1702285076755</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1702285076755</updated>
+    </task>
+    <task id="LOCAL-00003" summary="P5 05">
+      <created>1702357800595</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1702357800595</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="test update" />
+    <MESSAGE value="P4 04" />
+    <MESSAGE value="P5 05" />
+    <option name="LAST_COMMIT_MESSAGE" value="P5 05" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/mytornado$test.coverage" NAME="test Coverage Results" MODIFIED="1702277772915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
+    <SUITE FILE_PATH="coverage/mytornado$resptemplate.coverage" NAME="resptemplate Coverage Results" MODIFIED="1702964860528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
     <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
     <SUITE FILE_PATH="coverage/python_program$kelly_formula.coverage" NAME="kelly_formula 覆盖结果" MODIFIED="1700119542959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
   </component>
