@@ -59,7 +59,7 @@ class LoginHandler(RequestHandler):
 
 class BlogHandler(RequestHandler):
     def get(self, *args, **kwargs):
-        self.render('blog.html',
+        self.render('items.html',
                     blogs = [{
                         'author':'Tom',
                         'avatar':'a.jpeg',

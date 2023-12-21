@@ -21,15 +21,7 @@ read_default_file – Specifies my.cnf file to read these parameters from under 
 conv –
 """
 
-def _getConn():
-    settings = {"host": "127.0.0.1",
-                "port": 3306,
-                "user": "root",
-                "password": "19910403",
-                "database": "xianyu_db",
-                "charset": "utf8"
-                }
-    return pymysql.connect(**settings)
+
 
 class IndexHandler(RequestHandler):
 
@@ -40,20 +32,31 @@ class IndexHandler(RequestHandler):
         pass
 
 class LoginHandler(RequestHandler):
-    def get(self, *args, **kwargs):
-        self.render('login.html')
-    def post(self, *args, **kwargs):
-        ua = self.get_body_argument('username', None)
-        #通用方法get_argument
-        ps = self.get_argument('password', None)
-        favs = self.get_body_arguments('fav',None)
+    def initialize(self, conn):
+        self.conn = conn
 
-        if ua == 'admin' and ps == '123456':
-            self.write(u'登录成功')
+    def get(self, *args, **kwargs):
+
+        self.render('login.html')
+    def prepare(self):
+        if self.request.method == 'POST':
+            self.uname = self.get_argument('username')
+            self.pwd = self.get_argument('password')
+
+
+    def post(self, *args, **kwargs):
+        cursor = self.conn.cursor()
+        sql = 'select * from tb_user where user_name="%s" and user_password="%s"'%(self.uname,self.pwd)
+        cursor.execute(sql)
+        user = cursor.fetchone()
+        if user:
+            self.write('successdenglu')
         else:
-            self.write(u'登录失败')
-        # #输出到页面显示
-        # self.write('username is %s, password is %s, favs is %s' % (ua, ps, favs))
+            self.write('faildenglu')
+    def set_default_headers(self) -> None:
+        self.set_header("Server","SJXServer/1.0")
+    def write_error(self,status_code, **kwargs):
+        self.render('error.html')
 
 class UploadHandler(RequestHandler):
     def get(self, *args, **kwargs):
@@ -167,11 +170,18 @@ class Blogmodule(UIModule):
                         'tags':'bio',
                         'count': 3
                     }])
+dbconfig = dict(host="127.0.0.1",
+                port=3306,
+                user="root",
+                password="19910403",
+                database="xianyu_db",
+                charset="utf8")
+
 app = Application(handlers=[('/',IndexHandler),
-                            ('/login',LoginHandler),
+                            ('/login',LoginHandler,{'conn':pymysql.connect(**dbconfig)}),
                             ('/upload',UploadHandler),
                             ('/re',GetRequestInfo),
-                            ('/regist',RegistHandler,{'conn':_getConn()})],
+                            ('/regist',RegistHandler,{'conn':pymysql.connect(**dbconfig)})],
                   template_path = 'mytemplate',
                   static_path = 'mystatics',
                   ui_modules={'loginmodule':Loginmodule,

@@ -21,8 +21,8 @@ from web import db
 
 class MainHandler(RequestHandler):
     def get(self):
-        self.write('<a href="%s">link to story 1</a>' %
-                   self.reverse_url("story", "1"))
+        items = ["Item 1", "Item 2", "Item 3"]
+        self.render("template.html", title="My titlesjx", items=items)
 
 class StoryHandler(RequestHandler):
     def initialize(self, db):
@@ -56,7 +56,7 @@ def make_app():
         url(r"/myform",MyFormHandler),
         url(r"/diaotou",RedirectHandler,dict(url="http://baidu.com")),
         url(r"/api",MMainHandler)
-    ])
+    ],template_path = 'mytemplate',)
 
 async def main():
     app = make_app()
