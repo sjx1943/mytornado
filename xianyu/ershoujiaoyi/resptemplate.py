@@ -8,6 +8,18 @@ from tornado.ioloop import IOLoop
 from tornado.options import define, parse_config_file, options
 from tornado.web import Application, RequestHandler, UIModule
 import pymysql
+"""
+host – Host where the database server is located
+user – Username to log in as
+password – Password to use.
+database – Database to use, None to not use a particular one.
+port – MySQL port to use, default is usually OK. (default: 3306)
+unix_socket – Optionally, you can use a unix socket rather than TCP/IP.
+charset – Charset you want to use.
+sql_mode – Default SQL_MODE to use.
+read_default_file – Specifies my.cnf file to read these parameters from under the [client] section.
+conv –
+"""
 
 
 
