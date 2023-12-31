@@ -159,6 +159,24 @@ class Blogmodule(UIModule):
                         'tags':'bio',
                         'count': 3
                     }])
+
+class Setcookie(RequestHandler):
+    def get(self,*args,**kwargs):
+        # #普通设置方式
+        # self.set_cookie('uname','sjx',expires_days=3)
+        #加密设置方式
+        self.set_secure_cookie('uname','jiamisjx',expires_days=3)
+    # def post(self,*args,**kwargs):
+
+class Getcookie(RequestHandler):
+    def get(self,*args,**kwargs):
+        # #获取普通cookie
+        # self.write(self.get_cookie('uname'))
+        #获取加密cookie
+        self.write(self.get_secure_cookie('uname'))
+
+
+
 dbconfig = dict(host="127.0.0.1",
                 port=3306,
                 user="root",
@@ -166,16 +184,20 @@ dbconfig = dict(host="127.0.0.1",
                 database="xianyu_db",
                 charset="utf8")
 
+#cookie_secret 对应键值的作用是加密cookie中的数据，默认为随机键值加密，安全考虑用固定键值
+settings = {'cookie_secret':'sjxxx'}
+
 app = Application(handlers=[('/',IndexHandler),
                             ('/login',LoginHandler,{'conn':pymysql.connect(**dbconfig)}),
                             ('/upload',UploadHandler),
                             ('/re',GetRequestInfo),
-                            ('/regist',RegistHandler,{'conn':pymysql.connect(**dbconfig)})],
+                            ('/regist',RegistHandler,{'conn':pymysql.connect(**dbconfig)}),
+                            ('/set',Setcookie),('/get',Getcookie)],
                   template_path = 'mytemplate',
                   static_path = 'mystatics',
                   ui_modules={'loginmodule':Loginmodule,
                               'blogmodule':Blogmodule,
-                              'registmodule':Registmodule})
+                              'registmodule':Registmodule},**settings)
 
 
 
