@@ -6,16 +6,39 @@ import os
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.options import define, parse_config_file, options
-from tornado.web import Application, RequestHandler, UIModule
+from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 import pymysql
 
 
-
+def reverse(obj):
+    if isinstance(obj,list):
+        obj.reverse()
+    return obj
 
 class IndexHandler(RequestHandler):
 
     def get(self, *args, **kwargs):
-        self.render('login.html')
+        self.render('mystatics.html')
+
+    def post(self, *args, **kwargs):
+        pass
+
+
+class Person(object):
+    def __init__(self,pname):
+        self.name = pname
+
+
+class TemplateHandler(RequestHandler):
+    def get(self, *args, **kwargs):
+        L = ['a1','a2','a3']
+        D = {'k1':'v1','k2':'v2','k3':'v3'}
+        P = Person('sjx')
+        S1 = '<h1>china</h1>'
+        S2 = '<script>location.href="https://www.baidu.com"</script>'
+        self.render('template1.html',
+                    rev=reverse, s1=S1,s2=S2,
+                    title='mainPG',l=L,d=D,p=P)
 
     def post(self, *args, **kwargs):
         pass
@@ -185,9 +208,11 @@ dbconfig = dict(host="127.0.0.1",
                 charset="utf8")
 
 #cookie_secret 对应键值的作用是加密cookie中的数据，默认为随机键值加密，安全考虑用固定键值
-settings = {'cookie_secret':'sjxxx'}
+settings = {'cookie_secret':'sjxxx','xsrf_cookies':True}
 
 app = Application(handlers=[('/',IndexHandler),
+                            ('/mystatics/(.*)',StaticFileHandler,{'path':'mystatics'}),
+                            ('/moban',TemplateHandler),
                             ('/login',LoginHandler,{'conn':pymysql.connect(**dbconfig)}),
                             ('/upload',UploadHandler),
                             ('/re',GetRequestInfo),

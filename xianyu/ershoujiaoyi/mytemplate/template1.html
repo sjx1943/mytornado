@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>{{ title }}</title>
+   </head>
+   <body>
+     <ul>
+         <li>{{ l[1] }}</li> <!-- 列表 -->
+         <li>{{ d['k1']}}</li> <!-- 字典 -->
+        <li>{{ p.name}}</li>  <!-- 对象属性 -->
+     </ul>
+     <ul><!-- 逆序循环 -->
+         {% for item in rev(l) %}
+           <li>{{ escape(item) }}</li>
+         {% end %}
+     </ul>
+
+     <ul><!-- 循环 -->
+      {% for k,v in d.items() %}
+         <li>{{k}}-----{{v}}</li>
+         {% end %}
+     </ul>
+<!-- 判断 -->
+   {% if p==None %}
+       None
+   {% else %}
+        Person object<br/>
+   {% end %}
+<!-- s 会转义特殊字符,如 HTML 标记和换行符,这有助于防止跨站脚本攻击和其他安全问题。
+     raw s 不会转义特殊字符,这对于在模板中输出 HTML 或其他格式化的文本非常有用。 -->
+   {% raw s1%}<br/>
+   {{s2}}
+   </body>
+ </html>
