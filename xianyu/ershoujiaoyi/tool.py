@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# tornado框架数据库操作示例
+# tornado框架数据库直连操作示例,操作表为test表
 import pymysql
 
 dbconfig = dict(host="127.0.0.1",
@@ -19,6 +19,8 @@ def inserData(city,pro):
     cursor.execute(sql)
     conn.commit()
     conn.close()
+    # inserData('hangzhou','zhejiang')
+
 # 多行插入
 def inserDatas(args=[]):
     conn = pymysql.connect(**dbconfig)
@@ -28,6 +30,8 @@ def inserDatas(args=[]):
     cursor.executemany(sql,args)
     conn.commit()
     conn.close()
+    # inserDatas([('nanjing','jiangsu'),('lasa','xizang')])
+
 # 单表全量查询
 def queryDatas():
     conn = pymysql.connect(**dbconfig)
@@ -38,6 +42,8 @@ def queryDatas():
     msg = cursor.fetchall()
     conn.close()
     return msg
+# print(queryDatas())
+
 # 条件查询
 def queryDatasByParams(cid,city):
     conn = pymysql.connect(**dbconfig)
@@ -48,6 +54,8 @@ def queryDatasByParams(cid,city):
     msg = cursor.fetchall()
     conn.close()
     return msg
+# print(queryDatasByParams('tx','bj'))
+
 # 模糊查询,%%代表通配，例中输出以‘u'为结尾的结果
 def queryDatasBylike(x):
     conn = pymysql.connect(**dbconfig)
@@ -58,9 +66,38 @@ def queryDatasBylike(x):
     msg = cursor.fetchall()
     conn.close()
     return msg
-
-# inserData('hangzhou','zhejiang')
-# inserDatas([('nanjing','jiangsu'),('lasa','xizang')])
-# print(queryDatas())
-# print(queryDatasByParams('tx','bj'))
 # print(queryDatasBylike('u'))
+
+#分页,num代表第几页，size代表每页行数
+def query_all_page(num,size):
+    conn = pymysql.connect(**dbconfig)
+    #用连接对象创建游标对象
+    cursor = conn.cursor()
+    sql = 'select * from test limit %s,%s'%((num-1)*size,size)
+    cursor.execute(sql)
+    msg = cursor.fetchall()
+    conn.close()
+    return msg
+#print(fenye(2,3))
+
+#更新单条数据
+def update(cid,newcity):
+    conn = pymysql.connect(**dbconfig)
+    #用连接对象创建游标对象
+    cursor = conn.cursor()
+    sql = 'update test set city="%s" where cid="%s"'%(newcity,cid)
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+#update('jd','shanghai')
+
+#删除单行数据
+def delete(cid):
+    conn = pymysql.connect(**dbconfig)
+    #用连接对象创建游标对象
+    cursor = conn.cursor()
+    sql = 'delete from test where cid="%s"'%(cid)
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+#delete('tx')
