@@ -208,18 +208,20 @@ dbconfig = dict(host="127.0.0.1",
                 charset="utf8")
 
 #cookie_secret 对应键值的作用是加密cookie中的数据，默认为随机键值加密，安全考虑用固定键值
-settings = {'cookie_secret':'sjxxx','xsrf_cookies':True}
+settings = {"static_path":os.path.join(os.path.dirname(__file__), "mystatics"),
+            'template_path':os.path.join(os.path.dirname(__file__), "mytemplate"),
+            "login_url":"/login", 'cookie_secret':'sjxxx','xsrf_cookies':True}
 
 app = Application(handlers=[('/',IndexHandler),
-                            ('/mystatics/(.*)',StaticFileHandler,{'path':'mystatics'}),
+                            ('/mystatics/(.*)',StaticFileHandler,dict(path=settings['static_path'])),
                             ('/moban',TemplateHandler),
                             ('/login',LoginHandler,{'conn':pymysql.connect(**dbconfig)}),
                             ('/upload',UploadHandler),
                             ('/re',GetRequestInfo),
                             ('/regist',RegistHandler,{'conn':pymysql.connect(**dbconfig)}),
                             ('/set',Setcookie),('/get',Getcookie)],
-                  template_path = 'mytemplate',
-                  static_path = 'mystatics',
+                  # template_path = 'mytemplate',
+                  # static_path = 'mystatics',
                   ui_modules={'loginmodule':Loginmodule,
                               'blogmodule':Blogmodule,
                               'registmodule':Registmodule},**settings)
