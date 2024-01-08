@@ -16,8 +16,10 @@ from tornado.web import RequestHandler, Application, url, RedirectHandler
 
 import asyncio
 import tornado
-from web import db
-
+# from web import db
+from tornado import template
+t = template.Template("<html>{{ myvalue }}</html>")
+print(t.generate(myvalue="XXSX"))
 
 class MainHandler(RequestHandler):
     def get(self):
@@ -52,7 +54,7 @@ class MMainHandler(tornado.web.RequestHandler):
 def make_app():
     return Application([
         url(r"/", MainHandler),
-        url(r"/story/([0-9]+)", StoryHandler, dict(db=db), name="story"),
+        # url(r"/story/([0-9]+)", StoryHandler, dict(db=db), name="story"),
         url(r"/myform",MyFormHandler),
         url(r"/diaotou",RedirectHandler,dict(url="http://baidu.com")),
         url(r"/api",MMainHandler)
