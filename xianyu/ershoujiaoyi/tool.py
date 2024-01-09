@@ -114,6 +114,7 @@ from sqlalchemy import create_engine,desc,Column
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.types import Integer, String, DateTime
 from sqlalchemy.sql import func
+from sqlalchemy import ForeignKey
 
 # Update the connection URL to use PyMySQL (`+pymysql`)
 conn_url = 'mysql+pymysql://root:19910403@localhost:3306/xianyu_db?charset=utf8'
@@ -308,12 +309,39 @@ def updateUser(session, user_id, newvalue):
     user.uname = newvalue
 # updateUser(1,'zhangsan')
 
+"""
+多表ORM操作示例,采用第三方组件
+"""
+class Clazz(Base):
+    __tablename__ = 't_cls'
+    cno = Column(Integer, primary_key=True, autoincrement=True)
+    cname = Column(String(30), unique=True, nullable=False)
+    def __repr__(self):
+        return "<Clazz(class_name='%s')>" % (self.cname)
+class Student(Base):
+    __tablename__ = 't_stu'
+    sno = Column(Integer, primary_key=True, autoincrement=True)
+    sname = Column(String(30), unique=True, nullable=False)
+    cno = Column(Integer, ForeignKey('t_cls.cno',ondelete='CASCADE'))
+    def __repr__(self):
+        return "<Student(people_name='%s')>" % (self.sname)
+class Course(Base):
+    __tablename__ = 't_course'
+    courseid = Column(Integer, primary_key=True, autoincrement=True)
+    coursename = Column(String(30), unique=True, nullable=False)
+    def __repr__(self):
+        return "<Course(course_name='%s')>" % (self.coursename)
+class Middle(Base):
+    __tablename__ = 't_sc'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    sno = Column(Integer, ForeignKey('t_stu.sno',ondelete='CASCADE'))
+    courseid = Column(Integer, ForeignKey('t_course.courseid',ondelete='CASCADE'))
 
 
-
-
-
-
+# if __name__ == '__main__':
+#     Base.metadata.create_all(engine)
+#
+#
 
 
 
