@@ -110,22 +110,22 @@ tornado框架数据库ORM操作示例,采用第三方组件
 """
 
 import sqlalchemy
-from sqlalchemy import create_engine,desc,Column
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_
+from sqlalchemy.orm import declarative_base, sessionmaker,joinedload
 from sqlalchemy.types import Integer, String, DateTime
 from sqlalchemy.sql import func
-from sqlalchemy import ForeignKey
+
 
 # Update the connection URL to use PyMySQL (`+pymysql`)
-conn_url = 'mysql+pymysql://root:19910403@localhost:3306/xianyu_db?charset=utf8'
-engine = create_engine(conn_url, echo=True)
+conn_url = 'mysql+pymysql://root:19910403@localhost:3306/xianyu_db?charset=utf8mb4'
+engine = create_engine(conn_url, echo=False,pool_recycle=3600)
 
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
 
 class Test(Base):
-    __tablename__ = 'test'
+    __tablename__ = 'test1'
     userid = Column(Integer, primary_key=True, autoincrement=True)
     uname = Column(String(30), unique=True)
     pwd = Column(String(30))
@@ -140,6 +140,7 @@ class Test(Base):
 #提取公共部分形成装饰器
 def connwrapper(func):
     def _wrapper(*args, **kwargs):
+
         try:
             datas = func(session, *args, **kwargs)
             session.commit()  # 确保操作提交
@@ -158,7 +159,7 @@ def insert_record(session,uname, pwd):
         new_record = Test(uname=uname, pwd=pwd)
         session.add(new_record)
         return new_record.userid  # Return the primary key of the new record
-# insert_record('user1', 'password123')
+# insert_record('user2', 'password123')
 
 # Insert multiple records
 @connwrapper
@@ -228,7 +229,7 @@ def filter1(session, value):
 # 使用装饰器实现查询指定uname和pwd的行数据
 @connwrapper
 def filter_and(session,un,pwd):
-    from sqlalchemy import and_
+
     results = session.query(Test).filter(and_(Test.uname == un,Test.pwd == pwd)).all()
     return [row.__dict__ for row in results]
 # print(filter_and('zhangsan','122'))
@@ -336,15 +337,113 @@ class Middle(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     sno = Column(Integer, ForeignKey('t_stu.sno',ondelete='CASCADE'))
     courseid = Column(Integer, ForeignKey('t_course.courseid',ondelete='CASCADE'))
-
-
+#
 # if __name__ == '__main__':
 #     Base.metadata.create_all(engine)
+# #
 #
-#
+@connwrapper
+def insertDatas(session, cname, sname, coursenames):
+    # Insert into Clazz
+    new_class = Clazz(cname=cname)
+    session.add(new_class)
+    session.flush()  # Flush to get the generated ID for the class
+
+    # Insert into Student
+    new_student = Student(sname=sname, cno=new_class.cno)
+    session.add(new_student)
+    session.flush()  # Flush to get the generated ID for the student
+
+    # Insert into Course and Middle
+    for coursename in coursenames:
+        # Check if the course already exists
+        existing_course = session.query(Course).filter_by(coursename=coursename).first()
+        if not existing_course:
+            # If the course does not exist, create a new one
+            new_course = Course(coursename=coursename)
+            session.add(new_course)
+            session.flush()  # Flush to get the generated ID for the course
+            course_id = new_course.courseid
+        else:
+            # If the course exists, use the existing ID
+            course_id = existing_course.courseid
+
+        # Insert into Middle table
+        new_middle = Middle(sno=new_student.sno, courseid=course_id)
+        session.add(new_middle)
+
+    # Return some kind of success indicator or the created objects
+    return {"class": new_class, "student": new_student, "courses": coursenames}
+
+# Call the function
+# You would use the function like this:
+# insertDatas('class11', 'Mary', ['C++'])
 
 
+def queryALL():
+    def process_results(query_results):
+        processed_results = []
+        for result in query_results:
+            if hasattr(result, '__dict__'):
+                # It's an ORM object; convert it to a dictionary.
+                obj_dict = result.__dict__.copy()
+                obj_dict.pop('_sa_instance_state', None)
+                processed_results.append(obj_dict)
+            elif isinstance(result, tuple):
+                # Check if the tuple contains ORM objects
+                if all(hasattr(item, '__dict__') for item in result):
+                    # It's a tuple of ORM objects; convert each to a dictionary.
+                    combined_dict = {}
+                    for item in result:
+                        obj_dict = item.__dict__.copy()
+                        obj_dict.pop('_sa_instance_state', None)
+                        combined_dict.update(obj_dict)
+                    processed_results.append(combined_dict)
+                else:
+                    # It's a raw SQL result; assume the tuple is structured with known schema
+                    # You need to define the column names that correspond to your SQL query's result
+                    column_names = ['column1', 'column2']  # Replace with actual column names
+                    row_as_dict = {column_names[i]: column for i, column in enumerate(result)}
+                    processed_results.append(row_as_dict)
+            else:
+                # Handle other types of results if necessary.
+                pass  # Replace with appropriate handling code if needed.
+        return processed_results
 
+    try:
+        # 执行各种查询
+        cross_join = session.query(Student, Clazz).all()
+        equi_join = session.query(Student).join(Clazz, Student.cno == Clazz.cno).all()
+        non_equi_join = session.query(Student).join(Clazz, and_(Student.cno == Clazz.cno,Clazz.cno<3,)).all()
+        inner_join = session.query(Student).join(Clazz).filter(Student.cno == Clazz.cno).all()
+        left_outer_join = session.query(Student).outerjoin(Clazz, Student.cno == Clazz.cno).all()
+        native_sql_query = session.execute(text("SELECT * FROM t_cls")).fetchall()
+        # print('查看原始结果1',cross_join)
+        # print('查看原始结果2', native_sql_query)
+        # 处理查询结果
+        results = {
+            "cross_join": process_results(cross_join),
+            "equi_join": process_results(equi_join),
+            "non_equi_join": process_results(non_equi_join),
+            "inner_join": process_results(inner_join),
+            "left_outer_join": process_results(left_outer_join),
+            "native_sql": process_results(native_sql_query)
+        }
+
+    finally:
+        session.close()
+
+    # 打印结果
+    for key, value in results.items():
+        print(f"{key}:")
+        for item in value:
+            print(item)
+
+    return results
+
+
+# 调用函数进行查询
+queryALL()
 
 
 

@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urldefrag
 
 import tornado
 from tornado import gen, httpclient, queues
+from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url, RedirectHandler
@@ -60,11 +61,28 @@ def make_app():
         url(r"/api",MMainHandler)
     ],template_path = 'mytemplate',)
 
-async def main():
-    app = make_app()
-    app.listen(8888)
-    shutdown_event = asyncio.Event()
-    await shutdown_event.wait()
+# async def main():
+#     app = make_app()
+#     app.listen(8888)
+#     shutdown_event = asyncio.Event()
+#     await shutdown_event.wait()
+#
+# if __name__ == "__main__":
+#     asyncio.run(main())
+async def f():
+    http_client = AsyncHTTPClient()
+    try:
+        response = await http_client.fetch("http://www.google.com/")
+    except Exception as e:
+        print("Error: %s" % e)
+    else:
+        print(response.body)
+
+def main():
+    io_loop = tornado.ioloop.IOLoop()
+    io_loop.add_callback(f)
+    io_loop.start()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
+
