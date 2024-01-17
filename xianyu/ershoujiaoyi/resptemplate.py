@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+from urllib.parse import urlencode
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -58,13 +59,15 @@ class LoginHandler(RequestHandler):
 
     def post(self, *args, **kwargs):
         cursor = self.conn.cursor()
-        sql = 'select * from tb_user where user_name="%s" and user_password="%s"'%(self.uname,self.pwd)
-        cursor.execute(sql)
+        sql = 'SELECT * FROM tb_user WHERE uname=%s AND pwd=%s'
+        cursor.execute(sql, (self.uname, self.pwd))
         user = cursor.fetchone()
         if user:
-            self.write('successdenglu')
+            # Use the username from the user object to display the personalized message
+            self.write('你好，%s' % self.uname)
         else:
             self.write('faildenglu')
+
     def set_default_headers(self) -> None:
         self.set_header("Server","SJXServer/1.0")
     def write_error(self,status_code, **kwargs):
@@ -116,7 +119,7 @@ class Loginmodule(UIModule):
         # print(self.request.query)
         r=''
         if self.request.query:
-            r = '用户名或密码错误'
+            r = '注册成功，返回登录'
         return self.render_string('mymodule/login_module.html',result=r)
 
 class Registmodule(UIModule):
@@ -124,39 +127,46 @@ class Registmodule(UIModule):
         print('regist_query---->', self.request.query)
         r = ''
         if self.request.query:
-            err = self.request.query.split("=")[1]
-            if err == 'empty':
-                r = '请输入完整'
-            if err == 'duplicate%20error':
-                r = '已有该用户'
-            if err == 'other dberror':
-                r = '其他数据库错误'
-        return self.render_string('mymodule/regist_module.html',result=r)
-class RegistHandler(RequestHandler):
+            r = '注册失败'
+        return self.render_string('mymodule/regist_module.html', result=r)
 
+
+class RegistHandler(RequestHandler):
     def initialize(self,conn):
         self.conn = conn
-
-
     def get(self,*args,**kwargs):
-        self.render('regist.html')
+        error_message = self.get_argument('error',None)
+        self.render('regist.html',error = error_message)
     def post(self,*args,**kwargs):
-        uname = self.get_argument('username')
-        pwd = self.get_argument('password')
-        city = self.get_argument('city',None)
-        cursor = self.conn.cursor()
-        sql = 'insert into tb_user values(null,"%s","%s",NULL,"%s",now(),null)'%(uname,pwd,city)
+        uname = self.get_argument('username', '').strip()  # Use strip() to remove leading/trailing whitespace
+        pwd = self.get_argument('password', '').strip()
+        city = self.get_argument('city', None)
 
-        # params = (uname, pwd, city)
+        # Check if username or password is empty
+        if not uname or not pwd:
+            error_message = '用户名和密码不能为空'
+            self.redirect('/regist?' + urlencode({'error': error_message}))
+            return  # Return early to prevent further processing
+
+        cursor = self.conn.cursor()
+        sql = 'INSERT INTO tb_user (uname, pwd, city, create_time) VALUES (%s, %s, %s, NOW())'
+        params = (uname, pwd, city)
         try:
-            cursor.execute(sql)
-            # cursor.connection.commit()
-            # cursor.execute('insert into tb_user values(NULL,"%s","%s",NULL,"%s",now(),NULL'%(uname,pwd,city))
+            cursor.execute(sql, params)
             self.conn.commit()
-            self.write("success!")
+            self.redirect('/login?success=1')
         except Exception as e:
             self.conn.rollback()
-            self.write("fail!")
+            error_message = str(e)
+            if 'duplicate' in error_message.lower():
+                error_message = '已有该用户'
+            elif 'not null' in error_message.lower():
+                error_message = '请输入完整'
+            else:
+                error_message = '其他数据库错误'
+            self.redirect('/regist?注册失败：' + urlencode({'error': error_message}))
+
+
 
 class Blogmodule(UIModule):
     def render(self,*args,**kwargs):
