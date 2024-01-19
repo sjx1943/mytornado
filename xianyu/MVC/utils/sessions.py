@@ -2,7 +2,7 @@
 
 import uuid
 import pickle
-
+#tornado框架没有提供session工具，需要自己封装
 class Session(object):
     def __init__(self):
         self._sessionid = uuid.uuid4().get_hex()
