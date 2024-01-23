@@ -7,21 +7,20 @@ from datetime import timedelta
 
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urldefrag
-import socket
+
 import tornado
-from tornado.queues import Queue, PriorityQueue
 from tornado import gen, httpclient, queues
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url, RedirectHandler
-from tornado.locks import Event, Condition
+import re
 import asyncio
 import tornado
 # from web import db
 from tornado import template
-t = template.Template("<html>{{ myvalue }}</html>")
-print(t.generate(myvalue="XXSX"))
+import redis
+
 
 class MainHandler(RequestHandler):
     def get(self):
@@ -71,15 +70,32 @@ def make_app():
 # if __name__ == "__main__":
 #     asyncio.run(main())
 
+def parse_time(time_str):
+    # 正则表达式匹配小时、分钟和可选的AM/PM
+    match = re.match(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)?', time_str, re.I)
+    if not match:
+        raise ValueError("Invalid time format")
 
-async def main():
-    q = PriorityQueue()
-    q.put((1, 'medium-priority item'))
-    q.put((0, 'high-priority item'))
-    q.put((-100, 'low-priority item'))
+    # 从匹配的结果中提取小时、分钟和周期
+    hours, minutes, period = match.groups()
+    hours = int(hours)
+    minutes = int(minutes) if minutes else 0
+    period = period.lower() if period else None
 
-    print(await q.get())
-    print(await q.get())
-    print(await q.get())
+    # 根据AM/PM调整小时数
+    if period == 'am' and hours == 12:
+        hours = 0
+    elif period == 'pm' and hours != 12:
+        hours += 12
+    elif hours == 24:
+        hours = 0
 
-asyncio.run(main())
+    # 返回总分钟数
+    return hours * 60 + minutes
+
+# 测试函数
+print(parse_time("4pm"))       # 960
+print(parse_time("7:38pm"))    # 1158
+print(parse_time("23:42"))     # 1422
+print(parse_time("3:16"))      # 196
+print(parse_time("00:03"))    #2

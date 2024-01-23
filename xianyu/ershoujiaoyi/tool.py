@@ -116,6 +116,7 @@ from sqlalchemy.types import Integer, String, DateTime
 from sqlalchemy.sql import func
 
 
+
 # Update the connection URL to use PyMySQL (`+pymysql`)
 conn_url = 'mysql+pymysql://root:19910403@localhost:3306/xianyu_db?charset=utf8mb4'
 engine = create_engine(conn_url, echo=True, pool_recycle=3600)
@@ -125,16 +126,17 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 class Test(Base):
-    __tablename__ = 'test1'
+    __tablename__ = 'tb_user'
     userid = Column(Integer, primary_key=True, autoincrement=True)
-    uname = Column(String(30), unique=True)
+    uname = Column(String(30), unique=True, nullable=False)
     pwd = Column(String(30))
+    city = Column(String(10))
     create_time = Column(DateTime,default=func.now())
     def __repr__(self):
         return "<Test(userid='%s',uname='%s',create_time='%s')>" % (self.userid,self.uname,self.create_time)
 # Create all tables in the engine. This is equivalent to "Create Table"
 # statements in raw SQL.
-# Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 
 #提取公共部分形成装饰器
@@ -443,7 +445,7 @@ def queryALL():
 
 
 # 调用函数进行查询
-queryALL()
+# queryALL()
 
 
 

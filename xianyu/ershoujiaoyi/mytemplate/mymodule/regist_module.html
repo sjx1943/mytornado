@@ -1,4 +1,5 @@
 <form method="post" action="/regist" enctype="multipart/form-data">
+    {% raw xsrf_form_html() %} <!-- 防跨域攻击 -->
         <tr>
             <td>
                 <input type="text" name="username" placeholder="用户名"><br>
