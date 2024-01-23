@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+    <style>
+
+        #divId{
+            width:500px;
+            height: 300px;
+            border: 1px solid gray;
+            overflow: auto;
+            background: lightblue;
+        }
+
+        #msg{
+            width: 400px;
+            height: 40px;
+            font-size: 20px;
+        }
+
+
+        #btn{
+            width:99px;
+            height: 42px;
+            border:none;
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <div id="divId"></div>
+    <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="send();" />
+
+    <script>
+        var ws = new WebSocket('ws://127.0.0.1:8000/chat/');
+
+
+        ws.onmessage = function (evt) {
+            $('#divId').append('<p>'+evt.data+'</p>');
+        }
+
+        function send(){
+            var msg = $('#msg').val();
+            ws.send(msg);
+            $('#msg').val('');
+        }
+
+
+    </script>
+</body>
+</html>

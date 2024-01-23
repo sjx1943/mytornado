@@ -4,14 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="before P28 28">
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/modes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/server.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/utils/sessions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/views.py" afterDir="false" />
+    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="P28 28">
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/chat_room.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/chat.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/yibu/mytemplate/myName.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/yibu/mytemplate/theme_list.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/yibu/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -63,6 +62,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
@@ -79,7 +79,7 @@
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "http.proxy",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -91,11 +91,35 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC\templates" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\yibu\mytemplate" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\yibu" />
       <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC\utils" />
-      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\ershoujiaoyi\mytemplate" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.server">
+  <component name="RunManager" selected="Python.chat_room">
+    <configuration name="chat_room" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="python_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/MVC" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/MVC/chat_room.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="resptemplate" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -162,42 +186,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="test (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Program Files\Python311\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/yibu" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/ershoujiaoyi/test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="tool" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="python_project" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="C:\Program Files\Python311\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/ershoujiaoyi/tool.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/yibu/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -207,19 +209,19 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.chat_room" />
+      <item itemvalue="Python.test (1)" />
       <item itemvalue="Python.server" />
       <item itemvalue="Python.sessions" />
       <item itemvalue="Python.resptemplate" />
-      <item itemvalue="Python.test" />
-      <item itemvalue="Python.tool" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.chat_room" />
+        <item itemvalue="Python.test (1)" />
         <item itemvalue="Python.server" />
         <item itemvalue="Python.sessions" />
         <item itemvalue="Python.resptemplate" />
-        <item itemvalue="Python.tool" />
-        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -246,7 +248,8 @@
       <workItem from="1705288312198" duration="6265000" />
       <workItem from="1705305931638" duration="8429000" />
       <workItem from="1705485980248" duration="10195000" />
-      <workItem from="1705547303949" duration="4385000" />
+      <workItem from="1705547303949" duration="4705000" />
+      <workItem from="1705910282723" duration="8305000" />
     </task>
     <task id="LOCAL-00001" summary="test update">
       <created>1702277878055</created>
@@ -311,7 +314,14 @@
       <option name="project" value="LOCAL" />
       <updated>1705495594627</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="P28 28">
+      <created>1705640178383</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1705640178384</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -335,6 +345,7 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="test update" />
     <MESSAGE value="P4 04" />
     <MESSAGE value="P5 05" />
@@ -343,16 +354,19 @@
     <MESSAGE value="P22 22" />
     <MESSAGE value="P23 23" />
     <MESSAGE value="before P28 28" />
-    <option name="LAST_COMMIT_MESSAGE" value="before P28 28" />
+    <MESSAGE value="P28 28" />
+    <option name="LAST_COMMIT_MESSAGE" value="P28 28" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/mytornado$test.coverage" NAME="test Coverage Results" MODIFIED="1705486460495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
+    <SUITE FILE_PATH="coverage/mytornado$chat_room.coverage" NAME="chat_room Coverage Results" MODIFIED="1705999153288" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
     <SUITE FILE_PATH="coverage/mytornado$resptemplate.coverage" NAME="resptemplate Coverage Results" MODIFIED="1705495480365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
     <SUITE FILE_PATH="coverage/mytornado$server.coverage" NAME="server Coverage Results" MODIFIED="1705638672982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
     <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
     <SUITE FILE_PATH="coverage/mytornado$tool.coverage" NAME="tool Coverage Results" MODIFIED="1705490019732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
     <SUITE FILE_PATH="coverage/python_program$kelly_formula.coverage" NAME="kelly_formula 覆盖结果" MODIFIED="1700119542959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
     <SUITE FILE_PATH="coverage/mytornado$sessions.coverage" NAME="sessions Coverage Results" MODIFIED="1705637190496" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/utils" />
+    <SUITE FILE_PATH="coverage/mytornado$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1705917461037" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/yibu" />
   </component>
   <component name="masterDetails">
     <states>
