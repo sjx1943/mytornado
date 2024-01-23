@@ -7,14 +7,15 @@ from datetime import timedelta
 
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urldefrag
-
+import socket
 import tornado
+from tornado.queues import Queue, PriorityQueue
 from tornado import gen, httpclient, queues
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url, RedirectHandler
-
+from tornado.locks import Event, Condition
 import asyncio
 import tornado
 # from web import db
@@ -69,20 +70,16 @@ def make_app():
 #
 # if __name__ == "__main__":
 #     asyncio.run(main())
-async def f():
-    http_client = AsyncHTTPClient()
-    try:
-        response = await http_client.fetch("http://www.google.com/")
-    except Exception as e:
-        print("Error: %s" % e)
-    else:
-        print(response.body)
 
-def main():
-    io_loop = tornado.ioloop.IOLoop()
-    io_loop.add_callback(f)
-    io_loop.start()
 
-if __name__ == "__main__":
-    main()
+async def main():
+    q = PriorityQueue()
+    q.put((1, 'medium-priority item'))
+    q.put((0, 'high-priority item'))
+    q.put((-100, 'low-priority item'))
 
+    print(await q.get())
+    print(await q.get())
+    print(await q.get())
+
+asyncio.run(main())
