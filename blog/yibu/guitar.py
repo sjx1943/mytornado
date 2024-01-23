@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#吉他 指弹练习指法生成
+#吉他 指弹练习指法生成1.23
 
 import random
 

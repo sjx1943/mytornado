@@ -119,7 +119,7 @@ from sqlalchemy.sql import func
 
 # Update the connection URL to use PyMySQL (`+pymysql`)
 conn_url = 'mysql+pymysql://root:19910403@localhost:3306/xianyu_db?charset=utf8mb4'
-engine = create_engine(conn_url, echo=False,pool_recycle=3600)
+engine = create_engine(conn_url, echo=True, pool_recycle=3600)
 
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
