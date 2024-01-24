@@ -3,6 +3,7 @@ import tornado.ioloop
 import tornado.web
 from tornado.options import define
 from tornado.options import options
+from tornado.websocket import WebSocketHandler
 
 
 class BaseHandler(tornado.web.RequestHandler):
