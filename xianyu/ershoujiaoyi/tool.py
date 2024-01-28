@@ -7,9 +7,9 @@ import pymysql
 
 dbconfig = dict(host="127.0.0.1",
                 port=3306,
-                user="root",
+                user="sjx",
                 password="19910403",
-                database="xianyu_db",
+                database="db01",
                 charset="utf8")
 
 # 单行插入
@@ -118,7 +118,7 @@ from sqlalchemy.sql import func
 
 
 # Update the connection URL to use PyMySQL (`+pymysql`)
-conn_url = 'mysql+pymysql://root:19910403@localhost:3306/xianyu_db?charset=utf8mb4'
+conn_url = 'mysql+pymysql://sjx:19910403@localhost:3306/db01?charset=utf8mb4'
 engine = create_engine(conn_url, echo=True, pool_recycle=3600)
 
 Base = declarative_base()
@@ -126,7 +126,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 class Test(Base):
-    __tablename__ = 'tb_user'
+    __tablename__ = 'tb_user1'
     userid = Column(Integer, primary_key=True, autoincrement=True)
     uname = Column(String(30), unique=True, nullable=False)
     pwd = Column(String(30))
@@ -136,7 +136,7 @@ class Test(Base):
         return "<Test(userid='%s',uname='%s',create_time='%s')>" % (self.userid,self.uname,self.create_time)
 # Create all tables in the engine. This is equivalent to "Create Table"
 # statements in raw SQL.
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 
 #提取公共部分形成装饰器
@@ -379,7 +379,7 @@ def insertDatas(session, cname, sname, coursenames):
 
 # Call the function
 # You would use the function like this:
-# insertDatas('class11', 'Mary', ['C++'])
+# insertDatas('class11', 'Mary', ['C++','JavaScript'])
 
 
 def queryALL():

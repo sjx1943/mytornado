@@ -22,9 +22,10 @@ class IndexHandler(RequestHandler):
         p = Person('xiaoming')
 
         s = '<h1>中国</h1>'
-        s1 = '<script>location.href="https://www.baidu.com"</script>'
-
+        # s1 = '<script>location.href="https://www.baidu.com"</script>'
+        s1 = '<h1>asia</h1>'
         self.render('temp1.html',uname='wangwu',l=l,d=d,p=p,rev=reverse,s=s,s1=s1)
+
 
 app = Application([
     (r'/index',IndexHandler)

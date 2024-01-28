@@ -17,7 +17,7 @@ class IndexHandler(RequestHandler):
         # self.write(c)
 
         #升级1
-        # self.render('templates/temp.html',uname='lisi')
+        # render作用：向指定页面传参
         self.render('temp.html',uname='wangwu')
 
 app = Application([

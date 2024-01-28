@@ -9,7 +9,7 @@ from tornado.concurrent import Future
 class IndexHandler(RequestHandler):
     @coroutine
     def get(self,filename):
-        print filename
+        print(filename)
         content = yield self.readImg(filename)
 
         if not content:

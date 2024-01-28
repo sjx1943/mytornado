@@ -36,6 +36,6 @@ app = Application([
     (r'^/websocket/?$', ChatHandler),
 ],template_path=os.path.join(os.getcwd(),'templates'),debug=True)
 
-app.listen(8000,address='127.0.0.1')
+app.listen(8000,address='192.168.9.81')
 
 IOLoop.instance().start()

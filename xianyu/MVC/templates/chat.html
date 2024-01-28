@@ -36,7 +36,7 @@
     <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="send();" />
 
     <script>
-        var ws = new WebSocket('ws://127.0.0.1:8000/chat/');
+        var ws = new WebSocket('ws://192.168.9.81:8000/chat/');
 
 
         ws.onmessage = function (evt) {

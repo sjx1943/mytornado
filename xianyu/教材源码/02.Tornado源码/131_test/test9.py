@@ -4,7 +4,7 @@
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler
 from tornado.web import Application
-import MySQLdb
+import pymysql
 
 class LoginHandler(RequestHandler):
 
@@ -16,7 +16,7 @@ class LoginHandler(RequestHandler):
             self.uname = self.get_argument('uname')
             self.pwd = self.get_argument('pwd')
 
-
+#实现错误自动跳转到指定页面
     def get(self, *args, **kwargs):
         1/0
         self.render('templates/login1.html')
@@ -25,12 +25,14 @@ class LoginHandler(RequestHandler):
         #获取游标对象
         cursor = self.conn.cursor()
         #执行SQL语句
-        cursor.execute('select * from t_user where uname="%s" and pwd="%s"'%(self.uname,self.pwd))
+        sql = "select * from tb_user where uname='%s' and pwd='%s'" % (self.uname, self.pwd)
+        cursor.execute(sql)
+
         #获取执行结果
-        user = cursor.fetchone()
+        user = cursor.fetchall()
         #判断是否登录成功
         if user:
-            self.write('登录成功！')
+            self.write('登录成功喽！')
         else:
             self.write('登录失败！')
 
@@ -46,11 +48,11 @@ class LoginHandler(RequestHandler):
 
 
 
-dbconfig=dict(host='127.0.0.1',user='root',passwd='123456',db='db01',port=3306)
+dbconfig=dict(host='127.0.0.1',user='sjx',passwd='19910403',db='db01',port=3306)
 
 
 app = Application([
-    (r'/login',LoginHandler,{'conn':MySQLdb.connect(**dbconfig)})
+    (r'/login',LoginHandler,{'conn':pymysql.connect(**dbconfig)})
 ])
 
 if __name__ == '__main__':

@@ -23,14 +23,17 @@ class LoginHandler(tornado.web.RequestHandler):
         pwd = self.get_argument('pwd')
         favs = self.get_query_arguments('fav')
 
-
+        #你的 get 方法中，使用了 get_query_arguments('fav') 来获取 fav 参数的值，
+        # 这意味着你应该在 URL 中使用 fav 作为参数名
+        # 例如：http://localhost:8000/login/?uname=sjx&pwd=1234&fav=eat&fav=sleep
 
         #输出到页面显示
+        #页面显示结果为  sjx, 1234, ['eat', 'sleep']
         self.write('%s,%s,%s'%(uname,pwd,favs))
 
     def post(self, *args, **kwargs):
         # 获取请求参数(POST请求方式)
-        uname = self.get_body_argument('uname')
+        uname = self.get_body_argument('username')
         # pwd = self.get_body_argument('pwd')
         # favs = self.get_body_arguments('fav')
         pwd = self.get_argument('pwd')

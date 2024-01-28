@@ -4,11 +4,11 @@
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler
 from tornado.web import Application
-import MySQLdb
+import pymysql
 
 
 def _getConn():
-    return MySQLdb.connect(host='127.0.0.1',user='root',passwd='123456',db='db01',port=3306)
+    return pymysql.connect(host='127.0.0.1',user='sjx',passwd='19910403',db='db01',port=3306)
 
 class RegisterHandler(RequestHandler):
     def initialize(self,conn):
@@ -22,13 +22,16 @@ class RegisterHandler(RequestHandler):
         uname = self.get_argument('uname')
         pwd = self.get_argument('pwd')
 
-
+        cursor = self.conn.cursor()
+        sql = 'insert into tb_user (uname, pwd) VALUES (%s, %s)'
+        params = (uname, pwd)
         try:
-            cursor = self.conn.cursor()
-            cursor.execute('insert into t_user values(null,"%s","%s",now())'%(uname,pwd))
+
+            cursor.execute(sql,params)
             self.conn.commit()
             self.write('注册成功！')
         except Exception as e:
+            print(e)
             self.conn.rollback()
             self.write('注册失败！')
 
