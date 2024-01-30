@@ -5,95 +5,77 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="P32 32">
-      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/125_test/files/截图 2024-01-21 12-35-09.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/auth_controller.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/main_controller.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/product_controller.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/models/chat.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/models/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/models/product.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/models/user.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/main_page.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/product_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/register.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/.idea/10第十阶段：Tornado.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/124_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/125_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/126_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/127_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/files/bd_logo1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/templates/login.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/templates/register.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/templates/upload.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test1.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test4.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test5.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test6.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/128_test/test7.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/132_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/133_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/134_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/135_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/136_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/137_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/138_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/139_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/140_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/141_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/142_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/142_test/test19.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/142_test/test20.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/142_test/test21.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/files/bd_logo1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/static/css/my.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/static/images/bd_logo1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/143_test/static/js/my.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/144_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/145_test/.idea/test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/146_test/.idea/test.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/python_project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/python_project.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mystatics/images/1681130761.646044webbs-jupiter-images-showcase-auroras-hazes_52303684090_o.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mystatics/images/a.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mystatics/images/b.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mystatics/images/default_avatar.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/base.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/blog.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/login.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/mymodule/blog_module.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/mymodule/login_module.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/mymodule/regist_module.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/mytemplate/regist.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/resptemplate.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/tool.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/tornadodb.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/util/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/ershoujiaoyi/util/myutil.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/a.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/banner-bg.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/banner-img.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/client-img1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/client-img2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/default_avatar.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/fevicon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/icon-3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/img-3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mystatics/images/quick-icon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/base.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/blog.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/login.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/blog_module.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/contact.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/login_module.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/mymodule/regist_module.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/mytemplate/regist.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/resptemplate.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/tool.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/util/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/stock_select/util/myutil.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/chat_room.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/chat_room.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/templates/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/templates/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/ershoujiaoyi/tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/ershoujiaoyi/tool.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/122_test1.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/templates/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/test1.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/test1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/test2.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/123_test/test2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/127_test/test6.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/127_test/test6.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/test6.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/test6.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/test8.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test/test8.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/test6.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/test6.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/test8.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/test8.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/test9.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test/test9.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test6.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test6.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test7.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test8.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test8.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test9.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test/test9.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/132_test/test11.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/132_test/test11.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/133_test/templates/temp1.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/133_test/templates/temp1.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/133_test/test12.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/133_test/test12.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/134_test/test12.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/134_test/test12.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/144_test/test23.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/144_test/test23.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/145_test/test23.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/145_test/test23.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/145_test/test24.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4/test1.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4/test1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4/test2.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4/test2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test1.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test2.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test3.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test4.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test4.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/03.Tornado笔记/5_Tornado_语法源码.rar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/03.Tornado笔记/5_Tornado_语法笔记.rar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/教材源码/5_案例3-登录功能（不连数据库）.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/chat_room.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/chat_room.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/modes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/models/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/views/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,20 +105,6 @@
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;sjx1943&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">
-    <option name="selectedUrlAndAccountId">
-      <UrlAndAccount>
-        <option name="accountId" value="eaca7d94-345d-40cd-a91f-b83ca92efa1d" />
-        <option name="url" value="https://github.com/sjx1943/mytornado.git" />
-      </UrlAndAccount>
-    </option>
-  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -159,27 +127,6 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "DefaultHtmlFileTemplate": "HTML File",
-    "Python.122_test1.executor": "Run",
-    "Python.chat_room.executor": "Run",
-    "Python.server.executor": "Run",
-    "Python.test1.executor": "Run",
-    "Python.test10.executor": "Run",
-    "Python.test11.executor": "Run",
-    "Python.test12.executor": "Run",
-    "Python.test13.executor": "Run",
-    "Python.test14.executor": "Run",
-    "Python.test17.executor": "Run",
-    "Python.test2 (1).executor": "Run",
-    "Python.test2.executor": "Run",
-    "Python.test23.executor": "Run",
-    "Python.test3.executor": "Run",
-    "Python.test4.executor": "Run",
-    "Python.test5.executor": "Run",
-    "Python.test6.executor": "Run",
-    "Python.test7.executor": "Run",
-    "Python.test8.executor": "Run",
-    "Python.test9.executor": "Run",
-    "Python.tool.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -189,15 +136,14 @@
     "WebServerToolWindowPanel.toolwindow.show.date": "false",
     "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
     "WebServerToolWindowPanel.toolwindow.show.size": "false",
-    "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "/home/kennys/Downloads/尚学堂官网-IT培训 Java培训 人工智能+Python培训 大数据培训 Web前端培训.html",
+    "last_opened_file_path": "C:/Users/sjx19/PycharmProjects/mytornado/xianyu/MVC/views",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "http.proxy",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -208,37 +154,14 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4" />
-      <recent name="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/145_test" />
-      <recent name="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/134_test" />
-      <recent name="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test" />
-      <recent name="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC\views" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC\models" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC\controllers" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC" />
+      <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC\templates" />
     </key>
   </component>
   <component name="RunManager" selected="Python.chat_room">
-    <configuration name="122_test1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="python_project" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/122_test1.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="chat_room" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="ENV_FILES" value="" />
@@ -262,7 +185,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="resptemplate" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -270,13 +193,13 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4" />
+      <option name="SDK_HOME" value="C:\Program Files\Python311\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4/test2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/ershoujiaoyi/resptemplate.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -285,7 +208,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test3" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="server" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -294,12 +217,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/MVC" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test3.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/MVC/server.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -308,7 +231,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test4" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="sessions" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -317,12 +240,35 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/MVC/utils" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4/test4.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/MVC/utils/sessions.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="python_project" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/xianyu/yibu" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/xianyu/yibu/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -332,26 +278,26 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.122_test1" />
       <item itemvalue="Python.chat_room" />
-      <item itemvalue="Python.test2" />
-      <item itemvalue="Python.test3" />
-      <item itemvalue="Python.test4" />
+      <item itemvalue="Python.resptemplate" />
+      <item itemvalue="Python.server" />
+      <item itemvalue="Python.sessions" />
+      <item itemvalue="Python.test (1)" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.chat_room" />
-        <item itemvalue="Python.122_test1" />
-        <item itemvalue="Python.test4" />
-        <item itemvalue="Python.test3" />
-        <item itemvalue="Python.test2" />
+        <item itemvalue="Python.test (1)" />
+        <item itemvalue="Python.server" />
+        <item itemvalue="Python.sessions" />
+        <item itemvalue="Python.resptemplate" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5a2391486177-2887949eec09-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.13763.11" />
+        <option value="bundled-python-sdk-50da183f06c8-2887949eec09-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.13135.95" />
       </set>
     </attachedChunks>
   </component>
@@ -386,9 +332,6 @@
       <workItem from="1706005754587" duration="3019000" />
       <workItem from="1706010722591" duration="3259000" />
       <workItem from="1706016607016" duration="228000" />
-      <workItem from="1706411382124" duration="71000" />
-      <workItem from="1706411461313" duration="7535000" />
-      <workItem from="1706427175086" duration="6568000" />
     </task>
     <task id="LOCAL-00001" summary="test update">
       <created>1702277878055</created>
@@ -505,32 +448,14 @@
     <option name="LAST_COMMIT_MESSAGE" value="P32 32" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/mytornado$test1.coverage" NAME="test1 Coverage Results" MODIFIED="1706430660359" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4" />
-    <SUITE FILE_PATH="coverage/mytornado$test4.coverage" NAME="test4 Coverage Results" MODIFIED="1706432355415" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4" />
-    <SUITE FILE_PATH="coverage/mytornado$test2__1_.coverage" NAME="test2 (1) Coverage Results" MODIFIED="1706412435523" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/124_test" />
-    <SUITE FILE_PATH="coverage/mytornado$resptemplate.coverage" NAME="resptemplate Coverage Results" MODIFIED="1705495480365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
-    <SUITE FILE_PATH="coverage/mytornado$test7.coverage" NAME="test7 Coverage Results" MODIFIED="1706416081256" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test12.coverage" NAME="test12 Coverage Results" MODIFIED="1706427719667" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/133_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test3.coverage" NAME="test3 Coverage Results" MODIFIED="1706431671086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/151_test4" />
-    <SUITE FILE_PATH="coverage/mytornado$test5.coverage" NAME="test5 Coverage Results" MODIFIED="1706412938102" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/126_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test10.coverage" NAME="test10 Coverage Results" MODIFIED="1706426474902" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/131_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test8.coverage" NAME="test8 Coverage Results" MODIFIED="1706417182887" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/129_test" />
-    <SUITE FILE_PATH="coverage/mytornado$server.coverage" NAME="server Coverage Results" MODIFIED="1706430119458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/149_test3" />
-    <SUITE FILE_PATH="coverage/python_program$kelly_formula.coverage" NAME="kelly_formula 覆盖结果" MODIFIED="1700119542959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
-    <SUITE FILE_PATH="coverage/mytornado$test13.coverage" NAME="test13 Coverage Results" MODIFIED="1706427831851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/134_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test2.coverage" NAME="test2 Coverage Results" MODIFIED="1706430744731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/150_test4" />
-    <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
-    <SUITE FILE_PATH="coverage/mytornado$chat_room.coverage" NAME="chat_room Coverage Results" MODIFIED="1706433238772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
-    <SUITE FILE_PATH="coverage/mytornado$test6.coverage" NAME="test6 Coverage Results" MODIFIED="1706415681123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/127_test" />
-    <SUITE FILE_PATH="coverage/mytornado$tool.coverage" NAME="tool Coverage Results" MODIFIED="1706429949113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
-    <SUITE FILE_PATH="coverage/mytornado$sessions.coverage" NAME="sessions Coverage Results" MODIFIED="1705637190496" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/utils" />
-    <SUITE FILE_PATH="coverage/mytornado$test14.coverage" NAME="test14 Coverage Results" MODIFIED="1706427892774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/135_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test17.coverage" NAME="test17 Coverage Results" MODIFIED="1706428244019" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/138_test" />
     <SUITE FILE_PATH="coverage/mytornado$test.coverage" NAME="test Coverage Results" MODIFIED="1705486460495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
-    <SUITE FILE_PATH="coverage/mytornado$test11.coverage" NAME="test11 Coverage Results" MODIFIED="1706426599463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/132_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test9.coverage" NAME="test9 Coverage Results" MODIFIED="1706417696644" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/130_test" />
-    <SUITE FILE_PATH="coverage/mytornado$test23.coverage" NAME="test23 Coverage Results" MODIFIED="1706429514469" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码/144_test" />
-    <SUITE FILE_PATH="coverage/mytornado$122_test1.coverage" NAME="122_test1 Coverage Results" MODIFIED="1706432393827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/教材源码/02.Tornado源码" />
+    <SUITE FILE_PATH="coverage/mytornado$chat_room.coverage" NAME="chat_room Coverage Results" MODIFIED="1706001038348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
+    <SUITE FILE_PATH="coverage/mytornado$resptemplate.coverage" NAME="resptemplate Coverage Results" MODIFIED="1705495480365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
+    <SUITE FILE_PATH="coverage/mytornado$server.coverage" NAME="server Coverage Results" MODIFIED="1705638672982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
+    <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
+    <SUITE FILE_PATH="coverage/mytornado$tool.coverage" NAME="tool Coverage Results" MODIFIED="1705490019732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
+    <SUITE FILE_PATH="coverage/python_program$kelly_formula.coverage" NAME="kelly_formula 覆盖结果" MODIFIED="1700119542959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
+    <SUITE FILE_PATH="coverage/mytornado$sessions.coverage" NAME="sessions Coverage Results" MODIFIED="1705637190496" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/utils" />
     <SUITE FILE_PATH="coverage/mytornado$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1705917461037" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/yibu" />
   </component>
   <component name="masterDetails">

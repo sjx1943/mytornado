@@ -4,7 +4,6 @@ from tornado.web import RequestHandler,Application
 from modes import User
 from utils.sessions import SessionManager
 
-
 class BaseHandler(RequestHandler):
     def prepare(self):
         #从cookie中获取sessionid
