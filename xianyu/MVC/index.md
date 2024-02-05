@@ -4,7 +4,7 @@
 
 1. 确保你已经安装了Python和Tornado。如果没有，请参考官方文档进行安装。
 2. 创建项目目录结构，如之前所示。
-3. 初始化Python虚拟环境并安装Tornado：`python -m venv venv` 和 `pip install tornado`.
+3. 初始化Python虚拟环境并安装Tornado：`python -m venv myvenv` 和 `pip install tornado`.
 
 ### 步骤 2: 数据库设计
 
