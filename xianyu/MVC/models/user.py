@@ -1,11 +1,10 @@
 
-import sqlalchemy
+#写user表的model
 from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
-from base import Base
-
+from base import Base, engine
 
 class User(Base):
     __tablename__ = 'xu_user'

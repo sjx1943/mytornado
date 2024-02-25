@@ -1,4 +1,4 @@
-import sqlalchemy
+#聊天室建表初始化
 from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_,Integer,String
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationship
 from sqlalchemy.types import Integer, String, DateTime, Float
