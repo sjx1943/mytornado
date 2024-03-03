@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import json
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -11,12 +10,26 @@ from tornado.web import Application, RequestHandler
 class IndexHandler(RequestHandler):
 
     def get(self, *args, **kwargs):
-        r=''
+        html = '<form method = post action =/login enctype=multipart/form-data>' \
+               '<span>用户名: </span><input type=text name=username><br>' \
+               '<span>密码: </span><input type=password name=password><br>' \
+               '<input type=file name=avatar><br>' \
+               '<input type=file name=avatar><br>' \
+               '<input type = submit value=login>&nbsp;&nbsp;' \
+               '<input type = reset value=reset>' \
+               '</form>'
+        fail_html = '<form method = post action =/login>' \
+                    '<span>用户名: </span><input type=text name=username><br>' \
+                    '<span>密码: </span><input type=password name=password><br>' \
+                    '<span style=color:red;>用户名或密码错误</span>' \
+                    '<input type = submit value=login>&nbsp;&nbsp;' \
+                    '<input type = reset value=reset>' \
+                    '</form>'
         msg = self.get_query_argument('msg', None)
         if msg:
-            r = '用户名或密码错误'
-        self.render('login.html',result=r)
-
+            self.write(fail_html)
+        else:
+            self.write(html)
 
 
     def post(self, *args, **kwargs):
@@ -50,7 +63,7 @@ class LoginHandler(RequestHandler):
                     writer = open('upload/%s'%a['filename'],'wb')
                     writer.write(body)
                     writer.close()
-            self.redirect('/blog?username='+ua)
+            self.redirect('/example_app?username='+ua)
         else:
             #跳转回登陆界面
             self.redirect('/?msg=fail')
@@ -59,29 +72,11 @@ class LoginHandler(RequestHandler):
 
 class BlogHandler(RequestHandler):
     def get(self, *args, **kwargs):
-        self.render('blog.html',
-                    blogs = [{
-                        'author':'Tom',
-                        'avatar':'a.jpeg',
-                        'title':'living',
-                        'content':'how life is going on the earth',
-                        'tags':'bio',
-                        'count': 9
-                    },{
-                        'author':'John',
-                        'avatar': 'fevicon.png',
-                        'title':'what is chatgpt',
-                        'content':'chatgpt is xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-                        'tags':'IT',
-                        'count': 0
-                    },{
-                        'author':'Jordan',
-                        'avatar': None,
-                        'title':'food',
-                        'content':'the most delicious food in the world is xxxxxxxxxxxxxxxxx',
-                        'tags':'bio',
-                        'count': 3
-                    }])
+        ua = self.get_query_argument('username',None)
+        if ua:
+            self.write('welcome '+ua+', happy new year!')
+        else:
+            self.write('welcome,happy new year!')
 
     def post(self,*args,**kwargs):
         pass
@@ -89,9 +84,7 @@ class BlogHandler(RequestHandler):
 
 app = Application(handlers=[('/',IndexHandler),
                             ('/login',LoginHandler),
-                            ('/blog',BlogHandler)],
-                  template_path = 'mytemplate',
-                  static_path = 'mystatics')
+                            ('/example_app',BlogHandler)])
 
 
 define('duankou',type=int,default = 8888)

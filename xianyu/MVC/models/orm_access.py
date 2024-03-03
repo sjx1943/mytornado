@@ -17,7 +17,7 @@ session = Session()
 
 
 #添加用户
-# new_user = User(id=2, username='tom', password='password', email='tom@example.com')
+# new_user = User(id=3, username='sgg', password='password', email='sgg@example.com')
 # session.add(new_user)
 # session.commit()
 
@@ -39,18 +39,19 @@ session = Session()
 # session.delete(product_to_delete)
 # session.commit()
 
-
 # # 查询商品
-product = session.query(Product).filter_by(name='iPhone 15 Pro Max').first()
-print(product)
+# product = session.query(Product).filter_by(name='iPhone 15 Pro Max').first()
+# print(product)
 #
 # # 添加聊天
-# new_chat = Chat(user1_id=user.id, user2_id=2, message='Hello!')
+# new_chat = Chat(user1_id=2, user2_id=3, message='Hola!')
 # session.add(new_chat)
 # session.commit()
 #
 # # 查询聊天
-# chat = session.query(Chat).filter_by(id=1).first()
+chat = session.query(Chat).filter_by(id=4).first()
+print(chat)
 #
 # # 关闭会话
-# session.close()
+session.close()
+# Base.metadata.drop_all(engine)

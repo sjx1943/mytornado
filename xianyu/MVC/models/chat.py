@@ -19,8 +19,7 @@ class Chat(Base):
     user1 = relationship("User", foreign_keys=[user1_id])
     user2 = relationship("User", foreign_keys=[user2_id])
 
-    def __init__(self, id, user1_id, user2_id, message):
-        self.id = id
+    def __init__(self, user1_id, user2_id, message):
         self.user1_id = user1_id
         self.user2_id = user2_id
         self.message = message
@@ -28,4 +27,9 @@ class Chat(Base):
     def __repr__(self):
         return f"<Chat(id={self.id}, user1_id={self.user1_id}, user2_id={self.user2_id}, message={self.message})>"
 
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
+
+
+
+
+

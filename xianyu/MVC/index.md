@@ -28,6 +28,7 @@ class User:
     def save_to_db(self):
         pass
 ```
+2024-3-3已经完成
 
 ### 步骤 4: 构建控制器（controllers）
 
@@ -47,6 +48,7 @@ class LoginHandler(tornado.web.RequestHandler):
         # 验证用户名和密码...
         self.redirect("/")
 ```
+
 
 ### 步骤 5: 创建视图（views/templates）
 
