@@ -1,7 +1,7 @@
 #coding=utf-8
 
 
-from base import Base, engine
+from MVC.base.base import Base, engine
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from user import User

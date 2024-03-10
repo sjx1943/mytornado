@@ -4,8 +4,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationshi
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
 from user import User
-from base import Base, engine
-
+from MVC.base.base import Base, engine
 
 
 class Chat(Base):

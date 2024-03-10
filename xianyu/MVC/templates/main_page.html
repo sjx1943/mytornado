@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>登陆后页面</title>
 </head>
 <body>
-
+    {% if username %}
+        <p>Welcome, {{ username }}!</p>
+    {% end %}
 </body>
 </html>

@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
-from base import Base, engine
+from MVC.base.base import Base, engine
 
 class User(Base):
     __tablename__ = 'xu_user'
@@ -24,7 +24,7 @@ class User(Base):
         return f"<User(id={self.id}, username={self.username}, email={self.email})>"
 
 
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 
 

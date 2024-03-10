@@ -5,7 +5,7 @@ from user import User
 from chat import Chat
 from sqlalchemy.orm import sessionmaker,declarative_base
 from sqlalchemy import create_engine
-from base import engine
+from MVC.base.base import Base, engine
 # Update the connection URL to use PyMySQL (`+pymysql`)
 
 #Base.metadata.create_all(engine)

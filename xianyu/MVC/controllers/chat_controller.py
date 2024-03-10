@@ -13,6 +13,8 @@ class IndexHandler(RequestHandler):
 userList = set()
 
 class ChatHandler(WebSocketHandler):
+    # 处理WebSocket连接、消息和关闭...
+
 
     def open(self, *args, **kwargs):
 
