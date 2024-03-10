@@ -1,6 +1,7 @@
 <form method="post" action="/login">
     {% raw xsrf_form_html() %} <!-- 防跨域攻击 -->
         <tr>
+
             <td>
                 <input type="text" name="username" placeholder="用户名"><br>
             </td>
@@ -11,11 +12,6 @@
             </td>
         </tr>
 
-        <tr><td colspan="2"><span style="color: red;
-                             font-weight: bolder;">
-                                {{result}}
-                            </span></td></tr>
-        <tr>
             <td>
                 <input type="submit" value="登陆">&nbsp;&nbsp;
                 <input type="button" value="注册" onclick="javascript:location.href='/regist';">

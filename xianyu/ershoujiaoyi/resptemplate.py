@@ -128,7 +128,7 @@ class Registmodule(UIModule):
         r = ''
         if self.request.query:
             r = '注册失败'
-        return self.render_string('mymodule/regist_module.html', result=r)
+        return self.render_string('mymodule/register_module.html', result=r)
 
 
 class RegistHandler(RequestHandler):
@@ -136,7 +136,7 @@ class RegistHandler(RequestHandler):
         self.conn = conn
     def get(self,*args,**kwargs):
         error_message = self.get_argument('error',None)
-        self.render('regist.html',error = error_message)
+        self.render('reg.html',error = error_message)
     def post(self,*args,**kwargs):
         uname = self.get_argument('username', '').strip()  # Use strip() to remove leading/trailing whitespace
         pwd = self.get_argument('password', '').strip()
