@@ -48,7 +48,7 @@ class LoginHandler(tornado.web.RequestHandler):
         # 验证用户名和密码...
         self.redirect("/")
 ```
-2024-3-10  已经完成登陆和注册的控制器和视图设计，下一步设计“忘记密码”功能
+2024-3-10  已经完成登陆和注册的控制器和视图设计，下一步将设计“忘记密码”功能
 
 ### 步骤 5: 创建视图（views/templates）
 
