@@ -7,12 +7,14 @@ from controllers.auth_controller import LoginHandler, RegisterHandler, Loginmodu
 
 
 from views import *
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/main", MainHandler),
         (r"/login", LoginHandler),
         (r"/regist", RegisterHandler),
+        (r"/forgot_password", RegisterHandler),
         # (r"/product", ProductListHandler),
         # (r"/product/detail", ProductDetailHandler),
         # (r"/chat", ChatHandler),

@@ -1,8 +1,13 @@
 import tornado.web
 from sqlalchemy.orm import sessionmaker, scoped_session
 from tornado.web import UIModule, StaticFileHandler
-from MVC.base.base import engine
 from MVC.models.user import User
+from MVC.base.base import engine
+
+import bcrypt
+import uuid,smtplib,secrets
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Create a session
 Session = sessionmaker(bind=engine)
@@ -41,6 +46,82 @@ class LoginHandler(tornado.web.RequestHandler):
         # 使用会话查询数据库并验证用户名和密码
         user = self.session.query(User).filter_by(username=username, password=password).first()
         return user is not None
+
+def generate_reset_token():
+    """生成一个简单的重置令牌"""
+    return secrets.token_urlsafe(16)
+
+def send_email(to_email, subject, body):
+    """发送电子邮件的简单实现"""
+    msg = MIMEMultipart()
+    msg['From'] = '363328084@qq.com'
+    msg['To'] = to_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    server = smtplib.SMTP('smtp.qq.com', 587)
+    server.starttls()
+    server.login('363328084@qq.com', 'jluwcomlwzycbieb')
+    text = msg.as_string()
+    server.sendmail('363328084@qq.com', to_email, text)
+    server.quit()
+
+
+def send_reset_email(email, reset_token):
+    """发送包含密码重置令牌的电子邮件"""
+    reset_link = f"http://yourwebsite.com/reset_password?reset_token={reset_token}"
+    subject = "密码重置"
+    body = f"Please click on the following link to reset your password: {reset_link}"
+
+    send_email(email, subject, body)
+
+
+send_reset_email("sjx.1943@163.com", 423456)
+
+class ForgotPasswordHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = Session()  # 创建新的会话
+
+    def on_finish(self):
+        self.session.close()  # 关闭会话
+
+    def get(self):
+        ms = self.get_argument('message',default=None)
+        self.render("forgot_password.html",result=ms)
+    def post(self):
+        email = self.get_argument("email")
+        user = self.session.query(User).filter_by(email=email).first()
+        if user is not None:
+            reset_token = generate_reset_token()  # 这是一个假设的函数，你需要实现它
+            send_reset_email(email, reset_token)  # 这也是一个假设的函数，你需要实现它
+            self.render("reset_email_sent.html")
+        else:
+            self.render("forgot_password.html", result="No account associated with that email")
+
+def hash_password(password):
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password_bytes, salt)
+    return hashed_password.decode('utf-8')
+
+class ResetPasswordHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = Session()  # 创建新的会话
+
+    def on_finish(self):
+        self.session.close()  # 关闭会话
+
+    def post(self):
+        reset_token = self.get_argument("reset_token")
+        new_password = self.get_argument("new_password")
+        user = self.session.query(User).filter_by(reset_token=reset_token).first()
+        if user is not None:
+            user.password = hash_password(new_password)  # 这是一个假设的函数，你需要实现它
+            self.session.commit()
+            self.render("password_reset_success.html")
+        else:
+            self.render("reset_password.html", result="Invalid reset token")
 
 class Registmodule(UIModule):
     def render(self, *args, **kwargs):

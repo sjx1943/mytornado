@@ -7,6 +7,8 @@ from datetime import timedelta
 
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urldefrag
+import uuid,smtplib
+from email.mime.text import MIMEText
 
 import tornado
 from tornado import gen, httpclient, queues
@@ -20,82 +22,39 @@ import tornado
 # from web import db
 from tornado import template
 import redis
+import secrets
+
+from email.mime.multipart import MIMEMultipart
+
+def generate_reset_token():
+    """生成一个简单的重置令牌"""
+    return secrets.token_urlsafe(16)
+
+def send_email(to_email, subject, body):
+    """发送电子邮件的简单实现"""
+    msg = MIMEMultipart()
+    msg['From'] = '363328084@qq.com'
+    msg['To'] = to_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    server = smtplib.SMTP('smtp.qq.com', 587)
+    server.starttls()
+    server.login('363328084@qq.com', 'jluwcomlwzycbieb')
+    text = msg.as_string()
+    server.sendmail('363328084@qq.com', to_email, text)
+    server.quit()
 
 
-class MainHandler(RequestHandler):
-    def get(self):
-        items = ["Item 1", "Item 2", "Item 3"]
-        self.render("mystatics.html", title="My titlesjx", items=items)
+def send_reset_email(email, reset_token):
+    """发送包含密码重置令牌的电子邮件"""
+    reset_link = f"http://yourwebsite.com/reset_password?reset_token={reset_token}"
+    subject = "Reset Your Password"
+    body = f"Please click on the following link to reset your password: {reset_link}"
 
-class StoryHandler(RequestHandler):
-    def initialize(self, db):
-        self.db = db
-
-    def get(self, story_id):
-        self.write("this is story %s" % story_id)
+    send_email(email, subject, body)
 
 
-class MyFormHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write('<html><body><form action="/myform" method="POST">'
-                   '<input type="text" name="message">'
-                   '<input type="submit" value="Submit">'
-                   '</form></body></html>')
-    def post(self):
-        self.set_header("Content-Type", "text/plain")
-        self.write("You wrote " + self.get_body_argument("message"))
+send_reset_email("sjx.1943@163.com", 123456)
 
-class MMainHandler(tornado.web.RequestHandler):
-    async def get(self):
-        http = tornado.httpclient.AsyncHTTPClient()
-        response = await http.fetch("http://google.com")
-        json = tornado.escape.json_decode(response.body)
-        self.write("Fetched " + str(len(json["entries"])) + " entries "
-                   "from the FriendFeed API")
-def make_app():
-    return Application([
-        url(r"/", MainHandler),
-        # url(r"/story/([0-9]+)", StoryHandler, dict(db=db), name="story"),
-        url(r"/myform",MyFormHandler),
-        url(r"/diaotou",RedirectHandler,dict(url="http://baidu.com")),
-        url(r"/api",MMainHandler)
-    ],template_path = 'mytemplate',)
-
-# async def main():
-#     app = make_app()
-#     app.listen(8888)
-#     shutdown_event = asyncio.Event()
-#     await shutdown_event.wait()
-#
-# if __name__ == "__main__":
-#     asyncio.run(main())
-
-def parse_time(time_str):
-    # 正则表达式匹配小时、分钟和可选的AM/PM
-    match = re.match(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)?', time_str, re.I)
-    if not match:
-        raise ValueError("Invalid time format")
-
-    # 从匹配的结果中提取小时、分钟和周期
-    hours, minutes, period = match.groups()
-    hours = int(hours)
-    minutes = int(minutes) if minutes else 0
-    period = period.lower() if period else None
-
-    # 根据AM/PM调整小时数
-    if period == 'am' and hours == 12:
-        hours = 0
-    elif period == 'pm' and hours != 12:
-        hours += 12
-    elif hours == 24:
-        hours = 0
-
-    # 返回总分钟数
-    return hours * 60 + minutes
-
-# 测试函数
-print(parse_time("4pm"))       # 960
-print(parse_time("7:38pm"))    # 1158
-print(parse_time("23:42"))     # 1422
-print(parse_time("3:16"))      # 196
-print(parse_time("00:03"))    #2

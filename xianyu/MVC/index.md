@@ -49,6 +49,7 @@ class LoginHandler(tornado.web.RequestHandler):
         self.redirect("/")
 ```
 2024-3-10  已经完成登陆和注册的控制器和视图设计，下一步将设计“忘记密码”功能
+2024-3-13 完成忘记密码前端页面、控制器和发送重置邮件的部分，下一步将继续完善“忘记密码”功能，使得页面输入token后能顺利重置密码,注意分级目录的包导入问题。
 
 ### 步骤 5: 创建视图（views/templates）
 
