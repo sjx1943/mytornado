@@ -1,8 +1,9 @@
 import tornado.ioloop
 import tornado.web
 from controllers.main_controller import MainHandler
-from controllers.auth_controller import LoginHandler, RegisterHandler, Loginmodule, Registmodule
-# from controllers.product_controller import ProductListHandler, ProductDetailHandler
+from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
+    ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
+# from controllers.product_controller import ProductListHandler, ProductDetailHandler,
 # from controllers.chat_controller import ChatHandler
 
 
@@ -14,14 +15,15 @@ def make_app():
         (r"/main", MainHandler),
         (r"/login", LoginHandler),
         (r"/regist", RegisterHandler),
-        (r"/forgot_password", RegisterHandler),
+        (r"/forgot", ForgotPasswordHandler),
+        (r"/reset", ResetPasswordHandler),
         # (r"/product", ProductListHandler),
         # (r"/product/detail", ProductDetailHandler),
         # (r"/chat", ChatHandler),
         # 静态文件路径配置
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
     ],template_path = "templates",
-        ui_modules={'loginmodule':Loginmodule,'registmodule': Registmodule},
+        ui_modules={'loginmodule':Loginmodule,'registmodule': Registmodule, 'forgotmodule': Forgotmodule},
         cookie_secret='sjxxx',xsrf_cookies=True)
 
 # settings={

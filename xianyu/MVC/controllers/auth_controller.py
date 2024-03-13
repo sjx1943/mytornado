@@ -72,12 +72,14 @@ def send_reset_email(email, reset_token):
     """发送包含密码重置令牌的电子邮件"""
     reset_link = f"http://yourwebsite.com/reset_password?reset_token={reset_token}"
     subject = "密码重置"
-    body = f"Please click on the following link to reset your password: {reset_link}"
+    body = f"您的验证码为：\n\n {reset_token} \n\n请点击以下链接输入验证码和新密码进行密码重置： {reset_link}"
 
     send_email(email, subject, body)
 
-
-send_reset_email("sjx.1943@163.com", 423456)
+class Forgotmodule(UIModule):
+    def render(self, *args, **kwargs):
+        ms = kwargs.get('result', '')
+        return self.render_string('modules/forgot_module.html',ms="f module")
 
 class ForgotPasswordHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -93,11 +95,13 @@ class ForgotPasswordHandler(tornado.web.RequestHandler):
         email = self.get_argument("email")
         user = self.session.query(User).filter_by(email=email).first()
         if user is not None:
-            reset_token = generate_reset_token()  # 这是一个假设的函数，你需要实现它
-            send_reset_email(email, reset_token)  # 这也是一个假设的函数，你需要实现它
-            self.render("reset_email_sent.html")
+            reset_token = generate_reset_token()
+            user.reset_token = reset_token
+            self.session.commit()
+            send_reset_email(email, reset_token)
+            self.render("token_input.html", result="请输入您的邮箱中的验证码和新密码")
         else:
-            self.render("forgot_password.html", result="No account associated with that email")
+            self.render("forgot_password.html", result="未查到关联邮箱，请核实后输入正确邮箱")
 
 def hash_password(password):
     password_bytes = password.encode('utf-8')
@@ -117,11 +121,11 @@ class ResetPasswordHandler(tornado.web.RequestHandler):
         new_password = self.get_argument("new_password")
         user = self.session.query(User).filter_by(reset_token=reset_token).first()
         if user is not None:
-            user.password = hash_password(new_password)  # 这是一个假设的函数，你需要实现它
+            user.password = new_password  # 这是一个假设的函数，你需要实现它
             self.session.commit()
             self.render("password_reset_success.html")
         else:
-            self.render("reset_password.html", result="Invalid reset token")
+            self.render("token_input.html", result="Invalid reset token，请核实后输入正确的邮箱验证码")
 
 class Registmodule(UIModule):
     def render(self, *args, **kwargs):
@@ -134,7 +138,7 @@ class RegisterHandler(tornado.web.RequestHandler):
 
     def on_finish(self):
         self.session.close()  # 关闭会话
-
+    #
     def get(self):
         self.render("reg.html", result="")
 

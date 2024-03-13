@@ -4,7 +4,7 @@ from sqlalchemy import Sequence,create_engine, desc, Column, text, ForeignKey,an
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
-from base.base import Base, engine
+from MVC.base.base import Base, engine
 
 class User(Base):
     __tablename__ = 'xu_user'
@@ -12,6 +12,7 @@ class User(Base):
     username = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
+    reset_token = Column(String(255))
 
     def __init__(self, username, password, email):
         self.username = username
@@ -23,7 +24,7 @@ class User(Base):
         return f"<User(id={self.id}, username={self.username}, email={self.email})>"
 
 
-# Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 
 
