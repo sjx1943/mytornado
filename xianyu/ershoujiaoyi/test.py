@@ -56,5 +56,5 @@ def send_reset_email(email, reset_token):
     send_email(email, subject, body)
 
 
-send_reset_email("sjx.1943@163.com", 123456)
+send_reset_email("sjx.1943@163.com", 20240314)
 

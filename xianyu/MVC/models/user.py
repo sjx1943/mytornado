@@ -24,7 +24,7 @@ class User(Base):
         return f"<User(id={self.id}, username={self.username}, email={self.email})>"
 
 
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 
 

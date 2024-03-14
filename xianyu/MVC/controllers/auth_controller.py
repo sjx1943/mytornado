@@ -30,22 +30,28 @@ class LoginHandler(tornado.web.RequestHandler):
         ms = self.get_argument('message',default=None)
         self.render("login.html", result=ms)
 
-    def post(self):
+    async def post(self):
         # 在post方法中获取用户名和密码
         username = self.get_argument('username')
         password = self.get_argument('password')
         # 验证用户
-        if self.validate_credentials(username, password):
+        user = await self.validate_credentials(username,password)
+        if user:
             # 如果验证成功，设置session并重定向到主页面
             self.set_secure_cookie("user", username)
             self.redirect("/main")
+        # if self.validate_credentials(username, password):
+        #     # 如果验证成功，设置session并重定向到主页面
+        #     self.set_secure_cookie("user", username)
+        #     self.redirect("/main")
         else:
             # 如果验证失败，重新渲染登录页面并显示错误消息
-            self.render("login.html", result="Invalid username or password")
-    def validate_credentials(self, username, password):
+            self.render("login.html", result="用户名或密码错误")
+    async def validate_credentials(self, username, password):
         # 使用会话查询数据库并验证用户名和密码
         user = self.session.query(User).filter_by(username=username, password=password).first()
-        return user is not None
+        return user
+
 
 def generate_reset_token():
     """生成一个简单的重置令牌"""
