@@ -14,4 +14,5 @@ class MainHandler(tornado.web.RequestHandler):
             return
     def get(self):
         username = self.current_user
+        # self.write("已经成功登陆"+username)
         self.render("main_page.html", username=username)

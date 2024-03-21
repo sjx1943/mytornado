@@ -2,11 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>登陆后页面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登陆后主页面</title>
+    <link rel="stylesheet" href="{{ static_url('css/main.css') }}">
 </head>
 <body>
     {% if username %}
-        <p>Welcome, {{ username }}，歡迎來到二手交易平台!</p>
+        <p class="welcome-msg">欢迎 {{ username }}，來到二手交易平台!</p>
     {% end %}
+    <form action="/search" method="get" class="search-form">
+        <input type="text" name="query" placeholder="搜索商品、活动或信息">
+        <input type="submit" value="搜索">
+    </form>
+    <nav class="category-nav">
+        {% for tag in tags %}
+            <a href="/product_list?tag={{ tag }}">{{ tag }}</a>
+        {% end %}
+    </nav>
+    <div class="product-list">
+        {% for product in products %}
+            <div class="product-item">
+                <a href="/product/detail/{{ product.id }}">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                    <p class="product-name">{{ product.name }}</p>
+                    <p class="product-price">￥{{ product.price }}</p>
+                    <p class="product-tags">
+                        {% for tag in product.tags %}
+                            <span class="tag">{{ tag }}</span>
+                        {% end %}
+                    </p>
+                </a>
+            </div>
+        {% end %}
+    </div>
+    <footer class="main-footer">
+        <a href="/main">主页</a>
+        <a href="/publish_product">发布商品</a>
+        <a href="/chat">聊天消息</a>
+        <a href="/user/profile/{{ user.id }}">我的</a>
+    </footer>
+    <script src="{{ static_url('js/main.js') }}"></script>
 </body>
 </html>
