@@ -25,9 +25,16 @@ session = Session()
 # user = session.query(User).filter_by(username='john').first()
 # print(user)
 # 添加商品
-# new_product = Product(name='iPhone 15 Pro Max', description='The latest and greatest iPhone', price=2999.99, user_id=1)
-# session.add(new_product)
-# session.commit()
+new_product = Product(
+        name="气球",
+        description="这是一个示例商品描述",
+        price=199.99,
+        user_id=2,  # 假设用户ID为1
+        tag="生活用品",
+        image="https://img2.baidu.com/it/u=1301655116,4209223946&fm=253&fmt=auto&app=120&f=JPEG?w=679&h=500"
+)
+session.add(new_product)
+session.commit()
 
 #修改商品
 # product_to_update = session.query(Product).filter_by(name='iPhone 13 Pro Max').first()
@@ -49,8 +56,8 @@ session = Session()
 # session.commit()
 #
 # # 查询聊天
-chat = session.query(Chat).filter_by(id=4).first()
-print(chat)
+# chat = session.query(Chat).filter_by(id=4).first()
+# print(chat)
 #
 # # 关闭会话
 session.close()
