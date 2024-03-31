@@ -55,3 +55,6 @@ class MainHandler(tornado.web.RequestHandler):
 
         self.render("main_page.html", username=username, \
                     products = products, tags = tags)
+
+
+
