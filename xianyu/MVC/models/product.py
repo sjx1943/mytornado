@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationshi
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
 from MVC.base.base import Base, engine
+# from user import User
 
 class Product(Base):
     __tablename__ = 'products'
@@ -26,13 +27,13 @@ class Product(Base):
     def __repr__(self):
         return f"<Product(id={self.id}, name={self.name}, price={self.price}, user_id={self.user_id}, tag={self.tag})>"
 
-# class ProductImage(Base):
-#     __tablename__ = 'product_images'
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     filename = Column(String, nullable=False)
-#     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
-#
+class ProductImage(Base):
+    __tablename__ = 'product_images'
+
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String(255), nullable=False)
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+
 
 # Base.metadata.create_all(engine)
 #

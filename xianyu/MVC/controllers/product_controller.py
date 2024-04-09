@@ -1,7 +1,7 @@
 import tornado.web
 import os
 from sqlalchemy.orm import Session
-from MVC.models.product import Product
+from MVC.models.product import Product, ProductImage
 from sqlalchemy.orm import sessionmaker, scoped_session
 from MVC.base.base import engine
 import json
@@ -14,7 +14,9 @@ class ProductListHandler(tornado.web.RequestHandler):
 
 
 class ProductUploadHandler(tornado.web.RequestHandler):
-    def initialize(self):
+    def initialize(self, app_settings):
+        self.app_settings = app_settings
+        # self.settings = settings
         self.session = Session(engine)
 
     def get(self):
@@ -24,35 +26,49 @@ class ProductUploadHandler(tornado.web.RequestHandler):
 
     #上传商品...
     def post(self):
-        # 从请求中获取产品数据
+        # Retrieve product data from the request
         name = self.get_argument("name")
         description = self.get_argument("description")
         price = float(self.get_argument("price"))
         images = self.request.files.get("images", [])
-        user_id = 1  # 假设当前登录用户的ID为1
+        # images = self.get_argument('images', None)
+        if not images:
+            self.set_status(400)
+            self.write({"error": "Missing 'image' argument"})
+            return
 
-        # 验证产品数据
+        # Retrieve the user_id from the current logged-in user
+        user_id = self.get_secure_cookie("user_id")
+        # Replace this with your method of retrieving the logged-in user's ID
+        if user_id is None:
+            self.set_status(400)
+            self.write({'error': 'User not logged in'})
+            return
+
+        # Validate product data
         if self.validate_product_data(name, description, price, images):
-            # 创建新的产品
+            # Create a new product
             new_product = Product(
                 name=name,
                 description=description,
                 price=price,
                 user_id=user_id,
-                tag="生活用品"
+                tag="生活用品",
+                image=images[0]['filename'],
             )
             self.session.add(new_product)
+            self.session.commit()  # Commit here to get the new_product.id
 
-            # 保存产品图片
+            # Save product images
             for image in images:
-                filename = f"{new_product.id}_{image.filename}"
+                filename = f"{new_product.id}_{image['filename']}"
                 new_image = ProductImage(
                     filename=filename,
                     product_id=new_product.id
                 )
                 self.session.add(new_image)
-                with open(os.path.join("static", "images", filename), "wb") as f:
-                    f.write(image.body)
+                with open(os.path.join(self.app_settings['static_path'], "images", filename), "wb") as f:
+                    f.write(image['body'])
 
             self.session.commit()
             self.write(json.dumps({'product_id': new_product.id}))

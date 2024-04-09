@@ -6,6 +6,7 @@
 <body>
     <h1>Publish Product</h1>
     <form id="product-form" action="/publish_product" method="post" enctype="multipart/form-data">
+         {% raw xsrf_form_html() %} <!-- 防跨域攻击 -->
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
 
