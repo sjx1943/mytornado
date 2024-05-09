@@ -42,6 +42,7 @@ class LoginHandler(tornado.web.RequestHandler):
         if user:
             # 如果验证成功，设置session并重定向到主页面
             self.set_secure_cookie("user", username)
+            self.set_secure_cookie('user_id', str(user.id))
             self.redirect("/main")
         # if self.validate_credentials(username, password):
         #     # 如果验证成功，设置session并重定向到主页面

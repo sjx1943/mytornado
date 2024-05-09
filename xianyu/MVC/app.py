@@ -27,7 +27,7 @@ def make_app():
         (r"/regist", RegisterHandler),
         (r"/forgot", ForgotPasswordHandler),
         (r"/reset", ResetPasswordHandler),
-        (r"/publish_product",ProductUploadHandler),
+        (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
         # (r"/product", ProductListHandler),
         # (r"/product/detail", ProductDetailHandler),
         # (r"/chat", ChatHandler),
@@ -55,3 +55,5 @@ if __name__ == "__main__":
     app = make_app()
     app.listen(8000)
     tornado.ioloop.IOLoop.current().start()
+
+
