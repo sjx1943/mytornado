@@ -3,10 +3,19 @@ from MVC.models.product import Product
 from sqlalchemy.orm import sessionmaker, scoped_session
 from MVC.base.base import engine
 import tornado
-
 from MVC.models.user import User
+import urllib.parse
+import tornado.web
+
+class MyStaticFileHandler(tornado.web.StaticFileHandler):
+    def validate_absolute_path(self, root, absolute_path):
+        absolute_path = urllib.parse.unquote(absolute_path)
+        return super().validate_absolute_path(root, absolute_path)
+
 
 Session = sessionmaker(bind=engine)
+
+
 
 class MainHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -40,7 +49,7 @@ class MainHandler(tornado.web.RequestHandler):
                 "description": product.description,
                 "price": product.price,
                 "tag": product.tag,
-                "image_url": product.image
+                "image": product.image
             }
             for product in products
         ]

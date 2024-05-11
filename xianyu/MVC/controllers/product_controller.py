@@ -5,6 +5,8 @@ from MVC.models.product import Product, ProductImage
 from sqlalchemy.orm import sessionmaker, scoped_session
 from MVC.base.base import engine
 import json
+import re
+
 
 class ProductListHandler(tornado.web.RequestHandler):
     def get(self):
@@ -47,21 +49,23 @@ class ProductUploadHandler(tornado.web.RequestHandler):
 
         # Validate product data
         if self.validate_product_data(name, description, price, images):
-            # Create a new product
+            # Create a new product without image
             new_product = Product(
                 name=name,
                 description=description,
                 price=price,
                 user_id=user_id,
                 tag="生活用品",
-                image=images[0]['filename'],
+                image=""  # Temporarily set image as an empty string
             )
             self.session.add(new_product)
             self.session.commit()  # Commit here to get the new_product.id
 
             # Save product images
             for image in images:
-                filename = f"{new_product.id}_{image['filename']}"
+                # Remove non-ASCII characters from the filename
+                filename = re.sub(r'[^\x00-\x7F]+', '', image['filename'])
+                filename = f"{new_product.id}_{filename}"
                 new_image = ProductImage(
                     filename=filename,
                     product_id=new_product.id
@@ -70,7 +74,10 @@ class ProductUploadHandler(tornado.web.RequestHandler):
                 with open(os.path.join(self.app_settings['static_path'], "images", filename), "wb") as f:
                     f.write(image['body'])
 
+            # Update the product image
+            new_product.image = filename  # Use the filename with the id_ prefix
             self.session.commit()
+
             self.write(json.dumps({'product_id': new_product.id}))
         else:
             self.set_status(400)

@@ -1,7 +1,7 @@
 import tornado.ioloop
 import os
 from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
-from controllers.main_controller import MainHandler
+from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler
@@ -32,7 +32,7 @@ def make_app():
         # (r"/product/detail", ProductDetailHandler),
         # (r"/chat", ChatHandler),
         # 静态文件路径配置
-        (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
+        (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
     ],
         ui_modules={'loginmodule':Loginmodule,
                     'registmodule': Registmodule,

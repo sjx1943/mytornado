@@ -4,51 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="2024-3-14 win">
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/INSTALLER" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/METADATA" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/RECORD" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/REQUESTED" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/WHEEL" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/PyMySQL-1.1.0.dist-info/top_level.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/INSTALLER" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/METADATA" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/RECORD" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/REQUESTED" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/WHEEL" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt-4.1.2.dist-info/top_level.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt/__init__.pyi" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt/_bcrypt.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/bcrypt/py.typed" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/_auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/charset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/connections.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/CLIENT.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/COMMAND.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/CR.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/ER.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/FIELD_TYPE.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/FLAG.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/SERVER_STATUS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/constants/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/converters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/cursors.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/err.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/optionfile.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/protocol.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/site-packages/pymysql/times.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/7_屏幕截图 2023-07-07 200922.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/8_屏幕截图 2023-07-07 200922.png" afterDir="false" />
+    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="2024-4-9 win">
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/10_屏幕截图 2023-04-12 183356.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/11_ 2024-04-29 011913.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/12_ 2023-04-12 165543.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/a.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/b.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/c.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianyu/MVC/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/controllers/auth_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/auth_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/controllers/main_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/main_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianyu/MVC/controllers/product_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/product_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/models/product.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/models/product.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/templates/publish_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/templates/publish_product.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/index.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/7_屏幕截图 2023-07-07 200922.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/8_屏幕截图 2023-07-07 200922.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/templates/main_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/templates/main_page.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,7 +113,7 @@
       <recent name="C:\Users\sjx19\PycharmProjects\mytornado\xianyu\MVC" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.product">
+  <component name="RunManager" selected="Python.app">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_project" />
       <option name="ENV_FILES" value="" />
@@ -331,7 +301,8 @@
       <workItem from="1712625983445" duration="121000" />
       <workItem from="1712626138358" duration="335000" />
       <workItem from="1712626507861" duration="853000" />
-      <workItem from="1712628262310" duration="6965000" />
+      <workItem from="1712628262310" duration="7909000" />
+      <workItem from="1715389859857" duration="7089000" />
     </task>
     <task id="LOCAL-00001" summary="test update">
       <created>1702277878055</created>
@@ -450,7 +421,15 @@
       <option name="project" value="LOCAL" />
       <updated>1710382817804</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="2024-4-9 win">
+      <option name="closed" value="true" />
+      <created>1712661343900</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1712661343900</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -490,13 +469,14 @@
     <MESSAGE value="2024-2-5 win" />
     <MESSAGE value="2024-3-13 win" />
     <MESSAGE value="2024-3-14 win" />
-    <option name="LAST_COMMIT_MESSAGE" value="2024-3-14 win" />
+    <MESSAGE value="2024-4-9 win" />
+    <option name="LAST_COMMIT_MESSAGE" value="2024-4-9 win" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/mytornado$auth_controller.coverage" NAME="auth_controller Coverage Results" MODIFIED="1710322878732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/controllers" />
     <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
     <SUITE FILE_PATH="coverage/mytornado$models.coverage" NAME="models Coverage Results" MODIFIED="1707115958635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/models" />
-    <SUITE FILE_PATH="coverage/mytornado$app.coverage" NAME="app Coverage Results" MODIFIED="1712661084430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
+    <SUITE FILE_PATH="coverage/mytornado$app.coverage" NAME="app Coverage Results" MODIFIED="1715396676523" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
     <SUITE FILE_PATH="coverage/mytornado$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1707036681674" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/yibu" />
     <SUITE FILE_PATH="coverage/mytornado$test.coverage" NAME="test Coverage Results" MODIFIED="1710379156007" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
     <SUITE FILE_PATH="coverage/mytornado$user.coverage" NAME="user Coverage Results" MODIFIED="1710380014809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/models" />

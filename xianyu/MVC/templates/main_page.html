@@ -23,7 +23,7 @@
         {% for product in products %}
             <div class="product-item">
                 <a href="/product/detail/{{ product['id'] }}">  <!-- Change this line -->
-                <img src="{{ product['image_url'] }}" alt="{{ product['name'] }}">
+                <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
                 <p class="product-name">{{ product['name'] }}</p>
                 <p class="product-price">￥{{ product['price'] }}</p>
                 <p class="product-tags">
