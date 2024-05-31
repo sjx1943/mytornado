@@ -57,8 +57,8 @@ class LoginHandler(tornado.web.RequestHandler):
 2024-5-11 成功在主页中解决页面渲染问题，解决了静态图片路径和数据库中image字段文件名不符的问题
 
 
-下一步，设计个人主页雏形，顺利发布后可以跳转至个人主页上，个人主页可以显示最新的上传商品，/
-此外，主页和个人商品页需要用grid-container方式分2列展示，点击图片页面后应显示网页图片，而不是跳转至http://localhost:8000/product/detail/x 后404 。
+下一步，设计个人主页雏形home_page.html，利用ProductUploadHandler顺利发布商品后跳转至个人主页上，个人主页可以显示最新的上传商品，/
+此外，主页main_page和个人商品页需要用grid-container方式分2列展示，点击图片页面后应显示网页图片，而不是跳转至http://localhost:8000/product/detail/x 后404 。
 
 可设计主页面（几大分类：二手交易、活动征集和重要信息发布等）、游客页面以及设计商品详情浏览和发布页面。
 

@@ -41,19 +41,8 @@ def make_app():
         **settings
     )
 
-# settings={
-#     'handlers':[
-#         (r'^/login/$',LoginHandler),
-#         (r'^/center/$',CenterHandler)
-#     ],'template_path':os.path.join(os.getcwd(),'templates')
-# }
-
-
-
 #cookie_secret 对应键值的作用是加密cookie中的数据，默认为随机键值加密，安全考虑用固定键值
 if __name__ == "__main__":
     app = make_app()
     app.listen(8000)
     tornado.ioloop.IOLoop.current().start()
-
-
