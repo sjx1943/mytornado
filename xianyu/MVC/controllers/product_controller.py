@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from MVC.models.product import Product, ProductImage
 from sqlalchemy.orm import sessionmaker, scoped_session
 from MVC.base.base import engine
+from MVC.models.user import User
 import json
 import re
 
@@ -82,6 +83,7 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         else:
             self.set_status(400)
             self.write(json.dumps({'error': 'Invalid product data'}))
+        self.redirect("/home_page")
 
     def validate_product_data(self, name, description, price, images):
             # 验证产品数据是否合法
@@ -95,3 +97,39 @@ class ProductUploadHandler(tornado.web.RequestHandler):
 
 
 #设计商品发布相关控制器，路由关联为/publish_product
+
+class HomePageHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = Session(engine)
+
+    def get_current_user(self):
+        username = self.get_secure_cookie("user")
+        if username is not None:
+            user = self.session.query(User).filter_by(
+                username=username.decode()).first()  # Query the user from the database using the username
+            return user
+        return None
+
+    def get(self):
+        user = self.current_user
+        if user is None:
+            self.redirect("/login")
+            return
+
+        # Retrieve the latest products uploaded by the current user
+        products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
+        self.session.close()
+
+        products_list = [
+            {
+                'id': product.id,
+                "name": product.name,
+                "description": product.description,
+                "price": product.price,
+                "tag": product.tag,
+                "image": product.image
+            }
+            for product in products
+        ]
+
+        self.render("home_page.html", products=products_list)

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>My Products</h1>
+    <div class="product-list">
+        {% for product in products %}
+            <div class="product-item">
+                <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
+                <p class="product-name">{{ product['name'] }}</p>
+                <p class="product-price">￥{{ product['price'] }}</p>
+            </div>
+        {% end %}
+    </div>
+</body>
+</html>

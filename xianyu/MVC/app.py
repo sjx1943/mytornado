@@ -4,7 +4,7 @@ from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
-from controllers.product_controller import ProductUploadHandler
+from controllers.product_controller import ProductUploadHandler, HomePageHandler
 # from controllers.product_controller import ProductListHandler, ProductDetailHandler,
 # from controllers.chat_controller import ChatHandler
 
@@ -28,7 +28,7 @@ def make_app():
         (r"/forgot", ForgotPasswordHandler),
         (r"/reset", ResetPasswordHandler),
         (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
-        # (r"/product", ProductListHandler),
+        (r"/home_page", HomePageHandler),
         # (r"/product/detail", ProductDetailHandler),
         # (r"/chat", ChatHandler),
         # 静态文件路径配置
