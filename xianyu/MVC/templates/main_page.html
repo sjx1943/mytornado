@@ -20,21 +20,23 @@
         {% end %}
     </nav>
     <div class="product-list">
-        {% for product in products %}
-            <div class="product-item">
-                <a href="/product/detail/{{ product['id'] }}">  <!-- Change this line -->
-                <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
+    {% for product in products %}
+        <div class="product-item">
+            <a href="/product/detail/{{ product['id'] }}">
+                <img class="product-image" src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
                 <p class="product-name">{{ product['name'] }}</p>
+                <p class="product-quantity">数量：{{ product['quantity'] }}</p>
                 <p class="product-price">￥{{ product['price'] }}</p>
                 <p class="product-tags">
-                    {% for tag in product['tag'] %}  <!-- And this line if necessary -->
+                    {% for tag in product['tag'] %}
                         <span class="tag">{{ tag }}</span>
                     {% end %}
                 </p>
-               </a>
-            </div>
-        {% end %}
-    </div>
+            </a>
+            <button class="want-button">想要</button>
+        </div>
+    {% end %}
+</div>
     <footer class="main-footer">
         <a href="/main">主页</a>
         <a href="/publish_product">发布商品</a>

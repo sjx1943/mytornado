@@ -11,6 +11,12 @@
                 <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
                 <p class="product-name">{{ product['name'] }}</p>
                 <p class="product-price">￥{{ product['price'] }}</p>
+                <p class="product-quantity">数量：{{ product['quantity'] }}</p>
+                <p class="product-tags">
+                    {% for tag in product['tag'] %}
+                        <span class="tag">{{ tag }}</span>
+                    {% end %}
+                </p>
             </div>
         {% end %}
     </div>

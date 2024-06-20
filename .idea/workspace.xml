@@ -4,12 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="2024-5-31 win">
-      <change afterPath="$PROJECT_DIR$/xianyu/MVC/templates/home_page.html" afterDir="false" />
+    <list default="true" id="5482389d-c369-4aa4-bad2-267226b86212" name="Changes" comment="2024-6-4 win">
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/13_ 2024-04-29 003007.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/images/14_ 2024-05-15 165538.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xianyu/MVC/controllers/product_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/product_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/controllers/main_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/controllers/main_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianyu/MVC/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/index.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/models/product.py" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/models/product.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/mystatics/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/mystatics/css/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xianyu/MVC/templates/home_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/templates/home_page.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xianyu/MVC/templates/main_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/xianyu/MVC/templates/main_page.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -231,8 +234,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.app" />
-        <item itemvalue="Python.test (1)" />
         <item itemvalue="Python.product" />
+        <item itemvalue="Python.test (1)" />
         <item itemvalue="Python.user" />
         <item itemvalue="Python.test" />
       </list>
@@ -241,7 +244,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-50da183f06c8-2887949eec09-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.13135.95" />
+        <option value="bundled-python-sdk-eebebe6c2be4-b11f5e8da5ad-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.15325.20" />
       </set>
     </attachedChunks>
   </component>
@@ -299,7 +302,9 @@
       <workItem from="1717432166672" duration="222000" />
       <workItem from="1717432443822" duration="534000" />
       <workItem from="1717433015447" duration="2083000" />
-      <workItem from="1717463016608" duration="2298000" />
+      <workItem from="1717463016608" duration="2337000" />
+      <workItem from="1718847866157" duration="504000" />
+      <workItem from="1718848664853" duration="2662000" />
     </task>
     <task id="LOCAL-00001" summary="test update">
       <created>1702277878055</created>
@@ -450,7 +455,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717140559695</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="2024-6-4 win">
+      <option name="closed" value="true" />
+      <created>1717465337873</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1717465337873</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -494,17 +507,18 @@
     <MESSAGE value="2024-5-11 win" />
     <MESSAGE value="2024-5-14 win 只改了抽题函数代码" />
     <MESSAGE value="2024-5-31 win" />
-    <option name="LAST_COMMIT_MESSAGE" value="2024-5-31 win" />
+    <MESSAGE value="2024-6-4 win" />
+    <option name="LAST_COMMIT_MESSAGE" value="2024-6-4 win" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/mytornado$auth_controller.coverage" NAME="auth_controller Coverage Results" MODIFIED="1710322878732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/controllers" />
     <SUITE FILE_PATH="coverage/python_program$koutu.coverage" NAME="koutu 覆盖结果" MODIFIED="1696052741907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python_learning/practice/application" />
     <SUITE FILE_PATH="coverage/mytornado$models.coverage" NAME="models Coverage Results" MODIFIED="1707115958635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/models" />
-    <SUITE FILE_PATH="coverage/mytornado$app.coverage" NAME="app Coverage Results" MODIFIED="1717464136401" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
+    <SUITE FILE_PATH="coverage/mytornado$app.coverage" NAME="app Coverage Results" MODIFIED="1718850902207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
     <SUITE FILE_PATH="coverage/mytornado$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1717140610098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/yibu" />
     <SUITE FILE_PATH="coverage/mytornado$test.coverage" NAME="test Coverage Results" MODIFIED="1710379156007" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
     <SUITE FILE_PATH="coverage/mytornado$user.coverage" NAME="user Coverage Results" MODIFIED="1710380014809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/models" />
-    <SUITE FILE_PATH="coverage/mytornado$product.coverage" NAME="product Coverage Results" MODIFIED="1712659084946" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/models" />
+    <SUITE FILE_PATH="coverage/mytornado$product.coverage" NAME="product Coverage Results" MODIFIED="1718848975054" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC/models" />
     <SUITE FILE_PATH="coverage/mytornado$chat_room.coverage" NAME="chat_room Coverage Results" MODIFIED="1706001038348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/MVC" />
     <SUITE FILE_PATH="coverage/mytornado$tool.coverage" NAME="tool Coverage Results" MODIFIED="1707115034781" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />
     <SUITE FILE_PATH="coverage/mytornado$resptemplate.coverage" NAME="resptemplate Coverage Results" MODIFIED="1705495480365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/xianyu/ershoujiaoyi" />

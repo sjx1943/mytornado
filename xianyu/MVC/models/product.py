@@ -15,14 +15,18 @@ class Product(Base):
     user_id = Column(Integer, ForeignKey('xu_user.id'), nullable=False)
     tag = Column(String(255),nullable=False)
     image = Column(String(255))
+    quantity = Column(Integer)  # 新增字段
+    status = Column(String(64))  # 新增字段
 
-    def __init__(self, name, description, price, user_id, tag, image):
+    def __init__(self, name, description, price, user_id, tag, image,quantity, status):
         self.name = name
         self.description = description
         self.price = price
         self.user_id = user_id
         self.tag = tag
         self.image = image
+        self.quantity = quantity
+        self.status = status
 
     def __repr__(self):
         return f"<Product(id={self.id}, name={self.name}, price={self.price}, user_id={self.user_id}, tag={self.tag})>"

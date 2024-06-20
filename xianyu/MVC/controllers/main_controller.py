@@ -48,7 +48,9 @@ class MainHandler(tornado.web.RequestHandler):
                 "name": product.name,
                 "description": product.description,
                 "price": product.price,
+                "quantity": product.quantity,
                 "tag": product.tag,
+                "status": product.status,
                 "image": product.image
             }
             for product in products

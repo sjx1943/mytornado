@@ -49,10 +49,9 @@ body {
 }
 
 .product-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
 .product-item {
@@ -66,8 +65,8 @@ body {
 
 .product-item img {
     width: 100%;
-    height: 150px;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
 }
 
 .product-name {
@@ -95,6 +94,14 @@ body {
     border-radius: 3px;
 }
 
+.want-button {
+    /* 样式根据你的需求进行调整 */
+    background-color: #ea9c17;
+    color: #333;
+    padding: 2px 5px;
+    margin: 2px;
+    border-radius: 3px;
+}
 .main-footer {
     display: flex;
     justify-content: center;
