@@ -57,6 +57,7 @@ class MainHandler(tornado.web.RequestHandler):
         ]
         return products_list
 
+
     def get(self):
         user = self.current_user
         username = user.username if user else None

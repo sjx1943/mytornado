@@ -33,6 +33,7 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         name = self.get_argument("name")
         description = self.get_argument("description")
         price = float(self.get_argument("price"))
+        quantity = int(self.get_argument("quantity"))
         images = self.request.files.get("images", [])
         # images = self.get_argument('images', None)
         if not images:
@@ -49,7 +50,7 @@ class ProductUploadHandler(tornado.web.RequestHandler):
             return
 
         # Validate product data
-        if self.validate_product_data(name, description, price, images):
+        if self.validate_product_data(name, description, price, images, quantity):
             # Create a new product without image
             new_product = Product(
                 name=name,
@@ -57,7 +58,9 @@ class ProductUploadHandler(tornado.web.RequestHandler):
                 price=price,
                 user_id=user_id,
                 tag="生活用品",
-                image=""  # Temporarily set image as an empty string
+                image="",  # Temporarily set image as an empty string
+                quantity = quantity,
+                status = "在售"
             )
             self.session.add(new_product)
             self.session.commit()  # Commit here to get the new_product.id
@@ -85,9 +88,9 @@ class ProductUploadHandler(tornado.web.RequestHandler):
             self.write(json.dumps({'error': 'Invalid product data'}))
         self.redirect("/home_page")
 
-    def validate_product_data(self, name, description, price, images):
+    def validate_product_data(self, name, description, price, images, quantity):
             # 验证产品数据是否合法
-        if name and description and price > 0 and len(images) > 0:
+        if name and description and price > 0 and len(images) > 0 and quantity >0:
             return True
         else:
             return False
@@ -127,7 +130,8 @@ class HomePageHandler(tornado.web.RequestHandler):
                 "description": product.description,
                 "price": product.price,
                 "tag": product.tag,
-                "image": product.image
+                "image": product.image,
+                "quantity": product.quantity
             }
             for product in products
         ]
