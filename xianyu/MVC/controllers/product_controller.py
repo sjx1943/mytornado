@@ -9,11 +9,33 @@ import json
 import re
 
 
-class ProductListHandler(tornado.web.RequestHandler):
-    def get(self):
-        pass
+class ProductDetailHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = Session(engine)
 
-        # 获取商品列表...
+    def get(self, product_id):
+        # Fetch product details from the database using product_id
+        product = self.session.query(Product).filter_by(id=product_id).first()
+
+        # If no product is found, handle accordingly (e.g., show a 404 page)
+        if not product:
+            self.set_status(404)
+            self.write("Product not found")
+            return
+
+        # Convert the product object to a dictionary for template rendering
+        product_dict = {
+            'name': product.name,
+            'image': product.image,
+            'price': product.price,
+            'quantity': product.quantity,
+            'description': product.description
+        }
+
+        self.render("product_detail.html", product=product_dict)
+
+    def on_finish(self):
+        self.session.close()
 
 
 class ProductUploadHandler(tornado.web.RequestHandler):

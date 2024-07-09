@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Product Detail</title>
+    <link rel="stylesheet" href="{{ static_url('css/detail.css') }}">
 </head>
 <body>
+    <h1>{{ product['name'] }}</h1>
 
+    <p>Price: {{ product['price'] }}</p>
+    <p>Quantity: {{ product['quantity'] }}</p>
+    <p>Description: {{ product['description'] }}</p>
+    <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
+    <!-- Add more product details as needed -->
 </body>
 </html>
