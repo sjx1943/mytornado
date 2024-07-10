@@ -5,6 +5,7 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler
+from controllers.chat_controller import ChatHandler
 # from controllers.product_controller import ProductListHandler, ProductDetailHandler,
 # from controllers.chat_controller import ChatHandler
 
@@ -30,6 +31,7 @@ def make_app():
         (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
         (r"/home_page", HomePageHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
+        (r"/chat", ChatHandler),
         # (r"/chat", ChatHandler),
         # 静态文件路径配置
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),

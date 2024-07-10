@@ -15,3 +15,8 @@ h1, p {
     text-align: center; /* Center-align text */
     max-width: 90%; /* Ensure text does not stretch too wide on large screens */
 }
+
+.want-button {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}

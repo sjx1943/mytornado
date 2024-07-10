@@ -16,4 +16,17 @@ window.addEventListener('resize', function() {
 window.dispatchEvent(new Event('resize'));
 
 // 处理活动相关功能
-// ...
+var ws = new WebSocket("ws://192.168.9.165:8000/chat");
+// 在main.js中
+document.querySelectorAll('.want-button').forEach(function(button) {
+    button.addEventListener('click', function() {
+        var productId = this.id.split('-')[1];  // 获取产品ID
+        var userId = document.cookie.split('; ').find(row => row.startsWith('user_id')).split('=')[1];  // 从cookie中获取用户ID
+        var message = {
+            type: 'want',
+            productId: productId,
+            userId: userId
+        };
+        ws.send(JSON.stringify(message));  // 通过WebSocket发送消息
+    });
+});

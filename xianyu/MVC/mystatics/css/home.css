@@ -18,6 +18,11 @@
     order: 5; /* Image comes last */
 }
 
+.want-button {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
 .product-name { order: 1; }
 .product-price { order: 2; }
 .product-quantity { order: 3; }

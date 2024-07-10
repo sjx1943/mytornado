@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationshi
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
 from MVC.base.base import Base, engine
+from sqlalchemy.orm import Session
 # from user import User
 
 class Product(Base):
@@ -28,6 +29,13 @@ class Product(Base):
         self.quantity = quantity
         self.status = status
 
+    @classmethod
+    def find_seller_by_product_id(cls, product_id: int, session: Session):
+        product = session.query(cls).filter_by(id=product_id).first()
+        if product:
+            return product.user_id
+        else:
+            return None
     def __repr__(self):
         return f"<Product(id={self.id}, name={self.name}, price={self.price}, user_id={self.user_id}, tag={self.tag})>"
 
