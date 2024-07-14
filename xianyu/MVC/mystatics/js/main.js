@@ -1,3 +1,34 @@
+function setupWebSocket() {
+    var ws = new WebSocket("ws://192.168.9.165:8000/chat");
+
+    ws.onopen = function() {
+        console.log("WebSocket connection established");
+    };
+
+    ws.onerror = function() {
+        console.log("WebSocket connection error");
+    };
+
+    ws.onmessage = function (evt) {
+        var message = JSON.parse(evt.data);
+        if (message.type === 'message') {
+            $('#divId').append('<p>'+message.text+'</p>');
+            $('#unread-message-alert').show();
+        }
+    };
+
+    document.querySelectorAll('.want-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var productId = this.getAttribute('data-product-id');
+            var message = {
+                type: 'want',
+                productId: productId
+            };
+            ws.send(JSON.stringify(message));
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // 实现弹性伸缩布局
     window.addEventListener('resize', function() {
@@ -16,29 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 触发窗口调整大小事件以初始化布局
     window.dispatchEvent(new Event('resize'));
 
-    var ws = new WebSocket("ws://localhost:8000/chat");
-
-    ws.onopen = function() {
-        console.log("WebSocket connection established");
-    };
-
-    ws.onerror = function() {
-        console.log("WebSocket connection error");
-    };
-
-    document.querySelectorAll('.want-button').forEach(function(button) {
-        button.addEventListener('click', function() {
-            // Display an alert window with the message "想要点击成功"
-            alert("想要点击成功");
-        });
-    });
-}); // Fixed missing closing brace
-
-
-//     document.querySelectorAll('.want-button').forEach(function(button) {
-//         button.addEventListener('click', function() {
-//             console.log("Button clicked, product ID: ", this.getAttribute('data-product-id'));
-//             // Assuming the rest of the WebSocket message sending logic is here
-//         });
-//     });
-// });
+    // 在页面加载完成后设置 WebSocket 连接
+    setupWebSocket();
+});

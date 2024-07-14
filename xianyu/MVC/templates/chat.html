@@ -32,24 +32,25 @@
     </style>
 </head>
 <body>
-    <div id="divId"></div>
-    <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="send();" />
+    <div id="unread-message-alert" style="display: none;">You have unread messages</div>
+<script>
+        var ws = new WebSocket("ws://192.168.9.165:8000/chat");
 
-    <script>
-        var ws = new WebSocket('ws://localhost:8000/chat/');
+        ws.onopen = function() {
+            console.log("WebSocket connection established");
+        };
 
+        ws.onerror = function() {
+            console.log("WebSocket connection error");
+        };
 
         ws.onmessage = function (evt) {
-            $('#divId').append('<p>'+evt.data+'</p>');
-        }
-
-        function send(){
-            var msg = $('#msg').val();
-            ws.send(msg);
-            $('#msg').val('');
-        }
-
-
+            var message = JSON.parse(evt.data);
+            if (message.type === 'message') {
+                $('#divId').append('<p>'+message.text+'</p>');
+                $('#unread-message-alert').show();
+            }
+        };
     </script>
 </body>
 </html>

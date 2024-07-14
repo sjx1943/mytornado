@@ -4,11 +4,12 @@ import json
 from tornado.web import RequestHandler,Application
 from tornado.websocket import WebSocketHandler
 from MVC.models.product import Product
-from sqlalchemy.orm import Session, scoped_session, sessionmaker
-from tornado.ioloop import IOLoop
+from sqlalchemy.orm import scoped_session, sessionmaker
+from MVC.base.base import engine
 import os
 import datetime
 
+Session = sessionmaker(bind=engine)
 
 class IndexHandler(RequestHandler):
     def get(self, *args, **kwargs):
@@ -29,7 +30,8 @@ class User:
 
 class ChatHandler(WebSocketHandler):
     connections = {}  # 存储用户ID到WebSocket连接的映射
-
+    def initialize(self) -> None:
+        self.session = Session()
     def open(self):
         user_id = self.get_secure_cookie("user_id").decode('utf-8')
         if user_id:
@@ -38,17 +40,23 @@ class ChatHandler(WebSocketHandler):
 
     def on_message(self, message):
         # 解析消息
-        self.write_message(u"You said: " + message)
+        # self.write_message(u"You said: " + message)
+        # message_dict = json.loads(message)
+        # sender_id = message_dict.get('sender_id')
+        # receiver_id = message_dict.get('receiver_id')
+        # text = message_dict.get('text')
         message_dict = json.loads(message)
-        sender_id = message_dict.get('sender_id')
-        receiver_id = message_dict.get('receiver_id')
-        text = message_dict.get('text')
-
+        if message_dict['type'] == 'want':
+            product_id = message_dict['productId']
+            product = self.session.query(Product).filter_by(id=product_id).first()
+            if product:
+                seller_id = product.user_id
+                if seller_id in self.connections:
+                    seller_conn = self.connections[seller_id]
+                    seller_conn.write_message(f"User {self.current_user.id} wants your product {product_id}")
         # 确保发送者和接收者都有效
-        if sender_id in self.connections and receiver_id in self.connections:
-            # 向接收者发送消息
-            receiver_conn = self.connections[receiver_id]
-            receiver_conn.write_message(f"From {sender_id}: {text}")
+
+
 
     def on_close(self):
         user_id = self.get_secure_cookie("user_id").decode('utf-8')
