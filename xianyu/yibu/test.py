@@ -1,65 +1,46 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#coding=utf-8
 
-import random
+from tornado.web import RequestHandler,Application
+from tornado.websocket import WebSocketHandler
+from tornado.ioloop import IOLoop
+import os
+import datetime
 
-def draw_questions(question_types, num_questions_per_type):
-    """
-    Draw 3 questions from N types of questions, with 1 question from each type.
+class ChatHandler(RequestHandler):
+    def get(self, *args, **kwargs):
+        self.render('chat.html')
 
-    Args:
-        question_types (list): List of N types of questions (e.g. ["math", "science", "history"])
-        num_questions_per_type (dict): Dictionary mapping each question type to the number of questions (e.g. {"math": 5, "science": 3, "history": 4})
+userList = set()
 
-    Returns:
-        list: List of 3 questions, one from each of the randomly selected types
-    """
-    # Randomly select 3 question types
-    selected_types = random.sample(question_types, 3)
+class EchoWebSocket(WebSocketHandler):
 
-    # Draw 1 question from each of the selected types
-    questions = []
-    for question_type in selected_types:
-        num_questions = num_questions_per_type[question_type]
-        question_index = random.randint(0, num_questions - 1)
-        question = f"{question_type}_{question_index + 1}"  # e.g. "math_1", "science_2", etc.
-        questions.append(question)
+    def open(self, *args, **kwargs):
+        print("WebSocket connection opened")
+        userList.add(self)
+        [user.write_message(u'%s-%s:上线了~'%(self.request.remote_ip,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
 
-    return questions
+    def on_message(self, message):
+        print("Received message: " + message)
+        [user.write_message(u'%s-%s说:%s' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),message)) for user in userList]
 
-def draw_questions1(question_types, num_questions_per_type):
-    """
-    Draw 3 questions from N types of questions, with 1 question from each type.
+    def on_close(self):
+        userList.remove(self)
+        [user.write_message(
+            u'%s-%s:下线了~' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
 
-    Args:
-        question_types (list): List of N types of questions (e.g. ["math", "science", "history"])
-        num_questions_per_type (dict): Dictionary mapping each question type to the number of questions (e.g. {"math": 5, "science": 3, "history": 4})
+    def check_origin(self, origin: str) -> bool:
+        return True
 
-    Returns:
-        list: List of 3 questions, one from each of the randomly selected types
-    """
-    # Remove "lunwen" from question_types
-    question_types.remove("lunwen")
+    def on_pong(self, data: bytes) -> None:
+        print('pong')
+        super().on_pong(data)
 
-    # Randomly select 2 question types
-    selected_types = random.sample(question_types, 3)
+app = Application([
+    (r'^/$',ChatHandler),
+    (r'^/chat$',EchoWebSocket),
+],template_path=os.path.join(os.getcwd(),'mytemplate'),debug=True)
 
-    # Add "lunwen" to selected_types
-    selected_types.append("lunwen")
+# app.listen(9000,address='192.168.9.165')
+app.listen(9000)
 
-    # Draw 1 question from each of the selected types
-    questions = []
-    for question_type in selected_types:
-        num_questions = num_questions_per_type[question_type]
-        question_index = random.randint(0, num_questions - 1)
-        question = f"{question_type}_{question_index + 1}"  # e.g. "math_1", "science_2", etc.
-        questions.append(question)
-
-    return questions
-
-question_types = ["cp1", "cp2", "cp3", "cp4", "cp5", "cp6","lunwen"]
-num_questions_per_type = {"cp1": 9, "cp2": 10, "cp3": 7, "cp4": 12, "cp5": 10, "cp6":1,"lunwen":10}
-
-
-questions = draw_questions1(question_types, num_questions_per_type)
-print(questions)  # e.g. ["math_2", "science_1", "history_3"]
+IOLoop.instance().start()
