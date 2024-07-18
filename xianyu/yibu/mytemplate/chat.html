@@ -3,41 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>chatroom</title>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-
-        #divId{
-            width:500px;
-            height: 300px;
-            border: 1px solid gray;
-            overflow: auto;
-            background: lightblue;
-        }
-
-        #msg{
-            width: 400px;
-            height: 40px;
-            font-size: 20px;
-        }
-
-
-        #btn{
-            width:99px;
-            height: 42px;
-            border:none;
-        }
-
-
-
-    </style>
+    <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
 </head>
 <body>
-    <div id="unread-message-alert" style="display: none;">You have unread messages</div>
+    <div id="unread-message-alert" style="display: none;">消息</div>
     <div id="divId"></div>
     <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="send();" />
 <script>
-        var ws = new WebSocket("ws://192.168.9.165:9000/chat");
-
+        var ws = new WebSocket("ws://192.168.32.27:9000/chat");
 
         ws.onopen = function() {
             console.log("WebSocket connection established");
@@ -58,7 +31,7 @@
             ws.send(msg);
             $('#msg').val('');
         }
-
     </script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

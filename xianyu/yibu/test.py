@@ -38,7 +38,7 @@ class EchoWebSocket(WebSocketHandler):
 app = Application([
     (r'^/$',ChatHandler),
     (r'^/chat$',EchoWebSocket),
-],template_path=os.path.join(os.getcwd(),'mytemplate'),debug=True)
+],static_path=os.path.join(os.path.dirname(__file__), "mystatics"),template_path=os.path.join(os.getcwd(),'mytemplate'),debug=True)
 
 # app.listen(9000,address='192.168.9.165')
 app.listen(9000)

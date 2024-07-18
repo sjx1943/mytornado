@@ -2,55 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
-    <style>
-
-        #divId{
-            width:500px;
-            height: 300px;
-            border: 1px solid gray;
-            overflow: auto;
-            background: lightblue;
-        }
-
-        #msg{
-            width: 400px;
-            height: 40px;
-            font-size: 20px;
-        }
-
-
-        #btn{
-            width:99px;
-            height: 42px;
-            border:none;
-        }
-
-
-
-    </style>
+    <title>chatroom</title>
+    <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
 </head>
 <body>
-    <div id="unread-message-alert" style="display: none;">You have unread messages</div>
+    <div id="unread-message-alert" style="display: none;">消息</div>
+    <div id="divId"></div>
+    <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="send();" />
 <script>
-        var ws = new WebSocket("ws://192.168.9.165:8000/chat");
+        var ws = new WebSocket("ws://192.168.32.27:8000/chat");
 
         ws.onopen = function() {
             console.log("WebSocket connection established");
-        };
+        }
 
         ws.onerror = function() {
             console.log("WebSocket connection error");
-        };
+        }
 
         ws.onmessage = function (evt) {
-            var message = JSON.parse(evt.data);
-            if (message.type === 'message') {
-                $('#divId').append('<p>'+message.text+'</p>');
-                $('#unread-message-alert').show();
+        var message = evt.data; // 直接使用 evt.data 获取消息
+        $('#divId').append('<p>'+message+'</p>'); // 将消息添加到 divId 元素中
+        $('#unread-message-alert').show();
+    }
+
+            function send(){
+                var msg = $('#msg').val();
+                ws.send(msg);
+                $('#msg').val('');
             }
-        };
     </script>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>
