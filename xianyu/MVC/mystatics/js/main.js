@@ -1,34 +1,3 @@
-function setupWebSocket() {
-    var ws = new WebSocket("ws://192.168.9.165:8000/chat");
-
-    ws.onopen = function() {
-        console.log("WebSocket connection established");
-    };
-
-    ws.onerror = function() {
-        console.log("WebSocket connection error");
-    };
-
-    ws.onmessage = function (evt) {
-        var message = JSON.parse(evt.data);
-        if (message.type === 'message') {
-            $('#divId').append('<p>'+message.text+'</p>');
-            $('#unread-message-alert').show();
-        }
-    };
-
-    document.querySelectorAll('.want-button').forEach(function(button) {
-        button.addEventListener('click', function() {
-            var productId = this.getAttribute('data-product-id');
-            var message = {
-                type: 'want',
-                productId: productId
-            };
-            ws.send(JSON.stringify(message));
-        });
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     // 实现弹性伸缩布局
     window.addEventListener('resize', function() {
@@ -49,4 +18,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 在页面加载完成后设置 WebSocket 连接
     setupWebSocket();
+
+    // 添加“想要”按钮的点击事件监听器
+    document.querySelectorAll('.want-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var productId = this.getAttribute('data-product-id');
+            var uploaderId = this.getAttribute('data-uploader-id'); // Assuming uploader ID is stored in a data attribute
+            var message = {
+                type: 'want',
+                content: '我对这个商品感兴趣',
+                receiver_id: uploaderId
+            };
+            privateWs.send(JSON.stringify(message));
+            alert("想要点击成功");
+        });
+    });
 });
+
+function setupWebSocket() {
+    var userId = "1"; // Replace with actual current user ID
+    var partnerId = "2"; // Replace with actual partner user ID
+    var ws = new WebSocket(`ws://192.168.199.27:8000/chat`);
+    var privateWs = new WebSocket(`ws://192.168.199.27:8000/chat1?user_id=${userId}&partner_id=${partnerId}`);
+
+    ws.onopen = function() {
+        console.log("WebSocket connection established");
+    };
+
+    ws.onerror = function() {
+        console.log("WebSocket connection error");
+    };
+
+    ws.onmessage = function (evt) {
+        var message = evt.data; // 直接使用 evt.data 获取消息
+        $('#divId').append('<p>' + message + '</p>'); // 将消息添加到 divId 元素中
+        $('#unread-message-alert').show();
+    };
+
+    privateWs.onopen = function() {
+        console.log("Private WebSocket connection established");
+    };
+
+    privateWs.onerror = function() {
+        console.log("Private WebSocket connection error");
+    };
+
+    privateWs.onmessage = function (evt) {
+        var message = evt.data; // 直接使用 evt.data 获取消息
+        $('#divId').append('<p>' + message + '</p>'); // 将消息添加到 divId 元素中
+        $('#unread-message-alert').show();
+    };
+
+    window.send = function() {
+        var msg = $('#msg').val();
+        ws.send(msg);
+        $('#msg').val('');
+    };
+}
