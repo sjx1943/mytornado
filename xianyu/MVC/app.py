@@ -5,7 +5,7 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler
-from controllers.chat_controller import PublicChatHandler,EchoWebSocket,PrivateChatHandler, PrivateChatWebSocket
+from controllers.chat_controller import PublicChatHandler, PrivateChatHandler, PublicChatWebSocket, PrivateChatWebSocket
 # from controllers.product_controller import ProductListHandler, ProductDetailHandler,
 # from controllers.chat_controller import ChatHandler
 
@@ -32,9 +32,9 @@ def make_app():
         (r"/home_page", HomePageHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r'^/public_chat$', PublicChatHandler),
-        (r'^/chat$', EchoWebSocket),
+        (r'^/gchat$', PublicChatWebSocket),
         (r"/private_chat$", PrivateChatHandler),
-        (r'^/chat1$', PrivateChatWebSocket),
+        (r'^/schat$', PrivateChatWebSocket),
         # 静态文件路径配置
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
     ],

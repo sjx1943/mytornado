@@ -8,9 +8,14 @@
 <body>
     <div id="unread-message-alert" style="display: none;">消息</div>
     <div id="divId"></div>
-    <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="send();" />
+    <input type="text" id="msg" /><input type="button" id="btn" value="发送" onclick="sendPrivate();" />
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{{ static_url('js/main.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        setupPrivateWebSocket();
+    });
+</script>
 </body>
 </html>

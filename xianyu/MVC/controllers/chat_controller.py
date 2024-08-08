@@ -32,29 +32,26 @@ class User:
 
 userList = set()
 user_sessions = {}
-class EchoWebSocket(WebSocketHandler):
 
+# PublicChatWebSocket class
+class PublicChatWebSocket(WebSocketHandler):
     def open(self, *args, **kwargs):
         print("WebSocket connection opened")
         userList.add(self)
-        [user.write_message(u'%s-%s:上线了~'%(self.request.remote_ip,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
+        [user.write_message(u'%s-%s:上线了~' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
 
     def on_message(self, message):
         print("Received message: " + message)
-        [user.write_message(u'%s-%s说:%s' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),message)) for user in userList]
+        [user.write_message(u'%s-%s说:%s' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)) for user in userList]
 
     def on_close(self):
         userList.remove(self)
-        [user.write_message(
-            u'%s-%s:下线了~' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
+        [user.write_message(u'%s-%s:下线了~' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
 
     def check_origin(self, origin: str) -> bool:
         return True
 
-    def on_pong(self, data: bytes) -> None:
-        print('pong')
-        super().on_pong(data)
-
+# PrivateChatWebSocket class
 class PrivateChatWebSocket(WebSocketHandler):
     def open(self, *args, **kwargs):
         self.user_id = self.get_argument("user_id")
@@ -70,7 +67,7 @@ class PrivateChatWebSocket(WebSocketHandler):
             user_sessions[self.channel_id] = set()
         user_sessions[self.channel_id].add(self)
 
-        self.write_message(f"Connected to private channel: {self.channel_id}")
+        self.write_message(f"xxx 对你的商品感兴趣啊！: {self.channel_id}")
 
     def on_message(self, message):
         message_data = json.loads(message)

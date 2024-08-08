@@ -37,9 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function setupWebSocket() {
     var userId = "1"; // Replace with actual current user ID
-    var partnerId = "2"; // Replace with actual partner user ID
-    var ws = new WebSocket(`ws://192.168.199.27:8000/chat`);
-    var privateWs = new WebSocket(`ws://192.168.199.27:8000/chat1?user_id=${userId}&partner_id=${partnerId}`);
+    var ws = new WebSocket(`ws://192.168.199.27:8000/gchat?user_id=${userId}`);
 
     ws.onopen = function() {
         console.log("WebSocket connection established");
@@ -55,6 +53,18 @@ function setupWebSocket() {
         $('#unread-message-alert').show();
     };
 
+    window.send = function() {
+        var msg = $('#msg').val();
+        ws.send(msg);
+        $('#msg').val('');
+    };
+}
+
+function setupPrivateWebSocket() {
+    var userId = "1"; // Replace with actual current user ID
+    var partnerId = "2"; // Replace with actual partner user ID
+    var privateWs = new WebSocket(`ws://192.168.199.27:8000/schat?user_id=${userId}&partner_id=${partnerId}`);
+
     privateWs.onopen = function() {
         console.log("Private WebSocket connection established");
     };
@@ -69,9 +79,9 @@ function setupWebSocket() {
         $('#unread-message-alert').show();
     };
 
-    window.send = function() {
+    window.sendPrivate = function() {
         var msg = $('#msg').val();
-        ws.send(msg);
+        privateWs.send(msg);
         $('#msg').val('');
     };
 }
