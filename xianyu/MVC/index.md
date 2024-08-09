@@ -64,7 +64,7 @@ class LoginHandler(tornado.web.RequestHandler):
 2024-7-18 顺利将聊天室路由启动，在指定路由下查看聊天室消息。
 2024-8-7 成功设计私人和公共聊天室消息提醒，但无法实现消息提醒的自动刷线，且均为群聊消息，在聊天室中多余了"Connected to private channel"字样。
 2024-8-8 成功分离私人和公共聊天室的消息提醒。
-
+2024-8-9 在商品详情页上关联uploader用户信息（卖家），私人聊天室绑定买卖双方的user_id，但点击“想要后”的channel_id中还有报错。
 
 
 下一步， 通过用点击”想要“后关联商品上传用户ID和登录用户ID建立私人对话模式，并在private_chat.html中看到消息提醒。
@@ -72,6 +72,7 @@ class LoginHandler(tornado.web.RequestHandler):
 卖家获得提醒后可调用聊天chat控制器 相互发送聊天信息，交易成功后双方确认，卖家更新数据库中的商品数量和状态。
 
 可设计主页面（几大分类：二手交易、活动征集和重要信息发布等）、游客页面以及设计商品详情浏览和发布页面。
+
 
 
 ### 步骤 5: 创建视图（views/templates）

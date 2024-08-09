@@ -62,12 +62,13 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         user = self.current_user
         username = user.username if user else None
+        user_id = self.get_secure_cookie("user_id")
         products = self.get_products()
         tags = [product['tag'] for product in products]
         # self.write("已经成功登陆"+username)
 
         self.render("main_page.html", username=username, \
-                    products = products, tags = tags)
+                    user_id=user_id, tags = tags, products = products)
 
 
 

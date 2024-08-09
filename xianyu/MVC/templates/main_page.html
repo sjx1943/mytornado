@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登陆后首页面</title>
+    <title>二手交易平台主页</title>
     <link rel="stylesheet" href="{{ static_url('css/main.css') }}">
 </head>
 <body>
     {% if username %}
         <p class="welcome-msg">欢迎 {{ username }}，來到二手交易平台!</p>
+        <input type="hidden" id="logged-in-user-id" value="{{ user_id }}">
     {% end %}
     <form action="/search" method="get" class="search-form">
-        <input type="text" name="query" placeholder="搜索商品、活动或信息">
+        <input type="text" name="query" placeholder="搜索��品、活动或信息">
         <input type="submit" value="搜索">
     </form>
     <nav class="category-nav">
@@ -33,7 +33,7 @@
                     {% end %}
                 </p>
             </a>
-            <button class="want-button" data-product-id="{{ product['id'] }}" user-id="{{ product['user_id'] }}">想要</button>
+            <button class="want-button" data-product-id="{{ product['id'] }}" data-uploader-id="{{ product['user_id'] }}">想要</button>
         </div>
     {% end %}
 </div>

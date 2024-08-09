@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="{{ static_url('css/detail.css') }}">
 </head>
 <body>
-    <h1>{{ product['name'] }}</h1>
-
-    <p>Price: {{ product['price'] }}</p>
-    <p>Quantity: {{ product['quantity'] }}</p>
-    <p>Description: {{ product['description'] }}</p>
-    <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
-    <button class="want-button">想要</button>
-    <!-- Add more product details as needed -->
+    <h1>{{ product.name }}</h1>
+    <p>Price: {{ product.price }}</p>
+    <p>Quantity: {{ product.quantity }}</p>
+    <p>Description: {{ product.description }}</p>
+    <p>Uploader: {{ uploader.username }}</p>
+    <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
+    <button class="want-button" data-product-id="{{ product.id }}" data-uploader-id="{{ product.user_id }}">想要</button>
 </body>
 </html>

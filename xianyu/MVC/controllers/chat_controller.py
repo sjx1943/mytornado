@@ -55,11 +55,12 @@ class PublicChatWebSocket(WebSocketHandler):
 class PrivateChatWebSocket(WebSocketHandler):
     def open(self, *args, **kwargs):
         self.user_id = self.get_argument("user_id")
-        self.partner_id = self.get_argument("partner_id", None)  # Default to None if not provided
-        if not self.partner_id:
-            self.write_message("Error: Missing partner_id")
-            self.close()
-            return
+        self.product_id = self.get_argument("product_id")
+
+        session = scoped_session(Session)
+        product = session.query(Product).filter(Product.id == self.product_id).first()
+        self.partner_id = product.user_id
+        session.close()
 
         self.channel_id = f"{self.user_id}_{self.partner_id}" if self.user_id < self.partner_id else f"{self.partner_id}_{self.user_id}"
 
@@ -70,9 +71,12 @@ class PrivateChatWebSocket(WebSocketHandler):
         self.write_message(f"xxx 对你的商品感兴趣啊！: {self.channel_id}")
 
     def on_message(self, message):
-        message_data = json.loads(message)
-        for user in user_sessions[self.channel_id]:
-            user.write_message(f"{self.user_id} says: {message_data['content']}")
+        try:
+            message_data = json.loads(message)
+            for user in user_sessions[self.channel_id]:
+                user.write_message(f"{self.user_id} says: {message_data['content']}")
+        except json.JSONDecodeError:
+            self.write_message("Error: Invalid JSON format")
 
     def on_close(self):
         user_sessions[self.channel_id].remove(self)
