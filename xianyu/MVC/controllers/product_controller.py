@@ -12,7 +12,7 @@ Session = sessionmaker(bind=engine)
 
 class ProductDetailHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = scoped_session(Session)
+        self.session = scoped_session()
 
     def get(self, product_id):
         product = self.session.query(Product).filter(Product.id == product_id).first()
@@ -26,7 +26,7 @@ class ProductUploadHandler(tornado.web.RequestHandler):
     def initialize(self, app_settings):
         self.app_settings = app_settings
         # self.settings = settings
-        self.session = Session(engine)
+        self.session = Session()
 
     def get(self):
         # 获取指定product_id的产品信息
@@ -109,7 +109,7 @@ class ProductUploadHandler(tornado.web.RequestHandler):
 
 class HomePageHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = Session(engine)
+        self.session = Session()
 
     def get_current_user(self):
         username = self.get_secure_cookie("user")

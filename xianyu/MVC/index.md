@@ -65,7 +65,7 @@ class LoginHandler(tornado.web.RequestHandler):
 2024-8-7 成功设计私人和公共聊天室消息提醒，但无法实现消息提醒的自动刷线，且均为群聊消息，在聊天室中多余了"Connected to private channel"字样。
 2024-8-8 成功分离私人和公共聊天室的消息提醒。
 2024-8-9 在商品详情页上关联uploader用户信息（卖家），私人聊天室绑定买卖双方的user_id，但点击“想要后”的channel_id中还有报错。
-
+20248-14 点击想要按钮建立websocket连接时无法找到product_id，但能获取到user_id，看看user_id参数是在哪个环节顺利获取到的
 
 下一步， 通过用点击”想要“后关联商品上传用户ID和登录用户ID建立私人对话模式，并在private_chat.html中看到消息提醒。
 此外，需要在private.html左侧中设计消息列表，卖家可在主页看到消息提醒，并实现消息的自动刷新。我的消息中可以查看私人消息，即卖家和买家的点对点通信。

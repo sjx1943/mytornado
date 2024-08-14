@@ -8,8 +8,8 @@
     <h1>My Products</h1>
     <div class="product-list">
         {% for product in products %}
-            <div class="product-item">
-                <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
+        <div class="product-item" data-product-id="{{ product['id'] }}" data-uploader-id="{{ product['user_id'] }}">
+        <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
                 <p class="product-name">{{ product['name'] }}</p>
                 <p class="product-price">￥{{ product['price'] }}</p>
                 <p class="product-quantity">数量：{{ product['quantity'] }}</p>
@@ -18,8 +18,8 @@
                         <span class="tag">{{ tag }}</span>
                     {% end %}
                 </p>
-                 <button class="want-button">想要</button>
-            </div>
+        <button class="want-button">想要</button> </div>
+
         {% end %}
     </div>
 </body>

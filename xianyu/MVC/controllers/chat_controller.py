@@ -56,9 +56,12 @@ class PrivateChatWebSocket(WebSocketHandler):
     def open(self, *args, **kwargs):
         self.user_id = self.get_argument("user_id")
         self.product_id = self.get_argument("product_id")
-
+        if self.product_id == 'null':
+            raise ValueError("Invalid product_id: null")
         session = scoped_session(Session)
-        product = session.query(Product).filter(Product.id == self.product_id).first()
+        product = session.query(Product).filter(Product.id==self.product_id).first()
+        if product is None:
+            raise ValueError(f"No product found with id {self.product_id}")
         self.partner_id = product.user_id
         session.close()
 
