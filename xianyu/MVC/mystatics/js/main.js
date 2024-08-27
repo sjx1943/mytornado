@@ -1,83 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const productList = document.querySelector('.product-list');
-    const productItems = document.querySelectorAll('.product-item');
-    const itemWidth = 200; // 假设每个商品项目的宽度为 200px
-    const itemMargin = 20; // 假设每个商品项目的左右边距为 10px
-
-    // 计算并设置商品项目的宽度
-    function adjustLayout() {
-        const containerWidth = productList.offsetWidth;
-        const maxItemsPerRow = Math.floor((containerWidth + itemMargin) / (itemWidth + itemMargin * 2));
-
-        const calculatedItemWidth = (containerWidth - itemMargin * (maxItemsPerRow + 1)) / maxItemsPerRow;
-        productItems.forEach(item => {
-            item.style.width = `${calculatedItemWidth}px`;
-            item.style.margin = `${itemMargin / 2}px`;
-        });
-    }
-
-    // 监听窗口调整事件
-    window.addEventListener('resize', adjustLayout);
-
-    // 初始化布局
-    adjustLayout();
-
-    // 设置 WebSocket 连接
-    setupWebSocket();
-
-    // 添加“想要”按钮的点击事件监听器
-    productItems.forEach(item => {
-        const wantButton = item.querySelector('.want-button');
-    wantButton.addEventListener('click', function() {
-        const productId = item.getAttribute('data-product-id');
-        console.log(`Product ID: ${productId}`);
-        const uploaderId = item.getAttribute('data-uploader-id');
-        const loggedInUserId = document.getElementById('logged-in-user-id').value;
-        const message = {
-                type: 'want',
-                content: '对这个商品感兴趣',
-                receiver_id: uploaderId
-            };
-        console.log(productId);
-            setupPrivateWebSocket(loggedInUserId, productId, function() {
-                privateWs.send(JSON.stringify(message));
-                alert("想要点击成功");
-            });
-        });
-    });
-
-    let privateWs;
-
-    function setupPrivateWebSocket(buyerId, productId, callback) {
-
-          const wsUrl = `ws://192.168.9.166:8000/schat?user_id=${buyerId}&product_id=${productId}`;
-          console.log(`WebSocket URL: ${wsUrl}`);  // Add this line
-          privateWs = new WebSocket(wsUrl);
-
-        privateWs.onerror = function() {
-            console.log("Private WebSocket connection error");
-        };
-
-        privateWs.onmessage = function(evt) {
-            const message = evt.data;
-            $('#divId').append(`<p>${message}</p>`);
-            $('#unread-message-alert').show();
-        };
-
-        window.sendPrivate = function() {
-            const msg = $('#msg').val();
-            const message = JSON.stringify({ content: msg });
-            privateWs.send(message);
-            $('#msg').val('');
-        };
-    }
-
     function setupWebSocket() {
         const userId = "1"; // Replace with actual current user ID
-        const ws = new WebSocket(`ws://192.168.9.166:8000/gchat?user_id=${userId}`);
+        const ws = new WebSocket(`ws://192.168.221.27:8000/gchat?user_id=${userId}`);
 
         ws.onopen = function() {
             console.log("WebSocket connection established");
+            displayPublicMessage("欢迎来到公共聊天室");
         };
 
         ws.onerror = function() {
@@ -86,14 +14,73 @@ document.addEventListener('DOMContentLoaded', function() {
 
         ws.onmessage = function(evt) {
             const message = evt.data;
-            $('#divId').append(`<p>${message}</p>`);
-            $('#unread-message-alert').show();
+            displayPublicMessage(message);
         };
 
         window.send = function() {
-            const msg = $('#msg').val();
+            const msg = document.getElementById('msg').value;
             ws.send(msg);
-            $('#msg').val('');
+            document.getElementById('msg').value = '';
+            displayPublicMessage(msg); // Display the message on the page
         };
     }
+
+    function setupPrivateWebSocket(buyerId, productId, callback) {
+        const wsUrl = `ws://192.168.221.27:8000/schat?user_id=${buyerId}&product_id=${productId}`;
+        const privateWs = new WebSocket(wsUrl);
+
+        privateWs.onerror = function() {
+            console.log("Private WebSocket connection error");
+        };
+
+        privateWs.onopen = function() {
+            console.log("Private WebSocket connection established");
+            displayPrivateMessage("欢迎来到私人聊天室");
+            if (callback) callback();
+        };
+
+        privateWs.onmessage = function(evt) {
+            const message = evt.data;
+            displayPrivateMessage(message);
+        };
+
+        window.sendPrivate = function() {
+            const msg = document.getElementById('msg').value;
+            const message = JSON.stringify({ content: msg });
+            privateWs.send(message);
+            document.getElementById('msg').value = '';
+            displayPrivateMessage(msg); // Display the message on the page
+        };
+    }
+
+    function displayPublicMessage(message) {
+        const messageList = document.getElementById('divId');
+        const messageItem = document.createElement('p');
+        messageItem.textContent = message;
+        messageList.appendChild(messageItem);
+    }
+
+    function displayPrivateMessage(message) {
+        const messageList = document.getElementById('private-message-list');
+        const messageItem = document.createElement('li');
+        messageItem.textContent = message;
+        messageItem.style.border = "1px solid black"; // Add border
+        messageItem.style.padding = "10px"; // Add padding
+        messageItem.style.margin = "5px 0"; // Add margin
+        messageList.appendChild(messageItem);
+    }
+
+    // Initialize private WebSocket for private chat page
+    if (document.getElementById('private-message-list')) {
+        const loggedInUserId = document.getElementById('logged-in-user-id').value;
+        const productId = "1"; // Replace with actual product ID
+        setupPrivateWebSocket(loggedInUserId, productId);
+    }
+
+    // Initialize public WebSocket for public chat page
+    if (document.getElementById('divId')) {
+        setupWebSocket();
+    }
 });
+
+        // const productId = item.getAttribute('data-product-id');

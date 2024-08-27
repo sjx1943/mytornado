@@ -1,7 +1,7 @@
 #coding=utf-8
 import json
 
-from tornado.web import RequestHandler,Application
+from tornado.web import RequestHandler, Application
 from tornado.websocket import WebSocketHandler
 from MVC.models.product import Product
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -26,14 +26,13 @@ class User:
 
     @staticmethod
     def find_user_by_id(user_id):
-        # 这里模拟从数据库获取用户信息的过程
+        # 这���模拟从数据库获取用户信息的过程
         # 实际应用中应该从数据库中查询用户信息
         return User(user_id, "Username" + str(user_id))
 
 userList = set()
 user_sessions = {}
 
-# PublicChatWebSocket class
 class PublicChatWebSocket(WebSocketHandler):
     def open(self, *args, **kwargs):
         print("WebSocket connection opened")
@@ -51,7 +50,6 @@ class PublicChatWebSocket(WebSocketHandler):
     def check_origin(self, origin: str) -> bool:
         return True
 
-# PrivateChatWebSocket class
 class PrivateChatWebSocket(WebSocketHandler):
     def open(self, *args, **kwargs):
         self.user_id = self.get_argument("user_id")
@@ -59,13 +57,13 @@ class PrivateChatWebSocket(WebSocketHandler):
         if self.product_id == 'null':
             raise ValueError("Invalid product_id: null")
         session = scoped_session(Session)
-        product = session.query(Product).filter(Product.id==self.product_id).first()
+        product = session.query(Product).filter(Product.id == self.product_id).first()
         if product is None:
             raise ValueError(f"No product found with id {self.product_id}")
         self.partner_id = product.user_id
         session.close()
 
-        self.channel_id = f"{self.user_id}_{self.partner_id}" if self.user_id < self.partner_id else f"{self.partner_id}_{self.user_id}"
+        self.channel_id = f"{self.user_id}_{self.partner_id}" if int(self.user_id) < self.partner_id else f"{self.partner_id}_{self.user_id}"
 
         if self.channel_id not in user_sessions:
             user_sessions[self.channel_id] = set()
@@ -74,6 +72,7 @@ class PrivateChatWebSocket(WebSocketHandler):
         self.write_message(f"xxx 对你的商品感兴趣啊！: {self.channel_id}")
 
     def on_message(self, message):
+        print("Received message: " + message)
         try:
             message_data = json.loads(message)
             for user in user_sessions[self.channel_id]:
@@ -88,13 +87,3 @@ class PrivateChatWebSocket(WebSocketHandler):
 
     def check_origin(self, origin: str) -> bool:
         return True
-
-# app = Application([
-#     (r'^/()$', IndexHandler),
-#     (r'^/chat/?$', ChatHandler),
-#     (r'^/websocket/?$', ChatHandler),
-# ],template_path=os.path.join(os.getcwd(),'templates'),debug=True)
-#
-# app.listen(8000,address='192.168.9.81')
-#
-# IOLoop.instance().start()
