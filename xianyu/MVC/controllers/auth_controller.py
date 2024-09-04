@@ -43,7 +43,7 @@ class LoginHandler(tornado.web.RequestHandler):
             self.set_secure_cookie("username", user.username)
             self.redirect("/main")
         else:
-            self.render("login.html", message="Invalid username or password", result="用户名和密码错误")
+            self.render("login.html", message="Invalid username or password", result="用户名或密码错误")
 
 
 def generate_reset_token():
@@ -109,6 +109,7 @@ def hash_password(password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password_bytes, salt)
     return hashed_password.decode('utf-8')
+    # return hashed_password
 
 class ResetPasswordHandler(tornado.web.RequestHandler):
     def initialize(self):

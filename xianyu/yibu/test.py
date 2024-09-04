@@ -6,4 +6,4 @@ def hash_password(password):
     hashed_password = bcrypt.hashpw(password_bytes, salt)
     return hashed_password.decode('utf-8')
 
-print(hash_password("password"))
+print(hash_password("321"))
