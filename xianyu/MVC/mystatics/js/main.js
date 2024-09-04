@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     function setupWebSocket() {
-        const userId = "1"; // Replace with actual current user ID
-        const ws = new WebSocket(`ws://192.168.221.27:8000/gchat?user_id=${userId}`);
+        const userId = document.getElementById('logged-in-user-id').value;
+        const ws = new WebSocket(`ws://${window.location.host}/chat?user_id=${userId}`);
 
         ws.onopen = function() {
             console.log("WebSocket connection established");
-            displayPublicMessage("欢迎来到公共聊天室");
+            displayMessage("欢迎来到聊天室");
         };
 
         ws.onerror = function() {
@@ -14,73 +14,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
         ws.onmessage = function(evt) {
             const message = evt.data;
-            displayPublicMessage(message);
+            displayMessage(message);
         };
 
-        window.send = function() {
-            const msg = document.getElementById('msg').value;
-            ws.send(msg);
-            document.getElementById('msg').value = '';
-            displayPublicMessage(msg); // Display the message on the page
-        };
+        document.getElementById('send-button').addEventListener('click', function() {
+            const msg = document.getElementById('message-input').value;
+            ws.send(JSON.stringify({ content: msg }));
+            document.getElementById('message-input').value = '';
+            displayMessage(msg); // Display the message on the page
+        });
     }
 
-    function setupPrivateWebSocket(buyerId, productId, callback) {
-        const wsUrl = `ws://192.168.221.27:8000/schat?user_id=${buyerId}&product_id=${productId}`;
-        const privateWs = new WebSocket(wsUrl);
-
-        privateWs.onerror = function() {
-            console.log("Private WebSocket connection error");
-        };
-
-        privateWs.onopen = function() {
-            console.log("Private WebSocket connection established");
-            displayPrivateMessage("欢迎来到私人聊天室");
-            if (callback) callback();
-        };
-
-        privateWs.onmessage = function(evt) {
-            const message = evt.data;
-            displayPrivateMessage(message);
-        };
-
-        window.sendPrivate = function() {
-            const msg = document.getElementById('msg').value;
-            const message = JSON.stringify({ content: msg });
-            privateWs.send(message);
-            document.getElementById('msg').value = '';
-            displayPrivateMessage(msg); // Display the message on the page
-        };
-    }
-
-    function displayPublicMessage(message) {
-        const messageList = document.getElementById('divId');
+    function displayMessage(message) {
+        const messageList = document.getElementById('chat-messages');
         const messageItem = document.createElement('p');
         messageItem.textContent = message;
         messageList.appendChild(messageItem);
     }
 
-    function displayPrivateMessage(message) {
-        const messageList = document.getElementById('private-message-list');
-        const messageItem = document.createElement('li');
-        messageItem.textContent = message;
-        messageItem.style.border = "1px solid black"; // Add border
-        messageItem.style.padding = "10px"; // Add padding
-        messageItem.style.margin = "5px 0"; // Add margin
-        messageList.appendChild(messageItem);
-    }
-
-    // Initialize private WebSocket for private chat page
-    if (document.getElementById('private-message-list')) {
-        const loggedInUserId = document.getElementById('logged-in-user-id').value;
-        const productId = "1"; // Replace with actual product ID
-        setupPrivateWebSocket(loggedInUserId, productId);
-    }
-
-    // Initialize public WebSocket for public chat page
-    if (document.getElementById('divId')) {
+    // Initialize WebSocket for chat page
+    if (document.getElementById('chat-messages')) {
         setupWebSocket();
     }
-});
 
-        // const productId = item.getAttribute('data-product-id');
+    // Handle "想要" button click to initiate chat with product uploader
+    $(".want-button").click(function() {
+        var productId = $(this).closest(".product-item").data("product-id");
+        var uploaderId = $(this).closest(".product-item").data("uploader-id");
+        window.location.href = "/chat_room?product_id=" + productId + "&uploader_id=" + uploaderId;
+    });
+});

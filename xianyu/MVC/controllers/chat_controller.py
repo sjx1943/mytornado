@@ -1,78 +1,43 @@
-#coding=utf-8
+# chat_controller.py
+import tornado.web
+import tornado.websocket
 import json
+from models.product import Product
+from sqlalchemy.orm import scoped_session, Session
 
-from tornado.web import RequestHandler, Application
-from tornado.websocket import WebSocketHandler
-from MVC.models.product import Product
-from sqlalchemy.orm import scoped_session, sessionmaker
-from MVC.base.base import engine
-import os
-import datetime
-
-Session = sessionmaker(bind=engine)
-
-class PublicChatHandler(RequestHandler):
-    def get(self, *args, **kwargs):
-        self.render('public_chat.html')
-
-class PrivateChatHandler(RequestHandler):
-    def get(self, *args, **kwargs):
-        self.render('private_chat.html')
-
-class User:
-    def __init__(self, user_id, username):
-        self.user_id = user_id
-        self.username = username
-
-    @staticmethod
-    def find_user_by_id(user_id):
-        # 这���模拟从数据库获取用户信息的过程
-        # 实际应用中应该从数据库中查询用户信息
-        return User(user_id, "Username" + str(user_id))
-
-userList = set()
 user_sessions = {}
 
-class PublicChatWebSocket(WebSocketHandler):
-    def open(self, *args, **kwargs):
-        print("WebSocket connection opened")
-        userList.add(self)
-        [user.write_message(u'%s-%s:上线了~' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
 
-    def on_message(self, message):
-        print("Received message: " + message)
-        [user.write_message(u'%s-%s说:%s' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)) for user in userList]
+class ChatHandler(tornado.web.RequestHandler):
+    def get(self):
+        user_id = self.get_secure_cookie("user_id")
+        self.render('chat_room.html', user_id=user_id)
 
-    def on_close(self):
-        userList.remove(self)
-        [user.write_message(u'%s-%s:下线了~' % (self.request.remote_ip, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))) for user in userList]
 
-    def check_origin(self, origin: str) -> bool:
-        return True
-
-class PrivateChatWebSocket(WebSocketHandler):
-    def open(self, *args, **kwargs):
+class ChatWebSocket(tornado.websocket.WebSocketHandler):
+    def open(self):
         self.user_id = self.get_argument("user_id")
-        self.product_id = self.get_argument("product_id")
-        if self.product_id == 'null':
-            raise ValueError("Invalid product_id: null")
-        session = scoped_session(Session)
-        product = session.query(Product).filter(Product.id == self.product_id).first()
-        if product is None:
-            raise ValueError(f"No product found with id {self.product_id}")
-        self.partner_id = product.user_id
-        session.close()
+        self.product_id = self.get_argument("product_id", None)
 
-        self.channel_id = f"{self.user_id}_{self.partner_id}" if int(self.user_id) < self.partner_id else f"{self.partner_id}_{self.user_id}"
+        if self.product_id:
+            session = scoped_session(Session)
+            product = session.query(Product).filter(Product.id == self.product_id).first()
+            if product is None:
+                raise ValueError(f"No product found with id {self.product_id}")
+            self.partner_id = product.user_id
+            session.close()
+            self.channel_id = f"{self.user_id}_{self.partner_id}" if int(
+                self.user_id) < self.partner_id else f"{self.partner_id}_{self.user_id}"
+        else:
+            self.channel_id = 'public'
 
         if self.channel_id not in user_sessions:
             user_sessions[self.channel_id] = set()
         user_sessions[self.channel_id].add(self)
 
-        self.write_message(f"xxx 对你的商品感兴趣啊！: {self.channel_id}")
+        self.write_message(f"Welcome to the chat room: {self.channel_id}")
 
     def on_message(self, message):
-        print("Received message: " + message)
         try:
             message_data = json.loads(message)
             for user in user_sessions[self.channel_id]:

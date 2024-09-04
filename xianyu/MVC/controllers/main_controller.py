@@ -1,9 +1,9 @@
 from typing import Optional, Awaitable
-from MVC.models.product import Product
+from models.product import Product
 from sqlalchemy.orm import sessionmaker, scoped_session
-from MVC.base.base import engine
+from base.base import engine
 import tornado
-from MVC.models.user import User
+from models.user import User
 import urllib.parse
 import tornado.web
 

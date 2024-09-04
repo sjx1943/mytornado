@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add the directory containing the MVC module to the sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import tornado.ioloop
 import os
 from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
@@ -5,7 +11,7 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler
-from controllers.chat_controller import PublicChatHandler, PrivateChatHandler, PublicChatWebSocket, PrivateChatWebSocket
+from controllers.chat_controller import ChatHandler, ChatWebSocket
 # from controllers.product_controller import ProductListHandler, ProductDetailHandler,
 # from controllers.chat_controller import ChatHandler
 
@@ -31,10 +37,8 @@ def make_app():
         (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
         (r"/home_page", HomePageHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
-        (r'^/public_chat$', PublicChatHandler),
-        (r'^/gchat$', PublicChatWebSocket),
-        (r"/private_chat$", PrivateChatHandler),
-        (r'^/schat$', PrivateChatWebSocket),
+        (r'^/chat_room$', ChatHandler),
+        (r"/chat$", ChatWebSocket),
         # 静态文件路径配置
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
     ],

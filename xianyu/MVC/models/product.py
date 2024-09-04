@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationship
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
-from MVC.base.base import Base, engine
+from base.base import Base, engine
 from sqlalchemy.orm import Session
 # from user import User
 

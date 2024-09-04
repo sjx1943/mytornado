@@ -4,7 +4,7 @@ from sqlalchemy import Sequence,create_engine, desc, Column, text, ForeignKey,an
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
-from MVC.base.base import Base, engine
+from base.base import Base, engine
 
 class User(Base):
     __tablename__ = 'xu_user'

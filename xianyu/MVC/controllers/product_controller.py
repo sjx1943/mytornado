@@ -1,10 +1,10 @@
 import tornado.web
 import os
 from sqlalchemy.orm import Session
-from MVC.models.product import Product, ProductImage
+from models.product import Product, ProductImage
 from sqlalchemy.orm import sessionmaker, scoped_session
-from MVC.base.base import engine
-from MVC.models.user import User
+from base.base import engine
+from models.user import User
 import json
 import re
 

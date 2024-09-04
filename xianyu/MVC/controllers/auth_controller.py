@@ -1,8 +1,8 @@
 import tornado.web
 from sqlalchemy.orm import sessionmaker, scoped_session
 from tornado.web import UIModule, StaticFileHandler
-from MVC.models.user import User
-from MVC.base.base import engine
+from models.user import User
+from base.base import engine
 
 import bcrypt
 import uuid,smtplib,secrets
