@@ -1,51 +1,115 @@
-/* chatroom.css */
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
 }
-#chat-container {
-    width: 800px;
-    margin: 0 auto;
-    border: 1px solid #ccc;
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
-
-#chat-messages {
-    height: 400px;
-    overflow-y: scroll;
+.header {
+    background-color: #333;
+    color: white;
     padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-#user-list {
-    float: right;
-    width: 200px;
-    border-left: 1px solid #ccc;
+.header .user {
+    font-size: 16px;
+}
+.header .status {
+    font-size: 14px;
+    color: #00ff00;
+}
+.main {
+    display: flex;
+    flex: 1;
+    background-color: white;
+}
+.chat-box {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
+    border-right: 1px solid #ccc;
 }
-#message-input {
-    width: 100%;
+.messages {
+    flex: 1;
+    overflow-y: auto;
     padding: 10px;
+    background-color: #f9f9f9;
 }
-
-
-#unread-message-alert {
-    font-size: 20px; /* Makes the font larger */
-    font-weight: bold; /* Makes the font bold */
+.message {
+    display: flex;
+    margin-bottom: 10px;
 }
-
-#divId{
-    width:500px;
-    height: 300px;
-    border: 1px solid gray;
-    overflow: auto;
-    background: lightblue;
-}
-
-#msg{
-    width: 400px;
+.message .avatar {
+    width: 40px;
     height: 40px;
-    font-size: 20px;
+    background-color: #ccc;
+    border-radius: 50%;
+    margin-right: 10px;
 }
-
-#btn{
-    width:99px;
-    height: 42px;
-    border:none;
+.message .text {
+    max-width: 70%;
+    padding: 10px;
+    border-radius: 5px;
+}
+.message.sent .text {
+    background-color: #e0ffe0;
+    align-self: flex-end;
+}
+.message.received .text {
+    background-color: #e0e0e0;
+}
+.input-box {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+.input-box input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.input-box button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    background-color: #00bfff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.sidebar {
+    flex: 1;
+    padding: 10px;
+    background-color: #f0f0f0;
+}
+.sidebar .section {
+    margin-bottom: 20px;
+}
+.sidebar .section h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+.sidebar .section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.sidebar .section ul li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
+}
+.sidebar .section ul li.friend {
+    color: #007bff;
+}
+.sidebar .section ul li.system {
+    color: #ff4500;
 }

@@ -7,21 +7,39 @@
     <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-header">
-            <h2>聊天室</h2>
-            <p>当前用户：<input type="hidden" id="logged-in-user-id" value="{{ user_id }}"></p>
+    <div class="chat-container">
+        <div class="header">
+            <div class="user">用户: {{ current_user }}</div>
+            <div class="status">在线</div>
         </div>
-        <div id="chat-body">
-            <div id="chat-messages"></div>
-            <div id="user-list">
-                <h3>在线用户</h3>
-                <ul id="online-users"></ul>
+        <div class="main">
+            <div class="chat-box">
+                <div class="messages" id="chat-messages">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+                <div class="input-box">
+                    <input type="text" id="message-input" placeholder="在此输入文字信息...">
+                    <button id="send-button">发送</button>
+                </div>
             </div>
-        </div>
-        <div id="chat-footer">
-            <input type="text" id="message-input" placeholder="输入消息...">
-            <button id="send-button">发送</button>
+            <div class="sidebar">
+                <div class="section">
+                    <h3>好友列表</h3>
+                    <ul>
+                        {% for friend in friends %}
+                            <li class="friend">{{ friend }}</li>
+                        {% end %}
+                    </ul>
+                </div>
+                <div class="section">
+                    <h3>系统广播</h3>
+                    <ul>
+                        {% for friend in friends %}
+                            <li class="system">您的好友 {{ friend }} 已上线</li>
+                        {% end %}
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 

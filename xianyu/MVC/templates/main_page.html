@@ -1,3 +1,4 @@
+<!-- main_page.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +12,7 @@
         <input type="hidden" id="logged-in-user-id" value="{{ user_id }}">
     {% end %}
     <form action="/search" method="get" class="search-form">
-        <input type="text" name="query" placeholder="搜索��品、活动或信息">
+        <input type="text" name="query" placeholder="搜索商品、活动或信息">
         <input type="submit" value="搜索">
     </form>
     <nav class="category-nav">
@@ -34,11 +35,11 @@
             <button class="want-button">想要</button>
         </div>
     {% end %}
-</div>
+    </div>
     <footer class="main-footer">
         <a href="/main">主页</a>
         <a href="/publish_product">发布商品</a>
-        <a href="/chat_room">我的消息</a>
+        <a href="/chat_room" id="my-messages-link">我的消息</a>
         <a href="/home_page">我的</a>
     </footer>
     <script src="{{ static_url('js/main.js') }}"></script>

@@ -1,3 +1,4 @@
+// main.js
 document.addEventListener('DOMContentLoaded', function() {
     function setupWebSocket() {
         const userId = document.getElementById('logged-in-user-id').value;
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const msg = document.getElementById('message-input').value;
             ws.send(JSON.stringify({ content: msg }));
             document.getElementById('message-input').value = '';
-            displayMessage(msg); // Display the message on the page
+            displayMessage(msg);
         });
     }
 
@@ -32,12 +33,15 @@ document.addEventListener('DOMContentLoaded', function() {
         messageList.appendChild(messageItem);
     }
 
-    // Initialize WebSocket for chat page
     if (document.getElementById('chat-messages')) {
         setupWebSocket();
     }
 
-    // Handle "想要" button click to initiate chat with product uploader
+    document.getElementById('my-messages-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        window.location.href = "/chat_room";
+    });
+
     $(".want-button").click(function() {
         var productId = $(this).closest(".product-item").data("product-id");
         var uploaderId = $(this).closest(".product-item").data("uploader-id");

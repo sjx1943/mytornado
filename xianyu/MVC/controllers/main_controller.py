@@ -1,3 +1,4 @@
+from itertools import product
 from typing import Optional, Awaitable
 from models.product import Product
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -58,17 +59,30 @@ class MainHandler(tornado.web.RequestHandler):
         ]
         return products_list
 
-
     def get(self):
-        user = self.current_user
-        username = user.username if user else None
         user_id = self.get_secure_cookie("user_id")
+        username = self.get_secure_cookie("username")
         products = self.get_products()
         tags = [product['tag'] for product in products]
-        # self.write("已经成功登陆"+username)
+        if user_id is not None:
+            user_id = user_id.decode('utf-8')
+        if username is not None:
+            username = username.decode('utf-8')
 
-        self.render("main_page.html", username=username, \
-                    user_id=user_id, tags = tags, products = products)
+        # tags = ["tag1", "tag2"]  # Example tags, replace with actual data retrieval
+        # products = []  # Example products, replace with actual data retrieval
+
+        self.render("main_page.html", username=username, user_id=user_id, tags=tags, products=products)
+    # def get(self):
+    #     user = self.current_user
+    #     username = user.username if user else None
+    #     user_id = self.get_secure_cookie("user_id")
+    #     products = self.get_products()
+    #     tags = [product['tag'] for product in products]
+    #     # self.write("已经成功登陆"+username)
+    #
+    #     self.render("main_page.html", username=username, \
+    #                 user_id=user_id, tags = tags, products = products)
 
 
 

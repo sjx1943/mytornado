@@ -8,10 +8,23 @@ from sqlalchemy.orm import scoped_session, Session
 user_sessions = {}
 
 
+# chat_controller.py
+import logging
+
+# chat_controller.py
 class ChatHandler(tornado.web.RequestHandler):
     def get(self):
         user_id = self.get_secure_cookie("user_id")
-        self.render('chat_room.html', user_id=user_id)
+        username = self.get_secure_cookie("username")
+
+        if user_id is not None:
+            user_id = user_id.decode('utf-8')
+        if username is not None:
+            username = username.decode('utf-8')
+
+        friends = ["李四", "王五"]  # Example friends list, replace with actual data retrieval
+        self.render('chat_room.html', current_user=username, friends=friends)
+
 
 
 class ChatWebSocket(tornado.websocket.WebSocketHandler):

@@ -1,3 +1,4 @@
+# auth_controller.py
 import tornado.web
 from sqlalchemy.orm import sessionmaker, scoped_session
 from tornado.web import UIModule, StaticFileHandler
@@ -15,12 +16,12 @@ Session = sessionmaker(bind=engine)
 
 
 
-
-
 class Loginmodule(UIModule):
     def render(self, *args, **kwargs):
         result = kwargs.get('result', '')
         return self.render_string('modules/login_module.html', result=result)
+
+
 
 class LoginHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -30,31 +31,19 @@ class LoginHandler(tornado.web.RequestHandler):
         self.session.close()  # 关闭会话
 
     def get(self):
-        ms = self.get_argument('message',default=None)
-        self.render("login.html", result=ms)
+        self.render("login.html", message="", result=None)
 
-    async def post(self):
-        # 在post方法中获取用户名和密码
-        username = self.get_argument('username')
-        password = self.get_argument('password')
-        # 验证用户
-        user = await self.validate_credentials(username,password)
-        if user:
-            # 如果验证成功，设置session并重定向到主页面
-            self.set_secure_cookie("user", username)
-            self.set_secure_cookie('user_id', str(user.id))
+    def post(self):
+        username = self.get_argument("username")
+        password = self.get_argument("password")
+        user = self.session.query(User).filter_by(username=username).first()
+
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            self.set_secure_cookie("user_id", str(user.id))
+            self.set_secure_cookie("username", user.username)
             self.redirect("/main")
-        # if self.validate_credentials(username, password):
-        #     # 如果验证成功，设置session并重定向到主页面
-        #     self.set_secure_cookie("user", username)
-        #     self.redirect("/main")
         else:
-            # 如果验证失败，重新渲染登录页面并显示错误消息
-            self.render("login.html", result="用户名或密码错误")
-    async def validate_credentials(self, username, password):
-        # 使用会话查询数据库并验证用户名和密码
-        user = self.session.query(User).filter_by(username=username, password=password).first()
-        return user
+            self.render("login.html", message="Invalid username or password", result="用户名和密码错误")
 
 
 def generate_reset_token():
@@ -113,6 +102,8 @@ class ForgotPasswordHandler(tornado.web.RequestHandler):
         else:
             self.render("forgot_password.html", result="未查到关联邮箱，请核实后输入正确邮箱")
 
+
+
 def hash_password(password):
     password_bytes = password.encode('utf-8')
     salt = bcrypt.gensalt()
@@ -131,7 +122,8 @@ class ResetPasswordHandler(tornado.web.RequestHandler):
         new_password = self.get_argument("new_password")
         user = self.session.query(User).filter_by(reset_token=reset_token).first()
         if user is not None:
-            user.password = new_password  # 这是一个假设的函数，你需要实现它
+            # 使用 hash_password 函数对新密码进行哈希处理
+            user.password = hash_password(new_password)
             self.session.commit()
             self.render("password_reset_success.html")
         else:
@@ -142,18 +134,19 @@ class Registmodule(UIModule):
         result = kwargs.get('result', '')
         return self.render_string('modules/register_module.html',result=result)
 
+
 class RegisterHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = Session()  # 创建新的会话
 
     def on_finish(self):
         self.session.close()  # 关闭会话
-    #
+
     def get(self):
         self.render("reg.html", result="")
 
     def post(self):
-        # 处理登陆逻辑
+        # 处理注册逻辑
         # 获取用户输入的用户名和密码
         username = self.get_argument("username")
         password = self.get_argument("password")
@@ -168,7 +161,8 @@ class RegisterHandler(tornado.web.RequestHandler):
             self.render("reg.html", result="该邮箱已注册")
         else:
             # 创建新用户并添加到数据库
-            new_user = User(username=username, password=password, email=email)
+            hashed_password = hash_password(password)  # Hash the password before storing
+            new_user = User(username=username, password=hashed_password, email=email)
             self.session.add(new_user)
             try:
                 self.session.commit()
