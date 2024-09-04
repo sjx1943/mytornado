@@ -23,6 +23,27 @@ class Loginmodule(UIModule):
 
 
 
+# class LoginHandler(tornado.web.RequestHandler):
+#     def initialize(self):
+#         self.session = Session()  # 创建新的会话
+#
+#     def on_finish(self):
+#         self.session.close()  # 关闭会话
+#
+#     def get(self):
+#         self.render("login.html", message="", result=None)
+#
+#     def post(self):
+#         username = self.get_argument("username")
+#         password = self.get_argument("password")
+#         user = self.session.query(User).filter_by(username=username).first()
+#
+#         if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+#             self.set_secure_cookie("user_id", str(user.id))
+#             self.set_secure_cookie("username", user.username)
+#             self.redirect("/main")
+#         else:
+#             self.render("login.html", message="Invalid username or password", result="用户名或密码错误")
 class LoginHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = Session()  # 创建新的会话
@@ -38,13 +59,15 @@ class LoginHandler(tornado.web.RequestHandler):
         password = self.get_argument("password")
         user = self.session.query(User).filter_by(username=username).first()
 
-        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-            self.set_secure_cookie("user_id", str(user.id))
-            self.set_secure_cookie("username", user.username)
-            self.redirect("/main")
-        else:
+        try:
+            if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                self.set_secure_cookie("user_id", str(user.id))
+                self.set_secure_cookie("username", user.username)
+                self.redirect("/main")
+            else:
+                self.render("login.html", message="Invalid username or password", result="用户名或密码错误")
+        except ValueError:
             self.render("login.html", message="Invalid username or password", result="用户名或密码错误")
-
 
 def generate_reset_token():
     """生成一个简单的重置令牌"""
