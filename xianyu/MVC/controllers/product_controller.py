@@ -112,15 +112,16 @@ class HomePageHandler(tornado.web.RequestHandler):
         self.session = Session()
 
     def get_current_user(self):
-        username = self.get_secure_cookie("user")
-        if username is not None:
-            user = self.session.query(User).filter_by(
-                username=username.decode()).first()  # Query the user from the database using the username
+        user_id = self.get_secure_cookie("user_id")
+        # print("当前用户ID：" +str(user_id))
+        if user_id is not None:
+            user = self.session.query(User).filter_by(id=int(user_id)).first()  # Query the user from the database using the user_id
             return user
         return None
 
     def get(self):
-        user = self.current_user
+        user = self.get_current_user()  # Correctly retrieve the current user
+        # user_id = self.get_secure_cookie("user_id")
         if user is None:
             self.redirect("/login")
             return
@@ -137,7 +138,8 @@ class HomePageHandler(tornado.web.RequestHandler):
                 "price": product.price,
                 "tag": product.tag,
                 "image": product.image,
-                "quantity": product.quantity
+                "quantity": product.quantity,
+                "user_id": product.user_id
             }
             for product in products
         ]

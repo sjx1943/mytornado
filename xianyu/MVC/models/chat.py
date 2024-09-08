@@ -1,11 +1,14 @@
-#聊天室建表初始化
-from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_,Integer,String
-from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationship
+# chat.py
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from sqlalchemy import create_engine, desc, Column, text, ForeignKey, and_, Integer, String
+from sqlalchemy.orm import declarative_base, sessionmaker, joinedload, relationship
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
-from user import User
-from MVC.base.base import Base, engine
-
+# from .user import User
+from base.base import Base, engine
 
 class Chat(Base):
     __tablename__ = 'chats'

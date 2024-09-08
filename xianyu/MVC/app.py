@@ -22,7 +22,7 @@ settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "mystatics"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
     "login_url": "/login",
-    'cookie_secret': 'sjxxx',
+    'cookie_secret': 'sjxxxx',
     'xsrf_cookies': True
 }
 

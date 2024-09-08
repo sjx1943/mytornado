@@ -7,7 +7,7 @@ import tornado
 from models.user import User
 import urllib.parse
 import tornado.web
-
+import logging
 class MyStaticFileHandler(tornado.web.StaticFileHandler):
     def validate_absolute_path(self, root, absolute_path):
         absolute_path = urllib.parse.unquote(absolute_path)
@@ -27,12 +27,13 @@ class MainHandler(tornado.web.RequestHandler):
     #     # 获取用户信息、推荐商品等...
 
     def get_current_user(self):
-        username = self.get_secure_cookie("user")
-        if username is not None:
-            user = self.session.query(User).filter_by(
-                username=username.decode()).first()  # Query the user from the database using the username
+        username = self.get_secure_cookie("username")
+        # logging.info(f"Retrieved username from cookie: {username}")
+        if username:
+            user = self.session.query(User).filter_by(username=username.decode()).first()
             return user
         return None
+
     def prepare(self):
         if not self.current_user:
             self.redirect("/login")

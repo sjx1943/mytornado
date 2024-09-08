@@ -1,9 +1,14 @@
-
+#user.py
 #写user表的model
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from sqlalchemy import Sequence,create_engine, desc, Column, text, ForeignKey,and_
 from sqlalchemy.orm import declarative_base, sessionmaker,joinedload
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
+# from MVC.base.base import Base, engine
 from base.base import Base, engine
 
 class User(Base):
@@ -26,5 +31,7 @@ class User(Base):
 
 # Base.metadata.create_all(engine)
 
-
+# if __name__ == '__main__':
+#     Base.metadata.create_all(engine)
+#
 

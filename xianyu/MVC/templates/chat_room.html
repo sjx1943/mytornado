@@ -24,18 +24,22 @@
             </div>
             <div class="sidebar">
                 <div class="section">
-                    <h3>好友列表</h3>
+                    <h3>最近消息</h3>
                     <ul>
                         {% for friend in friends %}
-                            <li class="friend">{{ friend }}</li>
+                            <li class="friend">{{ friend.username }}: {{ friend.message }}</li>
                         {% end %}
                     </ul>
                 </div>
                 <div class="section">
                     <h3>系统广播</h3>
                     <ul>
-                        {% for friend in friends %}
-                            <li class="system">您的好友 {{ friend }} 已上线</li>
+                        {% for broadcast in broadcasts %}
+                            <li class="system">
+                                <a href="/product/{{ broadcast.product_id }}">
+                                    {{ broadcast.uploader }} 于 {{ broadcast.time }} 上传了 {{ broadcast.product_name }}
+                                </a>
+                            </li>
                         {% end %}
                     </ul>
                 </div>

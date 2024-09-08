@@ -1,17 +1,31 @@
+<!-- product_details.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Product Detail</title>
-    <link rel="stylesheet" href="{{ static_url('css/detail.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情</title>
+    <link rel="stylesheet" href="{{ static_url('css/product_details.css') }}">
 </head>
 <body>
-    <h1>{{ product.name }}</h1>
-    <p>Price: {{ product.price }}</p>
-    <p>Quantity: {{ product.quantity }}</p>
-    <p>Description: {{ product.description }}</p>
-    <p>Uploader: {{ uploader.username }}</p>
-    <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
-    <button class="want-button" data-product-id="{{ product.id }}" data-uploader-id="{{ product.user_id }}">想要</button>
+    <div class="product-details">
+        <h1>{{ product.name }}</h1>
+        <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
+        <p>价格: ￥{{ product.price }}</p>
+        <p>数量: {{ product.quantity }}</p>
+        <p>描述: {{ product.description }}</p>
+        <button id="want-button" data-product-id="{{ product.id }}" data-uploader-id="{{ product.user_id }}">想要</button>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#want-button').click(function() {
+                var productId = $(this).data('product-id');
+                var uploaderId = $(this).data('uploader-id');
+                window.location.href = `/chat?user_id=${uploaderId}&product_id=${productId}`;
+            });
+        });
+    </script>
 </body>
 </html>

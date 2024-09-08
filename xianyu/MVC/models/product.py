@@ -1,11 +1,15 @@
-# 产品建表
-from sqlalchemy import create_engine, desc, Column, text, ForeignKey,and_
-from sqlalchemy.orm import declarative_base, sessionmaker,joinedload,relationship
+# product.py
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from sqlalchemy import create_engine, desc, Column, text, ForeignKey, and_
+from sqlalchemy.orm import declarative_base, sessionmaker, joinedload, relationship, Session
 from sqlalchemy.types import Integer, String, DateTime, Float
 from sqlalchemy.sql import func
 from base.base import Base, engine
-from sqlalchemy.orm import Session
 # from user import User
+# from sqlalchemy.orm import Session
 
 class Product(Base):
     __tablename__ = 'products'
@@ -14,12 +18,13 @@ class Product(Base):
     description = Column(String(255))
     price = Column(Float, nullable=False)
     user_id = Column(Integer, ForeignKey('xu_user.id'), nullable=False)
-    tag = Column(String(255),nullable=False)
+    tag = Column(String(255), nullable=False)
     image = Column(String(255))
-    quantity = Column(Integer)  # 新增字段
-    status = Column(String(64))  # 新增字段
+    quantity = Column(Integer)
+    status = Column(String(64))
+    upload_time = Column(DateTime, server_default=func.now())
 
-    def __init__(self, name, description, price, user_id, tag, image,quantity, status):
+    def __init__(self, name, description, price, user_id, tag, image, quantity, status):
         self.name = name
         self.description = description
         self.price = price
@@ -36,16 +41,16 @@ class Product(Base):
             return product.user_id
         else:
             return None
+
     def __repr__(self):
         return f"<Product(id={self.id}, name={self.name}, price={self.price}, user_id={self.user_id}, tag={self.tag})>"
 
 class ProductImage(Base):
     __tablename__ = 'product_images'
-
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String(255), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
 
-
-# Base.metadata.create_all(engine)
-#
+# Create the products table after xu_user table
+# if __name__ == '__main__':
+#     Base.metadata.create_all(engine)
