@@ -27,7 +27,8 @@
                     <h3>最近消息</h3>
                     <ul>
                         {% for friend in friends %}
-                            <li class="friend">{{ friend.username }}: {{ friend.message }}</li>
+                                <li class="friend">{{ friend['username'] }}: {{ friend['message'] }}</li>
+
                         {% end %}
                     </ul>
                 </div>
@@ -36,8 +37,8 @@
                     <ul>
                         {% for broadcast in broadcasts %}
                             <li class="system">
-                                <a href="/product/{{ broadcast.product_id }}">
-                                    {{ broadcast.uploader }} 于 {{ broadcast.time }} 上传了 {{ broadcast.product_name }}
+                                <a href="/product/{{ broadcast['product_id'] }}">
+                                    {{ broadcast['uploader'] }} 于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name'] }}
                                 </a>
                             </li>
                         {% end %}

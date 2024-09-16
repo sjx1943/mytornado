@@ -39,7 +39,7 @@ class ChatHandler(tornado.web.RequestHandler):
             friends.append({
                 'username': friend.username,
                 'message': message.message
-            })
+            })  # 修改为追加包含 username 和 message 的字典
 
         # Retrieve recent product uploads for system broadcast
         recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
