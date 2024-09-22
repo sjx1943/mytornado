@@ -10,8 +10,8 @@ from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
-from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler
-from controllers.chat_controller import ChatHandler, ChatWebSocket
+from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler
+from controllers.chat_controller import ChatHandler, ChatWebSocket, InitiateChatHandler
 # from controllers.product_controller import ProductListHandler, ProductDetailHandler,
 # from controllers.chat_controller import ChatHandler
 
@@ -19,7 +19,7 @@ from controllers.chat_controller import ChatHandler, ChatWebSocket
 from views import *
 
 settings = {
-    "static_path": os.path.join(os.path.dirname(__file__), "mystatics"),
+    'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
     "login_url": "/login",
     'cookie_secret': 'sjxxxx',
@@ -37,6 +37,8 @@ def make_app():
         (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
         (r"/home_page", HomePageHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
+        (r"/product_list", ProductListHandler),
+        (r"/initiate_chat", InitiateChatHandler),
         (r'^/chat_room$', ChatHandler),
         (r"/chat$", ChatWebSocket),
         # 静态文件路径配置

@@ -3,13 +3,13 @@ import tornado.web
 import tornado.websocket
 import json
 from models.product import Product
-from models.chat import Chat
+from models.chat import ChatMessage
 from models.user import User
 from sqlalchemy.orm import scoped_session, sessionmaker
 from base.base import engine
 user_sessions = {}
 
-Session = scoped_session(sessionmaker(bind=engine))
+Session = sessionmaker(bind=engine)
 
 class ChatHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -27,19 +27,25 @@ class ChatHandler(tornado.web.RequestHandler):
         if username is not None:
             username = username.decode('utf-8')
 
-        # Retrieve recent messages from the Chat model
-        recent_messages = self.session.query(Chat).filter(
-            (Chat.user1_id == user_id) | (Chat.user2_id == user_id)
-        ).order_by(Chat.id.desc()).limit(10).all()
+        # Retrieve recent messages from the ChatMessage model
+        recent_messages = self.session.query(ChatMessage).filter(
+            (ChatMessage.sender_id == user_id) | (ChatMessage.receiver_id == user_id)
+        ).order_by(ChatMessage.id.desc()).limit(10).all()
 
         friends = []
         for message in recent_messages:
-            friend_id = message.user2_id if message.user1_id == user_id else message.user1_id
+            friend_id = message.receiver_id if message.sender_id == user_id else message.sender_id
             friend = self.session.query(User).filter_by(id=friend_id).first()
             friends.append({
                 'username': friend.username,
                 'message': message.message
-            })  # 修改为追加包含 username 和 message 的字典
+            })
+
+            # Retrieve unread messages for the current user
+        unread_messages = self.session.query(ChatMessage).filter(
+       ChatMessage.receiver_id == user_id,
+                ChatMessage.status == "unread"
+            ).all()
 
         # Retrieve recent product uploads for system broadcast
         recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
@@ -53,46 +59,71 @@ class ChatHandler(tornado.web.RequestHandler):
                 'product_id': product.id
             })
 
-        self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts)
+        self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages)
+
+class InitiateChatHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
+    def get(self):
+        user_id = self.get_argument("user_id")
+        product_id = self.get_argument("product_id")
+        current_user_id = self.get_secure_cookie("user_id")
+
+        if not current_user_id:
+            self.redirect("/login")
+            return
+
+        # Create a new chat message to notify the product uploader
+        new_message = ChatMessage(
+            sender_id=current_user_id,
+            receiver_id=user_id,
+            product_id=product_id,
+            message="I am interested in your product.",
+            status="unread"
+        )
+        self.session.add(new_message)
+        self.session.commit()
+
+        # Redirect to the chat room
+        self.redirect(f"/chat_room?user_id={user_id}&product_id={product_id}")
+
+    def on_finish(self):
+        self.session.remove()
 
 class ChatWebSocket(tornado.websocket.WebSocketHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
     def open(self):
-        self.user_id = self.get_argument("user_id")
-        self.product_id = self.get_argument("product_id", None)
-        self.session = scoped_session(Session)  # Initialize session
-
-        if self.product_id:
-            product = self.session.query(Product).filter(Product.id == self.product_id).first()
-            if product is None:
-                raise ValueError(f"No product found with id {self.product_id}")
-            self.partner_id = product.user_id
-            self.channel_id = f"{self.user_id}_{self.partner_id}" if int(
-                self.user_id) < self.partner_id else f"{self.partner_id}_{self.user_id}"
-        else:
-            self.channel_id = 'public'
-
-        if self.channel_id not in user_sessions:
-            user_sessions[self.channel_id] = set()
-        user_sessions[self.channel_id].add(self)
-
-        self.write_message(f"Welcome to the chat room: {self.channel_id}")
+        self.user_id = self.get_secure_cookie("user_id")
+        if not self.user_id:
+            self.close()
+            return
+        self.user_id = int(self.user_id)
+        self.product_id = int(self.get_argument("product_id"))
+        self.connections[self.user_id] = self
 
     def on_message(self, message):
-        try:
-            message_data = json.loads(message)
-            chat_message = Chat(user1_id=self.user_id, user2_id=self.partner_id, message=message_data['content'])
-            self.session.add(chat_message)
-            self.session.commit()
-            for user in user_sessions[self.channel_id]:
-                user.write_message(f"{self.user_id} says: {message_data['content']}")
-        except json.JSONDecodeError:
-            self.write_message("Error: Invalid JSON format")
+        # Handle incoming messages
+        chat_message = ChatMessage(
+            sender_id=self.user_id,
+            receiver_id=self.get_argument("user_id"),
+            product_id=self.product_id,
+            message=message,
+            status="unread"
+        )
+        self.session.add(chat_message)
+        self.session.commit()
+
+        # Send the message to the receiver if they are connected
+        receiver_id = int(self.get_argument("user_id"))
+        if receiver_id in self.connections:
+            self.connections[receiver_id].write_message(message)
 
     def on_close(self):
-        user_sessions[self.channel_id].remove(self)
-        if not user_sessions[self.channel_id]:
-            del user_sessions[self.channel_id]
-        self.session.close()  # Close session
+        if self.user_id in self.connections:
+            del self.connections[self.user_id]
 
-    def check_origin(self, origin: str) -> bool:
-        return True
+    def on_finish(self):
+        self.session.remove()

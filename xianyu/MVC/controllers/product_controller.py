@@ -12,7 +12,7 @@ Session = sessionmaker(bind=engine)
 
 class ProductDetailHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = scoped_session()
+        self.session = scoped_session(Session)
 
     def get(self, product_id):
         product = self.session.query(Product).filter(Product.id == product_id).first()
@@ -25,7 +25,6 @@ class ProductDetailHandler(tornado.web.RequestHandler):
 class ProductUploadHandler(tornado.web.RequestHandler):
     def initialize(self, app_settings):
         self.app_settings = app_settings
-        # self.settings = settings
         self.session = Session()
 
     def get(self):
@@ -40,8 +39,9 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         description = self.get_argument("description")
         price = float(self.get_argument("price"))
         quantity = int(self.get_argument("quantity"))
+        tag = self.get_argument("tag")  # Get the tag from the form
         images = self.request.files.get("images", [])
-        # images = self.get_argument('images', None)
+
         if not images:
             self.set_status(400)
             self.write({"error": "Missing 'image' argument"})
@@ -49,7 +49,6 @@ class ProductUploadHandler(tornado.web.RequestHandler):
 
         # Retrieve the user_id from the current logged-in user
         user_id = self.get_secure_cookie("user_id")
-        # Replace this with your method of retrieving the logged-in user's ID
         if user_id is None:
             self.set_status(400)
             self.write({'error': 'User not logged in'})
@@ -63,35 +62,29 @@ class ProductUploadHandler(tornado.web.RequestHandler):
                 description=description,
                 price=price,
                 user_id=user_id,
-                tag="生活用品",
+                tag=tag,  # Use the tag from the form
                 image="",  # Temporarily set image as an empty string
-                quantity = quantity,
-                status = "在售"
+                quantity=quantity,
+                status="在售"
             )
             self.session.add(new_product)
-            self.session.commit()  # Commit here to get the new_product.id
-
-            # Save product images
-            for image in images:
-                # Remove non-ASCII characters from the filename
-                filename = re.sub(r'[^\x00-\x7F]+', '', image['filename'])
-                filename = f"{new_product.id}_{filename}"
-                new_image = ProductImage(
-                    filename=filename,
-                    product_id=new_product.id
-                )
-                self.session.add(new_image)
-                with open(os.path.join(self.app_settings['static_path'], "images", filename), "wb") as f:
-                    f.write(image['body'])
-
-            # Update the product image
-            new_product.image = filename  # Use the filename with the id_ prefix
             self.session.commit()
+
+            # Save images and update the product image field
+            for image in images:
+                filename = image["filename"]
+                filepath = os.path.join(self.app_settings["static_path"], "images", filename)
+                with open(filepath, "wb") as f:
+                    f.write(image["body"])
+                new_product.image = filename
+                self.session.add(new_product)
+                self.session.commit()
 
             self.write(json.dumps({'product_id': new_product.id}))
         else:
             self.set_status(400)
-            self.write(json.dumps({'error': 'Invalid product data'}))
+            self.write({'error': 'Invalid product data'})
+
         self.redirect("/home_page")
 
     def validate_product_data(self, name, description, price, images, quantity):
@@ -104,8 +97,35 @@ class ProductUploadHandler(tornado.web.RequestHandler):
     def on_finish(self):
         self.session.close()
 
+class ProductListHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
 
-#设计商品发布相关控制器，路由关联为/publish_product
+    def get(self):
+        tag = self.get_argument("tag", None)
+        if tag:
+            products = self.session.query(Product).filter(Product.tag == tag).all()
+        else:
+            products = self.session.query(Product).all()
+
+        products_list = [
+            {
+                'id': product.id,
+                "name": product.name,
+                "description": product.description,
+                "price": product.price,
+                "tag": product.tag,
+                "image": product.image,
+                "quantity": product.quantity,
+                "user_id": product.user_id
+            }
+            for product in products
+        ]
+
+        self.render("product_list.html", products=products_list)
+
+    def on_finish(self):
+        self.session.remove()
 
 class HomePageHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -144,4 +164,4 @@ class HomePageHandler(tornado.web.RequestHandler):
             for product in products
         ]
 
-        self.render("home_page.html", products=products_list)
+        self.render("home_page.html", products=products_list, username=user.username)
