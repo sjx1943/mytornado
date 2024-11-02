@@ -17,6 +17,7 @@ class ProductDetailHandler(tornado.web.RequestHandler):
     def get(self, product_id):
         product = self.session.query(Product).filter(Product.id == product_id).first()
         uploader = self.session.query(User).filter(User.id == product.user_id).first()
+
         self.render('product_detail.html', product=product, uploader=uploader)
 
     def on_finish(self):
@@ -127,26 +128,29 @@ class ProductListHandler(tornado.web.RequestHandler):
     def on_finish(self):
         self.session.remove()
 
+# product_controller.py
 class HomePageHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = Session()
 
     def get_current_user(self):
         user_id = self.get_secure_cookie("user_id")
-        # print("当前用户ID：" +str(user_id))
         if user_id is not None:
-            user = self.session.query(User).filter_by(id=int(user_id)).first()  # Query the user from the database using the user_id
+            user = self.session.query(User).filter_by(id=int(user_id)).first()
             return user
         return None
 
     def get(self):
-        user = self.get_current_user()  # Correctly retrieve the current user
-        # user_id = self.get_secure_cookie("user_id")
+        user_id = self.get_argument("user_id", None)
+        if user_id:
+            user = self.session.query(User).filter_by(id=int(user_id)).first()
+        else:
+            user = self.get_current_user()
+
         if user is None:
             self.redirect("/login")
             return
 
-        # Retrieve the latest products uploaded by the current user
         products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
         self.session.close()
 

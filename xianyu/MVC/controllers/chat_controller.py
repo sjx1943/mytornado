@@ -1,4 +1,6 @@
 # chat_controller.py
+from itertools import product
+
 import tornado.web
 import tornado.websocket
 import json
@@ -73,13 +75,14 @@ class InitiateChatHandler(tornado.web.RequestHandler):
         if not current_user_id:
             self.redirect("/login")
             return
+        product = self.session.query(Product).filter_by(id=product_id).first()
 
-        # Create a new chat message to notify the product uploader
         new_message = ChatMessage(
             sender_id=current_user_id,
             receiver_id=user_id,
             product_id=product_id,
-            message="I am interested in your product.",
+            product_name=product.name,
+            message=f"I am interested in your product: {product.name}. Let's chat!",
             status="unread"
         )
         self.session.add(new_message)
@@ -91,7 +94,24 @@ class InitiateChatHandler(tornado.web.RequestHandler):
     def on_finish(self):
         self.session.remove()
 
+# test
 class ChatWebSocket(tornado.websocket.WebSocketHandler):
+    clients = set()
+
+    def open(self):
+        ChatWebSocket.clients.add(self)
+        print("WebSocket opened")
+
+    def on_message(self, message):
+        for client in ChatWebSocket.clients:
+            if client != self:
+                client.write_message(message)
+
+    def on_close(self):
+        ChatWebSocket.clients.remove(self)
+        print("WebSocket closed")
+
+class ChatWebSocket1(tornado.websocket.WebSocketHandler):
     def initialize(self):
         self.session = scoped_session(Session)
 

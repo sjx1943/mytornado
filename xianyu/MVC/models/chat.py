@@ -18,6 +18,7 @@ class ChatMessage(Base):
     sender_id = Column(Integer, ForeignKey('xu_user.id'), nullable=False)
     receiver_id = Column(Integer, ForeignKey('xu_user.id'), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    product_name = Column(String(255))  # 新增字段
     message = Column(String(255), nullable=False)
     status = Column(String(64), default="unread")
     timestamp = Column(DateTime, server_default=func.now())
