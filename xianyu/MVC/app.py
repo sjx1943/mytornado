@@ -1,3 +1,4 @@
+# app.py
 import sys
 import os
 
@@ -11,12 +12,8 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
     ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler
-from controllers.chat_controller import ChatHandler, ChatWebSocket, InitiateChatHandler
-# from controllers.product_controller import ProductListHandler, ProductDetailHandler,
-# from controllers.chat_controller import ChatHandler
-
-
-from views import *
+from controllers.chat_controller import ChatHandler, InitiateChatHandler, ChatWebSocket
+# from chat_server import ChatWebSocket
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
@@ -34,24 +31,23 @@ def make_app():
         (r"/regist", RegisterHandler),
         (r"/forgot", ForgotPasswordHandler),
         (r"/reset", ResetPasswordHandler),
-        (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
+        (r"/publish_product", ProductUploadHandler, dict(app_settings=settings)),
         (r"/home_page", HomePageHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r"/product_list", ProductListHandler),
         (r"/initiate_chat", InitiateChatHandler),
         (r'^/chat_room$', ChatHandler),
         (r"/chat$", ChatWebSocket),
-        # 静态文件路径配置
+        # Static file path configuration
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
     ],
-        ui_modules={'loginmodule':Loginmodule,
+        ui_modules={'loginmodule': Loginmodule,
                     'registmodule': Registmodule,
                     'forgotmodule': Forgotmodule
                     },
         **settings
     )
 
-#cookie_secret 对应键值的作用是加密cookie中的数据，默认为随机键值加密，安全考虑用固定键值
 if __name__ == "__main__":
     app = make_app()
     app.listen(8000)
