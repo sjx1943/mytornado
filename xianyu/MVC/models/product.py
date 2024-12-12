@@ -22,7 +22,7 @@ class Product(Base):
     image = Column(String(255))
     quantity = Column(Integer)
     status = Column(String(64))
-    upload_time = Column(DateTime, server_default=func.now())
+    upload_time = Column(DateTime, server_default=func.now())   #本期新增
 
     def __init__(self, name, description, price, user_id, tag, image, quantity, status):
         self.name = name
@@ -51,6 +51,6 @@ class ProductImage(Base):
     filename = Column(String(255), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
 
-# Create the products table after xu_user table
+# # Create the products table after xu_user table
 # if __name__ == '__main__':
 #     Base.metadata.create_all(engine)

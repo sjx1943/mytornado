@@ -26,9 +26,11 @@
     </nav>
     <div class="product-list">
     {% for product in products %}
-      <a href="/product/detail/{{ product['id'] }}">
+
         <div class="product-item" data-product-id="{{ product['id'] }}" data-uploader-id="{{ product['user_id'] }}">
-            <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
+                <a href="/product/detail/{{ product['id'] }}">
+                <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
+                </a>
             <p class="product-name">{{ product['name'] }}</p>
             <p class="product-price">￥{{ product['price'] }}</p>
             <p class="product-quantity">数量：{{ product['quantity'] }}</p>
