@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{{ static_url('css/product_details.css') }}">
 </head>
 <body>
+
+<a href="/home_page?user_id={{ product.user_id }}">
+    {{ uploader.username }}
+</a>
     <div class="product-details">
         <h1>{{ product.name }}</h1>
         <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">

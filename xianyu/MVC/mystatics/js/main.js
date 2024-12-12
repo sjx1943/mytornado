@@ -1,8 +1,7 @@
 // main.js
 document.addEventListener('DOMContentLoaded', function() {
     function setupWebSocket() {
-        const userId = document.getElementById('logged-in-user-id').value;
-        const ws = new WebSocket(`ws://${window.location.host}/chat?user_id=${userId}`);
+        const ws = new WebSocket(`ws://${window.location.host}/chat`);
 
         ws.onopen = function() {
             console.log("WebSocket connection established");
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('send-button').addEventListener('click', function() {
             const msg = document.getElementById('message-input').value;
-            ws.send(JSON.stringify({ content: msg }));
+            ws.send(msg);
             document.getElementById('message-input').value = '';
             displayMessage(msg);
         });
@@ -42,9 +41,24 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = "/chat_room";
     });
 
-    $(".want-button").click(function() {
-        var productId = $(this).closest(".product-item").data("product-id");
-        var uploaderId = $(this).closest(".product-item").data("uploader-id");
-        window.location.href = "/chat_room?product_id=" + productId + "&uploader_id=" + uploaderId;
+    document.querySelectorAll('.want-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var productId = this.closest(".product-item").dataset.productId;
+            var uploaderId = this.closest(".product-item").dataset.uploaderId;
+            window.location.href = "/chat_room?product_id=" + productId + "&uploader_id=" + uploaderId;
+        });
+    });
+
+    function openChatDialog(userId, productId) {
+        const url = `/chat_room?user_id=${userId}&product_id=${productId}`;
+        window.open(url, 'Chat', 'width=600,height=400');
+    }
+
+    document.querySelectorAll('.recent-message').forEach(item => {
+        item.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const productId = this.dataset.productId;
+            openChatDialog(userId, productId);
+        });
     });
 });
