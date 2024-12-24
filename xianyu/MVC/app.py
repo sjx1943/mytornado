@@ -6,14 +6,13 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import tornado.ioloop
-import os
 from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
-from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
-    ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
+from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler
 from controllers.chat_controller import ChatHandler, InitiateChatHandler, ChatWebSocket
-# from chat_server import ChatWebSocket
+from motor import motor_tornado
+import redis
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
@@ -24,6 +23,9 @@ settings = {
 }
 
 def make_app():
+    mongo = motor_tornado.MotorClient('mongodb://localhost:27017').chat_app
+    redis_client = redis.StrictRedis()
+
     return Application([
         (r"/", MainHandler),
         (r"/main", MainHandler),
@@ -37,8 +39,7 @@ def make_app():
         (r"/product_list", ProductListHandler),
         (r"/initiate_chat", InitiateChatHandler),
         (r'^/chat_room$', ChatHandler),
-        (r"/chat$", ChatWebSocket),
-        # Static file path configuration
+        (r"/chat$", ChatWebSocket, dict(mongo=mongo)),
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
     ],
         ui_modules={'loginmodule': Loginmodule,
