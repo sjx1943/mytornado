@@ -72,8 +72,11 @@ class MainHandler(tornado.web.RequestHandler):
 
         # tags = ["tag1", "tag2"]  # Example tags, replace with actual data retrieval
         # products = []  # Example products, replace with actual data retrieval
+        product_id = products[0]['id'] if products else None
 
-        self.render("main_page.html", username=username, user_id=user_id, tags=tags, products=products)
+        self.render("main_page.html", username=username, user_id=user_id, tags=tags, products=products,
+                    product_id=product_id)
+
     # def get(self):
     #     user = self.current_user
     #     username = user.username if user else None

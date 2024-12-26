@@ -1,64 +1,55 @@
-// main.js
-document.addEventListener('DOMContentLoaded', function() {
-    function setupWebSocket() {
-        const ws = new WebSocket(`ws://${window.location.host}/chat`);
+// main.js 文件
 
-        ws.onopen = function() {
-            console.log("WebSocket connection established");
-            displayMessage("欢迎来到聊天室");
-        };
+// 获取页面中的 DOM 元素
+const userId = new URLSearchParams(window.location.search).get('user_id') || 'default_user_id';
+const productId = new URLSearchParams(window.location.search).get('product_id') || 'default_product_id';
+const chatBox = document.getElementById('chat-messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
 
-        ws.onerror = function() {
-            console.log("WebSocket connection error");
-        };
+// 建立 WebSocket 连接
+const ws = new WebSocket(`ws://${window.location.host}/ws/chat_room?user_id=${userId}&product_id=${productId}`);
 
-        ws.onmessage = function(evt) {
-            const message = evt.data;
-            displayMessage(message);
-        };
+ws.onopen = function() {
+    console.log("WebSocket connection opened");
+};
 
-        document.getElementById('send-button').addEventListener('click', function() {
-            const msg = document.getElementById('message-input').value;
-            ws.send(msg);
-            document.getElementById('message-input').value = '';
-            displayMessage(msg);
-        });
+// 处理接收到的消息
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.error) {
+        alert(data.error);
+    } else {
+        displayMessage(`From ${data.from_user_id}: ${data.message}`);
     }
+};
 
-    function displayMessage(message) {
-        const messageList = document.getElementById('chat-messages');
-        const messageItem = document.createElement('p');
-        messageItem.textContent = message;
-        messageList.appendChild(messageItem);
+function displayMessage(message) {
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight; // 滚动到底部
+}
+
+// 发送消息
+sendButton.addEventListener('click', function() {
+    const message = messageInput.value;
+    const targetUserId = prompt("请输入对方的用户 ID:"); // 测试用，实际可以换成 UI 控件
+    const productName = document.getElementById('product-name').value; // Assuming you have a hidden input field for product name
+
+    if (message && targetUserId && productId && productName) {
+        ws.send(JSON.stringify({
+            target_user_id: targetUserId,
+            message: message,
+            product_id: productId,
+            product_name: productName
+        }));
+        messageInput.value = ''; // 清空输入框
+        displayMessage(`To ${targetUserId}: ${message}`);
     }
-
-    if (document.getElementById('chat-messages')) {
-        setupWebSocket();
-    }
-
-    document.getElementById('my-messages-link').addEventListener('click', function(event) {
-        event.preventDefault();
-        window.location.href = "/chat_room";
-    });
-
-    document.querySelectorAll('.want-button').forEach(function(button) {
-        button.addEventListener('click', function() {
-            var productId = this.closest(".product-item").dataset.productId;
-            var uploaderId = this.closest(".product-item").dataset.uploaderId;
-            window.location.href = "/chat_room?product_id=" + productId + "&uploader_id=" + uploaderId;
-        });
-    });
-
-    function openChatDialog(userId, productId) {
-        const url = `/chat_room?user_id=${userId}&product_id=${productId}`;
-        window.open(url, 'Chat', 'width=600,height=400');
-    }
-
-    document.querySelectorAll('.recent-message').forEach(item => {
-        item.addEventListener('click', function() {
-            const userId = this.dataset.userId;
-            const productId = this.dataset.productId;
-            openChatDialog(userId, productId);
-        });
-    });
 });
+
+// 处理 WebSocket 关闭
+ws.onclose = function() {
+    alert("WebSocket 连接已关闭！");
+};

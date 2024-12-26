@@ -1,8 +1,8 @@
 # app.py
+
 import sys
 import os
 
-# Add the directory containing the MVC module to the sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import tornado.ioloop
@@ -10,7 +10,7 @@ from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler
-from controllers.chat_controller import ChatHandler, InitiateChatHandler, ChatWebSocket
+from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler
 from motor import motor_tornado
 import redis
 
@@ -38,8 +38,9 @@ def make_app():
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r"/product_list", ProductListHandler),
         (r"/initiate_chat", InitiateChatHandler),
-        (r'^/chat_room$', ChatHandler),
-        (r"/chat$", ChatWebSocket, dict(mongo=mongo)),
+        (r"/chat_room", ChatHandler),  # Add this line
+        (r'^/ws/chat_room$', ChatWebSocketHandler, dict(mongo=mongo)),
+        (r"/chat$", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
     ],
         ui_modules={'loginmodule': Loginmodule,

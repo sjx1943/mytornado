@@ -1,5 +1,5 @@
-
 # chat_controller.py
+
 import tornado.web
 import tornado.websocket
 import json
@@ -12,8 +12,69 @@ from tornado.gen import coroutine
 from motor import motor_tornado
 import redis
 import datetime
+from tornado.websocket import WebSocketHandler
 
 Session = sessionmaker(bind=engine)
+connections = {}
+
+class ChatWebSocketHandler(WebSocketHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+
+    def open(self):
+        self.user_id = self.get_argument("user_id", None)
+        self.product_id = self.get_argument("product_id", None)
+
+        if self.user_id:
+            connections[self.user_id] = self
+            print(f"WebSocket opened for user_id: {self.user_id}")
+
+    @coroutine
+    def on_message(self, message):
+        try:
+            data = json.loads(message)
+            target_user_id = data.get("target_user_id")
+            message_content = data.get("message")
+            product_id = data.get("product_id")
+            product_name = data.get("product_name")
+
+            if not all([target_user_id, message_content, product_id, product_name]):
+                self.write_message(json.dumps({"error": "Missing message fields."}))
+                return
+
+            # Insert message into MongoDB
+            yield self.mongo.chat_messages.insert_one({
+                "from_user_id": self.user_id,
+                "to_user_id": target_user_id,
+                "message": message_content,
+                "product_id": product_id,
+                "product_name": product_name,
+                "timestamp": datetime.datetime.utcnow()
+            })
+
+            if target_user_id in connections:
+                connections[target_user_id].write_message(json.dumps({
+                    "from_user_id": self.user_id,
+                    "message": message_content,
+                    "product_id": product_id,
+                    "product_name": product_name
+                }))
+            else:
+                self.write_message(json.dumps({
+                    "error": "Target user is not online."
+                }))
+        except json.JSONDecodeError:
+            self.write_message(json.dumps({"error": "Invalid message format."}))
+        except Exception as e:
+            self.write_message(json.dumps({"error": str(e)}))
+
+    def on_close(self):
+        if self.user_id in connections:
+            del connections[self.user_id]
+            print(f"WebSocket closed for user_id: {self.user_id}")
+
+    def check_origin(self, origin):
+        return True
 
 class ChatHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -25,6 +86,7 @@ class ChatHandler(tornado.web.RequestHandler):
     def get(self):
         user_id = self.get_secure_cookie("user_id")
         username = self.get_secure_cookie("username")
+        product_id = self.get_argument("product_id", None)
 
         if user_id is not None:
             user_id = user_id.decode('utf-8')
@@ -60,7 +122,14 @@ class ChatHandler(tornado.web.RequestHandler):
                 'product_id': product.id
             })
 
-        self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages)
+        # Fetch the product name based on the product_id
+        product_name = None
+        if product_id:
+            product = self.session.query(Product).filter_by(id=product_id).first()
+            if product:
+                product_name = product.name
+
+        self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages, product_name=product_name, user_id=user_id)
 
 class InitiateChatHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -91,65 +160,3 @@ class InitiateChatHandler(tornado.web.RequestHandler):
 
     def on_finish(self):
         self.session.remove()
-
-
-
-class ChatWebSocket(tornado.websocket.WebSocketHandler):
-    clients = set()
-
-    def initialize(self, mongo):
-        self.mongo = mongo
-
-    def open(self):
-        ChatWebSocket.clients.add(self)
-        self.write_message("WebSocket connection opened")
-
-    @coroutine
-    def on_message(self, message):
-        user_id = self.get_secure_cookie("user_id")
-        if not user_id:
-            self.write_message("Please log in to send messages.")
-            return
-
-        user_id = user_id.decode('utf-8')
-        try:
-            message_data = json.loads(message)
-        except json.JSONDecodeError:
-            self.write_message("Invalid message format.")
-            return
-
-        if not isinstance(message_data, dict):
-            self.write_message("Invalid message format.")
-            return
-
-        sender_id = user_id
-        receiver_id = message_data.get('receiver_id')
-        product_id = message_data.get('product_id')
-        product_name = message_data.get('product_name')
-        msg = message_data.get('message')
-
-        if not all([receiver_id, product_id, product_name, msg]):
-            self.write_message("Missing message fields.")
-            return
-
-        chat_message = {
-            'sender_id': sender_id,
-            'receiver_id': receiver_id,
-            'product_id': product_id,
-            'product_name': product_name,
-            'message': msg,
-            'status': 'unread',
-            'timestamp': datetime.datetime.utcnow()
-        }
-
-        yield self.mongo.chat_messages.insert_one(chat_message)
-
-        for client in ChatWebSocket.clients:
-            if client != self:
-                client.write_message(message)
-
-    def on_close(self):
-        ChatWebSocket.clients.remove(self)
-
-    def check_origin(self, origin):
-        return True
