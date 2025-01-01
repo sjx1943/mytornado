@@ -38,7 +38,7 @@ def make_app():
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r"/product_list", ProductListHandler),
         (r"/initiate_chat", InitiateChatHandler),
-        (r"/chat_room", ChatHandler),  # Add this line
+        (r"/chat_room", ChatHandler, dict(mongo=mongo)),  # Add this line
         (r'^/ws/chat_room$', ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/chat$", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),

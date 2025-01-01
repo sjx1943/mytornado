@@ -18,15 +18,7 @@
         <p>价格: ￥{{ product.price }}</p>
         <p>数量: {{ product.quantity }}</p>
         <p>描述: {{ product.description }}</p>
-        <div class="debug-info">
-            当前用户ID：{{ user_id }} （类型：{{ user_id.__class__.__name__ }}）<br>
-            商品上传者ID：{{ product.user_id }} （类型：{{ product.user_id.__class__.__name__ }})
-        </div>
-        {% if product.user_id == user_id %}
-            <p class="uploaded-by-me">我上传的商品</p>
-        {% else %}
-            <button class="want-button" data-user-id="{{ product.user_id }}" data-product-id="{{ product.id }}" onclick="initiateChat(this)">想要</button>
-        {% end %}
+        <button class="want-button" data-user-id="{{ product.user_id }}" data-product-id="{{ product.id }}" onclick="initiateChat(this)">想要</button>
     </div>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

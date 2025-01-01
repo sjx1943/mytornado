@@ -16,8 +16,6 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
 
 Session = sessionmaker(bind=engine)
 
-
-
 class MainHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = Session()
@@ -54,7 +52,7 @@ class MainHandler(tornado.web.RequestHandler):
                 "tag": product.tag,
                 "status": product.status,
                 "image": product.image,
-                "user_id": product.user_id
+                "user_id": str(product.user_id)
             }
             for product in products
         ]
@@ -70,23 +68,10 @@ class MainHandler(tornado.web.RequestHandler):
         if username is not None:
             username = username.decode('utf-8')
 
-        # tags = ["tag1", "tag2"]  # Example tags, replace with actual data retrieval
-        # products = []  # Example products, replace with actual data retrieval
         product_id = products[0]['id'] if products else None
+        # print('products打印显示:')
+        # for product in products:
+        #     print(product)
 
         self.render("main_page.html", username=username, user_id=user_id, tags=tags, products=products,
                     product_id=product_id)
-
-    # def get(self):
-    #     user = self.current_user
-    #     username = user.username if user else None
-    #     user_id = self.get_secure_cookie("user_id")
-    #     products = self.get_products()
-    #     tags = [product['tag'] for product in products]
-    #     # self.write("已经成功登陆"+username)
-    #
-    #     self.render("main_page.html", username=username, \
-    #                 user_id=user_id, tags = tags, products = products)
-
-
-

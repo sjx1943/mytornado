@@ -12,16 +12,25 @@ Session = sessionmaker(bind=engine)
 
 class ProductDetailHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = scoped_session(Session)
+        self.session = Session()
+
+    def get_current_user(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
 
     def get(self, product_id):
-        product = self.session.query(Product).filter(Product.id == product_id).first()
-        uploader = self.session.query(User).filter(User.id == product.user_id).first()
+        product = self.session.query(Product).filter_by(id=product_id).first()
+        uploader = self.session.query(User).filter_by(id=product.user_id).first()
+        user = self.get_current_user()
 
-        self.render('product_detail.html', product=product, uploader=uploader)
+        if user:
+            user_id = user.id
+        else:
+            user_id = None
 
-    def on_finish(self):
-        self.session.remove()
+        self.render('product_detail.html', product=product, uploader=uploader, user_id=user_id)
 
 class ProductUploadHandler(tornado.web.RequestHandler):
     def initialize(self, app_settings):
@@ -128,44 +137,60 @@ class ProductListHandler(tornado.web.RequestHandler):
     def on_finish(self):
         self.session.remove()
 
-# product_controller.py
 class HomePageHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = Session()
+        self.session = scoped_session(Session)
 
-    def get_current_user(self):
-        user_id = self.get_secure_cookie("user_id")
-        if user_id is not None:
-            user = self.session.query(User).filter_by(id=int(user_id)).first()
-            return user
-        return None
-
-    def get(self):
-        user_id = self.get_argument("user_id", None)
-        if user_id:
-            user = self.session.query(User).filter_by(id=int(user_id)).first()
-        else:
-            user = self.get_current_user()
-
-        if user is None:
-            self.redirect("/login")
-            return
-
-        products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
+    def on_finish(self):
         self.session.close()
 
-        products_list = [
-            {
-                'id': product.id,
-                "name": product.name,
-                "description": product.description,
-                "price": product.price,
-                "tag": product.tag,
-                "image": product.image,
-                "quantity": product.quantity,
-                "user_id": product.user_id
-            }
-            for product in products
-        ]
+    def get(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            user_id = user_id.decode('utf-8')
+            user = self.session.query(User).filter_by(id=user_id).first()
+            products_list = self.session.query(Product).filter_by(user_id=user_id).all()
+            self.render("home_page.html", products=products_list, username=user.username)
+        else:
+            self.redirect("/login")
 
-        self.render("home_page.html", products=products_list, username=user.username)
+# class HomePageHandler(tornado.web.RequestHandler):
+#     def initialize(self):
+#         self.session = Session()
+#
+#     def get_current_user(self):
+#         user_id = self.get_secure_cookie("user_id")
+#         if user_id is not None:
+#             user = self.session.query(User).filter_by(id=int(user_id)).first()
+#             return user
+#         return None
+#
+#     def get(self):
+#         user_id = self.get_argument("user_id", None)
+#         if user_id:
+#             user = self.session.query(User).filter_by(id=int(user_id)).first()
+#         else:
+#             user = self.get_current_user()
+#
+#         if user is None:
+#             self.redirect("/login")
+#             return
+#
+#         products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
+#         self.session.close()
+#
+#         products_list = [
+#             {
+#                 'id': product.id,
+#                 "name": product.name,
+#                 "description": product.description,
+#                 "price": product.price,
+#                 "tag": product.tag,
+#                 "image": product.image,
+#                 "quantity": product.quantity,
+#                 "user_id": product.user_id
+#             }
+#             for product in products
+#         ]
+#
+#         self.render("home_page.html", products=products_list, username=user.username)

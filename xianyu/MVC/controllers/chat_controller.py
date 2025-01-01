@@ -13,27 +13,57 @@ from motor import motor_tornado
 import redis
 import datetime
 from tornado.websocket import WebSocketHandler
+import logging
 
 Session = sessionmaker(bind=engine)
 connections = {}
 
-class ChatWebSocketHandler(WebSocketHandler):
+
+
+class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, mongo):
         self.mongo = mongo
 
     def open(self):
-        self.user_id = self.get_argument("user_id", None)
-        self.product_id = self.get_argument("product_id", None)
+        user_id = self.get_argument("user_id", None)
+        if user_id is None:
+            logging.warning("WebSocket connection opened without user_id, connection closed.")
+            self.close()
+            return
+        self.user_id = int(user_id)  # Ensure user_id is an integer
+        connections[self.user_id] = self
+        logging.info(f"WebSocket connection established, user_id: {self.user_id}")
+        self.send_stored_messages()
 
-        if self.user_id:
-            connections[self.user_id] = self
-            print(f"WebSocket opened for user_id: {self.user_id}")
+    @coroutine
+    def send_stored_messages(self):
+        try:
+            user_id = self.user_id
+            if not user_id:
+                logging.error("User ID is not set")
+                return
+
+            messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(length=None)
+            for message in messages:
+                sender = yield self.mongo.users.find_one({"id": message["from_user_id"]})
+                if sender:
+                    message_data = {
+                        "from_user_id": message["from_user_id"],
+                        "from_username": sender["username"],
+                        "message": message["message"],
+                        "timestamp": message["timestamp"]
+                    }
+                    self.write_message(json.dumps(message_data))
+                    # Mark the message as read
+                    yield self.mongo.chat_messages.update_one({"_id": message["_id"]}, {"$set": {"status": "read"}})
+        except Exception as e:
+            logging.error(f"Error sending stored messages: {e}")
 
     @coroutine
     def on_message(self, message):
         try:
             data = json.loads(message)
-            target_user_id = data.get("target_user_id")
+            target_user_id = str(data.get("target_user_id"))  # Ensure target_user_id is a string
             message_content = data.get("message")
             product_id = data.get("product_id")
             product_name = data.get("product_name")
@@ -49,20 +79,22 @@ class ChatWebSocketHandler(WebSocketHandler):
                 "message": message_content,
                 "product_id": product_id,
                 "product_name": product_name,
+                "status": "unread",
                 "timestamp": datetime.datetime.utcnow()
             })
 
-            if target_user_id in connections:
-                connections[target_user_id].write_message(json.dumps({
-                    "from_user_id": self.user_id,
-                    "message": message_content,
-                    "product_id": product_id,
-                    "product_name": product_name
-                }))
+            message_data = {
+                "from_user_id": self.user_id,
+                "message": message_content,
+                "product_id": product_id,
+                "product_name": product_name,
+                "timestamp": datetime.datetime.utcnow().isoformat()
+            }
+
+            if int(target_user_id) in connections:
+                connections[int(target_user_id)].write_message(json.dumps(message_data))
             else:
-                self.write_message(json.dumps({
-                    "error": "Target user is not online."
-                }))
+                logging.warning(f"Receiver user_id: {target_user_id} is not connected.")
         except json.JSONDecodeError:
             self.write_message(json.dumps({"error": "Invalid message format."}))
         except Exception as e:
@@ -71,18 +103,18 @@ class ChatWebSocketHandler(WebSocketHandler):
     def on_close(self):
         if self.user_id in connections:
             del connections[self.user_id]
-            print(f"WebSocket closed for user_id: {self.user_id}")
+            logging.info(f"WebSocket connection closed, user_id: {self.user_id}")
 
     def check_origin(self, origin):
         return True
 
+
 class ChatHandler(tornado.web.RequestHandler):
-    def initialize(self):
+    def initialize(self, mongo):
+        self.mongo = mongo
         self.session = scoped_session(Session)
 
-    def on_finish(self):
-        self.session.close()
-
+    @coroutine
     def get(self):
         user_id = self.get_secure_cookie("user_id")
         username = self.get_secure_cookie("username")
@@ -131,23 +163,28 @@ class ChatHandler(tornado.web.RequestHandler):
 
         self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages, product_name=product_name, user_id=user_id)
 
+    def on_finish(self):
+        self.session.remove()
+
 class InitiateChatHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = scoped_session(Session)
 
     def get(self):
-        user_id = self.get_argument("user_id")
+        uploader_id = self.get_argument("user_id")
+        # print("上传者ID: ",uploader_id)
         product_id = self.get_argument("product_id")
         current_user_id = self.get_secure_cookie("user_id")
-
-        if not current_user_id:
+        if current_user_id:
+            current_user_id = current_user_id.decode('utf-8')
+        else:
             self.redirect("/login")
             return
         product = self.session.query(Product).filter_by(id=product_id).first()
 
         new_message = ChatMessage(
             sender_id=current_user_id,
-            receiver_id=user_id,
+            receiver_id=uploader_id,
             product_id=product_id,
             product_name=product.name,
             message=f"I am interested in your product: {product.name}. Let's chat!",
@@ -156,7 +193,7 @@ class InitiateChatHandler(tornado.web.RequestHandler):
         self.session.add(new_message)
         self.session.commit()
 
-        self.redirect(f"/chat_room?user_id={user_id}&product_id={product_id}")
+        self.redirect(f"/chat_room?user_id={current_user_id}&product_id={product_id}")
 
     def on_finish(self):
         self.session.remove()
