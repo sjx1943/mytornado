@@ -19,15 +19,14 @@ Session = sessionmaker(bind=engine)
 connections = {}
 
 
-
 class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, mongo):
         self.mongo = mongo
 
     def open(self):
         user_id = self.get_argument("user_id", None)
-        if user_id is None:
-            logging.warning("WebSocket connection opened without user_id, connection closed.")
+        if user_id is None or not user_id.isdigit():
+            logging.warning("WebSocket connection opened with invalid user_id, connection closed.")
             self.close()
             return
         self.user_id = int(user_id)  # Ensure user_id is an integer
@@ -44,6 +43,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                 return
 
             messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(length=None)
+            logging.info(f"Found {len(messages)} unread messages for user_id: {user_id}")
             for message in messages:
                 sender = yield self.mongo.users.find_one({"id": message["from_user_id"]})
                 if sender:
@@ -56,6 +56,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                     self.write_message(json.dumps(message_data))
                     # Mark the message as read
                     yield self.mongo.chat_messages.update_one({"_id": message["_id"]}, {"$set": {"status": "read"}})
+            self.write_message(json.dumps({"info": "Offline messages pushed successfully"}))
         except Exception as e:
             logging.error(f"Error sending stored messages: {e}")
 
@@ -63,7 +64,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         try:
             data = json.loads(message)
-            target_user_id = str(data.get("target_user_id"))  # Ensure target_user_id is a string
+            target_user_id = str(data.get("target_user_id"))
             message_content = data.get("message")
             product_id = data.get("product_id")
             product_name = data.get("product_name")
@@ -107,7 +108,6 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def check_origin(self, origin):
         return True
-
 
 class ChatHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
@@ -161,6 +161,7 @@ class ChatHandler(tornado.web.RequestHandler):
             if product:
                 product_name = product.name
 
+        # logging.info(f"Rendering chat_room.html with user_id: {user_id}, username: {username}, product_name: {product_name}")  # 添加日志
         self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages, product_name=product_name, user_id=user_id)
 
     def on_finish(self):

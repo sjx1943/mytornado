@@ -1,10 +1,11 @@
 # app.py
-
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Import logging configuration
+import logging_config
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import tornado.ioloop
 from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
@@ -30,18 +31,16 @@ def make_app():
         (r"/", MainHandler),
         (r"/main", MainHandler),
         (r"/login", LoginHandler),
-        (r"/regist", RegisterHandler),
-        (r"/forgot", ForgotPasswordHandler),
-        (r"/reset", ResetPasswordHandler),
-        (r"/publish_product", ProductUploadHandler, dict(app_settings=settings)),
-        (r"/home_page", HomePageHandler),
+        (r"/register", RegisterHandler),
+        (r"/forgot_password", ForgotPasswordHandler),
+        (r"/reset_password", ResetPasswordHandler),
+        (r"/product/upload", ProductUploadHandler),
+        (r"/product/list", ProductListHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
-        (r"/product_list", ProductListHandler),
+        (r"/chat_room", ChatHandler, dict(mongo=mongo)),
+        (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/initiate_chat", InitiateChatHandler),
-        (r"/chat_room", ChatHandler, dict(mongo=mongo)),  # Add this line
-        (r'^/ws/chat_room$', ChatWebSocketHandler, dict(mongo=mongo)),
-        (r"/chat$", ChatWebSocketHandler, dict(mongo=mongo)),
-        (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
+        (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
     ],
         ui_modules={'loginmodule': Loginmodule,
                     'registmodule': Registmodule,
