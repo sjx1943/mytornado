@@ -23,17 +23,17 @@ ws.onopen = function() {
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     if (data.error) {
-        displayMessage(`Error: ${data.error}`, new Date().toISOString(), 'error'); // Add 'error' class for styling
+        displayMessage(`Error: ${data.error}`, 'error'); // Add 'error' class for styling
     } else {
-        displayMessage(`From ${data.from_username || data.from_user_id}: ${data.message}`, data.timestamp);
+        displayMessage(`From ${data.from_username || data.from_user_id}: ${data.message}`);
         updateNotificationBadge();
     }
 };
 
-function displayMessage(message, timestamp, type = 'normal') {
+function displayMessage(message, type = 'normal') {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message', type);
-    messageElement.innerHTML = `<span class="timestamp">${timestamp}</span> ${message}`;
+    messageElement.innerHTML = message;
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
 }
@@ -60,7 +60,7 @@ sendButton.addEventListener('click', function() {
             product_name: productName
         }));
         messageInput.value = ''; // Clear input field
-        displayMessage(`To ${targetUserId}: ${message}`, new Date().toISOString());
+        displayMessage(`To ${targetUserId}: ${message}`);
     }
 });
 
