@@ -28,9 +28,9 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             logging.warning("WebSocket connection opened with invalid user_id, connection closed.")
             self.close()
             return
-        self.user_id = str(user_id)  # Ensure user_id is a string
+        self.user_id = int(user_id)  # Ensure user_id is an integer
         connections[self.user_id] = self
-        logging.info(f"WebSocket connection established, user_id: {self.user_id}")
+        logging.warning(f"WebSocket connection established, user_id: {self.user_id}")
         self.send_stored_messages()
 
     @coroutine
@@ -40,33 +40,85 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             if not user_id:
                 return
 
-            messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(length=None)
+            messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(
+                length=None)
             logging.info(f"Found {len(messages)} unread messages for user_id: {user_id}")
 
             for message in messages:
                 message['_id'] = str(message['_id'])  # Convert ObjectId to string
-                if 'timestamp' in message:
+                if 'timestamp' in message and isinstance(message['timestamp'], datetime.datetime):
                     message['timestamp'] = message['timestamp'].isoformat()  # Convert datetime to string
-                if self.ws_connection:  # Check if WebSocket connection is open
+
+                from_user_id = message['from_user_id']
+                # logging.warning(f"Processing message from from_user_id: {from_user_id} (type: {type(from_user_id)})")
+
+                if self.ws_connection:
                     self.write_message(json.dumps(message))
                 else:
                     break
-
             if self.ws_connection:  # Check if WebSocket connection is open
-                self.write_message(json.dumps({"info": f"Offline messages pushed successfully, total: {len(messages)}"}))
+                self.write_message(
+                    json.dumps({"info": f"Offline messages pushed successfully, total: {len(messages)}"}))
 
         except Exception as e:
             logging.error(f"Error sending stored messages: {e}")
             if self.ws_connection:  # Check if WebSocket connection is open
                 self.write_message(json.dumps({"error": str(e)}))
 
+    # @coroutine
+    # def send_stored_messages(self):
+    #     try:
+    #         user_id = self.user_id
+    #         if not user_id:
+    #             return
+    #
+    #         messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(
+    #             length=None)
+    #         logging.info(f"Found {len(messages)} unread messages for user_id: {user_id}")
+    #
+    #         for message in messages:
+    #             message['_id'] = str(message['_id'])  # Convert ObjectId to string
+    #             if 'timestamp' in message and isinstance(message['timestamp'], datetime.datetime):
+    #                 message['timestamp'] = message['timestamp'].isoformat()  # Convert datetime to string
+    #
+    #             from_user_id = message['from_user_id']
+    #             logging.info(f"Fetching details for from_user_id: {from_user_id} (type: {type(from_user_id)})")
+    #
+    #             # Ensure from_user_id is a string for matching
+    #             from_user_id_str = int(from_user_id)
+    #             logging.info(f"Converted from_user_id to string: {from_user_id_str} (type: {type(from_user_id_str)})")
+    #
+    #             from_user = yield self.mongo.users.find_one({"_id": from_user_id_str})
+    #             logging.warning(f"Fetched from_user: {from_user} (type: {type(from_user)})")
+    #             if from_user:
+    #                 message['from_username'] = from_user['username']
+    #                 logging.info(f"Matched from_user_id: {from_user_id_str} with username: {from_user['username']}")
+    #             else:
+    #                 message['from_username'] = 'Unknown'
+    #                 logging.warning(f"Failed to match from_user_id: {from_user_id_str}")
+    #
+    #             if self.ws_connection:
+    #                 self.write_message(json.dumps(message))
+    #             else:
+    #                 break
+    #         if self.ws_connection:  # Check if WebSocket connection is open
+    #             self.write_message(
+    #                 json.dumps({"info": f"Offline messages pushed successfully, total: {len(messages)}"}))
+    #
+    #     except Exception as e:
+    #         logging.error(f"Error sending stored messages: {e}")
+    #         if self.ws_connection:  # Check if WebSocket connection is open
+    #             self.write_message(json.dumps({"error": str(e)}))
+
     @coroutine
     def on_message(self, message):
         try:
             data = json.loads(message)
-            target_user_id = str(data.get("target_user_id"))
+            target_user_id = int(data.get("target_user_id"))
+            from_user_id = int(self.get_secure_cookie("user_id").decode('utf-8'))  # Ensure from_user_id is an integer
+            from_username = self.get_secure_cookie("username").decode('utf-8')
             message_content = data.get("message")
-            product_id = str(data.get("product_id"))
+            product_id = int(data.get("product_id"))
             product_name = data.get("product_name")
 
             if not all([target_user_id, message_content, product_id, product_name]):
@@ -75,7 +127,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
 
             # Insert message into MongoDB
             yield self.mongo.chat_messages.insert_one({
-                "from_user_id": self.user_id,
+                "from_user_id": from_user_id,
                 "to_user_id": target_user_id,
                 "message": message_content,
                 "product_id": product_id,
@@ -85,7 +137,8 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             })
 
             message_data = {
-                "from_user_id": self.user_id,
+                "from_user_id": from_user_id,
+                "from_username": from_username,
                 "to_user_id": target_user_id,
                 "message": message_content,
                 "product_id": product_id,
@@ -123,7 +176,7 @@ class ChatHandler(tornado.web.RequestHandler):
         product_id = self.get_argument("product_id", None)
 
         if user_id is not None:
-            user_id = user_id.decode('utf-8')
+            user_id = int(user_id.decode('utf-8'))
         if username is not None:
             username = username.decode('utf-8')
 
@@ -136,7 +189,7 @@ class ChatHandler(tornado.web.RequestHandler):
             friend_id = message.receiver_id if message.sender_id == user_id else message.sender_id
             friend = self.session.query(User).filter_by(id=friend_id).first()
             friends.append({
-                "id": str(friend.id),
+                "id": friend.id,
                 "username": friend.username
             })
 
@@ -150,7 +203,7 @@ class ChatHandler(tornado.web.RequestHandler):
         for product in recent_products:
             uploader = self.session.query(User).filter_by(id=product.user_id).first()
             broadcasts.append({
-                "product_id": str(product.id),
+                "product_id": product.id,
                 "product_name": product.name,
                 "uploader": uploader.username,
                 "time": product.upload_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -166,7 +219,7 @@ class ChatHandler(tornado.web.RequestHandler):
         self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages, product_name=product_name, user_id=user_id)
         # Call send_stored_messages from ChatWebSocketHandler
         ws_handler = ChatWebSocketHandler(self.application, self.request, mongo=self.mongo)
-        ws_handler.user_id = str(user_id)
+        ws_handler.user_id = user_id
         yield ws_handler.send_stored_messages()
 
     def on_finish(self):
