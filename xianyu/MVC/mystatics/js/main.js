@@ -20,15 +20,17 @@ ws.onopen = function() {
 };
 
 // Handle incoming messages
-
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     if (data.error) {
         displayMessage(`Error: ${data.error}`, 'error'); // Add 'error' class for styling
     } else {
-        const fromUser = data.from_username || data.from_user_id || 'Unknown';  // Ensure from_username is used
-        displayMessage(`From ${fromUser}: ${data.message}`);
-        updateNotificationBadge();
+        const fromUser = data.from_username || data.from_user_id;
+        const toUser = data.to_username || data.to_user_id;
+        if (fromUser && data.message) {
+            displayMessage(`From ${fromUser} to ${toUser}: ${data.message}`);
+            updateNotificationBadge();
+        }
     }
 };
 
@@ -75,3 +77,9 @@ ws.onclose = function() {
 messageInput.addEventListener('input', function() {
     sendButton.disabled = !messageInput.value.trim();
 });
+
+function initiateChat(button) {
+    const userId = button.getAttribute('data-user-id');
+    const productId = button.getAttribute('data-product-id');
+    window.location.href = `/initiate_chat?user_id=${userId}&product_id=${productId}`;
+}

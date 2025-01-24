@@ -39,7 +39,7 @@ def make_app():
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r"/chat_room", ChatHandler, dict(mongo=mongo)),
         (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
-        (r"/initiate_chat", InitiateChatHandler),
+        (r"/initiate_chat", InitiateChatHandler, dict(mongo=mongo)),
         (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
     ],
         ui_modules={'loginmodule': Loginmodule,

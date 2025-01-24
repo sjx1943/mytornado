@@ -65,50 +65,6 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             if self.ws_connection:  # Check if WebSocket connection is open
                 self.write_message(json.dumps({"error": str(e)}))
 
-    # @coroutine
-    # def send_stored_messages(self):
-    #     try:
-    #         user_id = self.user_id
-    #         if not user_id:
-    #             return
-    #
-    #         messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(
-    #             length=None)
-    #         logging.info(f"Found {len(messages)} unread messages for user_id: {user_id}")
-    #
-    #         for message in messages:
-    #             message['_id'] = str(message['_id'])  # Convert ObjectId to string
-    #             if 'timestamp' in message and isinstance(message['timestamp'], datetime.datetime):
-    #                 message['timestamp'] = message['timestamp'].isoformat()  # Convert datetime to string
-    #
-    #             from_user_id = message['from_user_id']
-    #             logging.info(f"Fetching details for from_user_id: {from_user_id} (type: {type(from_user_id)})")
-    #
-    #             # Ensure from_user_id is a string for matching
-    #             from_user_id_str = int(from_user_id)
-    #             logging.info(f"Converted from_user_id to string: {from_user_id_str} (type: {type(from_user_id_str)})")
-    #
-    #             from_user = yield self.mongo.users.find_one({"_id": from_user_id_str})
-    #             logging.warning(f"Fetched from_user: {from_user} (type: {type(from_user)})")
-    #             if from_user:
-    #                 message['from_username'] = from_user['username']
-    #                 logging.info(f"Matched from_user_id: {from_user_id_str} with username: {from_user['username']}")
-    #             else:
-    #                 message['from_username'] = 'Unknown'
-    #                 logging.warning(f"Failed to match from_user_id: {from_user_id_str}")
-    #
-    #             if self.ws_connection:
-    #                 self.write_message(json.dumps(message))
-    #             else:
-    #                 break
-    #         if self.ws_connection:  # Check if WebSocket connection is open
-    #             self.write_message(
-    #                 json.dumps({"info": f"Offline messages pushed successfully, total: {len(messages)}"}))
-    #
-    #     except Exception as e:
-    #         logging.error(f"Error sending stored messages: {e}")
-    #         if self.ws_connection:  # Check if WebSocket connection is open
-    #             self.write_message(json.dumps({"error": str(e)}))
 
     @coroutine
     def on_message(self, message):
@@ -124,11 +80,15 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             if not all([target_user_id, message_content, product_id, product_name]):
                 self.write_message(json.dumps({"error": "Missing required parameters"}))
                 return
+            target_user = yield self.mongo.users.find_one({"_id": target_user_id})
+            to_username = target_user['username'] if target_user else '没有找到用户'
 
             # Insert message into MongoDB
             yield self.mongo.chat_messages.insert_one({
                 "from_user_id": from_user_id,
+                "from_username": from_username,
                 "to_user_id": target_user_id,
+                "to_username": to_username,
                 "message": message_content,
                 "product_id": product_id,
                 "product_name": product_name,
@@ -140,6 +100,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                 "from_user_id": from_user_id,
                 "from_username": from_username,
                 "to_user_id": target_user_id,
+                "to_username": to_username,
                 "message": message_content,
                 "product_id": product_id,
                 "product_name": product_name,
@@ -230,15 +191,22 @@ class InitiateChatHandler(tornado.web.RequestHandler):
         self.mongo = mongo
 
     @coroutine
-    def post(self):
-        user_id = self.get_secure_cookie("user_id")
-        target_user_id = self.get_argument("target_user_id")
+    def get(self):
+        user_id = self.get_argument("user_id")
         product_id = self.get_argument("product_id")
-        product_name = self.get_argument("product_name")
+        # Your logic to initiate chat
+        self.redirect(f"/chat_room?user_id={user_id}&product_id={product_id}")
 
-        if not all([user_id, target_user_id, product_id, product_name]):
-            self.write({"error": "Missing required parameters"})
-            return
-
-        # Insert initial chat message or chat initiation logic here
-        self.write({"status": "Chat initiated successfully"})
+    # @coroutine
+    # def post(self):
+    #     user_id = self.get_secure_cookie("user_id")
+    #     target_user_id = self.get_argument("target_user_id")
+    #     product_id = self.get_argument("product_id")
+    #     product_name = self.get_argument("product_name")
+    #
+    #     if not all([user_id, target_user_id, product_id, product_name]):
+    #         self.write({"error": "Missing required parameters"})
+    #         return
+    #
+    #     # Insert initial chat message or chat initiation logic here
+    #     self.write({"status": "Chat initiated successfully"})
