@@ -14,6 +14,7 @@ import redis
 import datetime
 from tornado.websocket import WebSocketHandler
 import logging
+from bson.objectid import ObjectId
 
 Session = sessionmaker(bind=engine)
 connections = {}
@@ -37,41 +38,63 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
     def send_stored_messages(self):
         try:
             user_id = self.user_id
-            if not user_id:
+            product_id = self.get_argument("product_id")
+            if not user_id or not product_id:
                 return
-
-            messages = yield self.mongo.chat_messages.find({"to_user_id": user_id, "status": "unread"}).to_list(
-                length=None)
-            logging.info(f"Found {len(messages)} unread messages for user_id: {user_id}")
-
+            messages = yield self.mongo.chat_messages.find({
+                "to_user_id": user_id,
+                "product_id": int(product_id),
+                "status": "unread"
+            }).to_list(length=None)
+            logging.info(f"Found {len(messages)} unread messages for user_id: {user_id} and product_id: {product_id}")
             for message in messages:
-                message['_id'] = str(message['_id'])  # Convert ObjectId to string
-                if 'timestamp' in message and isinstance(message['timestamp'], datetime.datetime):
-                    message['timestamp'] = message['timestamp'].isoformat()  # Convert datetime to string
+                message['_id'] = str(message['_id'])
+
+                # 强制格式化时间戳
+                if 'timestamp' in message:
+                    if isinstance(message['timestamp'], datetime.datetime):
+                        message['timestamp'] = message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+                    else:  # 如果是字符串，尝试解析并格式化
+                        try:
+                            message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime(
+                                "%Y-%m-%d %H:%M:%S")
+                        except ValueError:
+                            # 如果解析失败，记录错误并使用原始值或提供默认值
+                            logging.error(f"Invalid timestamp format: {message['timestamp']}")
+                            message['timestamp'] = "Invalid Date"  # 或者使用一个默认值
 
                 from_user_id = message['from_user_id']
-                # logging.warning(f"Processing message from from_user_id: {from_user_id} (type: {type(from_user_id)})")
-
+                to_user_id = message['to_user_id']
+                # Fetch usernames if not present
+                if 'from_username' not in message:
+                    from_user = yield self.mongo.users.find_one({"_id": from_user_id})
+                    message['from_username'] = from_user['username'] if from_user else '未知发件人'
+                if 'to_username' not in message:
+                    to_user = yield self.mongo.users.find_one({"_id": to_user_id})
+                    message['to_username'] = to_user['username'] if to_user else '未知收件人'
                 if self.ws_connection:
                     self.write_message(json.dumps(message))
+                    # 更新消息状态为已读
+                    yield self.mongo.chat_messages.update_one(
+                        {"_id": ObjectId(message['_id'])},  # 使用 ObjectId
+                        {"$set": {"status": "read"}}
+                    )
                 else:
                     break
             if self.ws_connection:  # Check if WebSocket connection is open
                 self.write_message(
                     json.dumps({"info": f"Offline messages pushed successfully, total: {len(messages)}"}))
-
         except Exception as e:
             logging.error(f"Error sending stored messages: {e}")
             if self.ws_connection:  # Check if WebSocket connection is open
                 self.write_message(json.dumps({"error": str(e)}))
-
 
     @coroutine
     def on_message(self, message):
         try:
             data = json.loads(message)
             target_user_id = int(data.get("target_user_id"))
-            from_user_id = int(self.get_secure_cookie("user_id").decode('utf-8'))  # Ensure from_user_id is an integer
+            from_user_id = int(self.get_secure_cookie("user_id").decode('utf-8'))
             from_username = self.get_secure_cookie("username").decode('utf-8')
             message_content = data.get("message")
             product_id = int(data.get("product_id"))
@@ -83,6 +106,8 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             target_user = yield self.mongo.users.find_one({"_id": target_user_id})
             to_username = target_user['username'] if target_user else '没有找到用户'
 
+            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
             # Insert message into MongoDB
             yield self.mongo.chat_messages.insert_one({
                 "from_user_id": from_user_id,
@@ -92,7 +117,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                 "message": message_content,
                 "product_id": product_id,
                 "product_name": product_name,
-                "timestamp": datetime.datetime.utcnow().isoformat(),
+                "timestamp": timestamp,
                 "status": "unread"
             })
 
@@ -104,7 +129,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                 "message": message_content,
                 "product_id": product_id,
                 "product_name": product_name,
-                "timestamp": datetime.datetime.utcnow().isoformat()
+                "timestamp": timestamp
             }
 
             if target_user_id in connections:
@@ -117,13 +142,6 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
         except Exception as e:
             self.write_message(json.dumps({"error": str(e)}))
 
-    def on_close(self):
-        if self.user_id in connections:
-            del connections[self.user_id]
-            logging.info(f"WebSocket connection closed, user_id: {self.user_id}")
-
-    def check_origin(self, origin):
-        return True
 
 class ChatHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
@@ -135,6 +153,12 @@ class ChatHandler(tornado.web.RequestHandler):
         user_id = self.get_secure_cookie("user_id")
         username = self.get_secure_cookie("username")
         product_id = self.get_argument("product_id", None)
+        if product_id is None:
+            product_id =0
+        else:
+            product_id = int(product_id)
+        product_obj = self.session.query(Product).filter_by(id=product_id).first()
+        product_name = product_obj.name if product_obj else "Unknown Product"
 
         if user_id is not None:
             user_id = int(user_id.decode('utf-8'))
@@ -159,32 +183,65 @@ class ChatHandler(tornado.web.RequestHandler):
             ChatMessage.status == "unread"
         ).all()
 
-        recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
+        user_products = self.session.query(Product).filter_by(user_id=user_id).all()
+        product_links = [{"product_id": product.id, "product_name": product.name} for product in user_products]
+
+        # Fetch all messages for the chat room
+        all_messages = yield self.mongo.chat_messages.find({
+            "$or": [{"from_user_id": user_id}, {"to_user_id": user_id}],
+            "product_id": int(product_id)
+        }).sort("timestamp", 1).to_list(length=None)
+
+        # Ensure all messages have from_username and to_username
+        for message in all_messages:
+            message['_id'] = str(message['_id'])
+
+            # 强制格式化时间戳
+            if 'timestamp' in message:
+                if isinstance(message['timestamp'], datetime.datetime):
+                    message['timestamp'] = message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+                else:  # 如果是字符串，尝试解析并格式化
+                    try:
+                        message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime(
+                            "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        # 如果解析失败，记录错误并使用原始值或提供默认值
+                        logging.error(f"Invalid timestamp format: {message['timestamp']}")
+                        message['timestamp'] = "Invalid Date"  # 或者使用一个默认值
+            if 'from_username' not in message:
+                from_user = yield self.mongo.users.find_one({"_id": message['from_user_id']})
+                message['from_username'] = from_user['username'] if from_user else 'Unknown'
+            if 'to_username' not in message:
+                to_user = yield self.mongo.users.find_one({"_id": message['to_user_id']})
+                message['to_username'] = to_user['username'] if to_user else 'Unknown'
+
+        # Remove duplicate messages
+        unique_messages = {msg['_id']: msg for msg in all_messages}.values()
         broadcasts = []
+        recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
         for product in recent_products:
             uploader = self.session.query(User).filter_by(id=product.user_id).first()
             broadcasts.append({
                 "product_id": product.id,
                 "product_name": product.name,
-                "uploader": uploader.username,
-                "time": product.upload_time.strftime("%Y-%m-%d %H:%M:%S")
+                "uploader": uploader.username if uploader else "Unknown",
+                "time": product.upload_time.strftime("%Y-%m-%d %H:%M:%S") if product.upload_time else "",
+                "image": "/mystatics/images/c.png"
             })
 
-        # Fetch the product name based on the product_id
-        product_name = None
-        if product_id:
-            product = self.session.query(Product).filter_by(id=product_id).first()
-            if product:
-                product_name = product.name
+            # Render the template with broadcasts
+        self.render(
+            'chat_room.html',
+            current_user=username,
+            friends=friends,
+            broadcasts=broadcasts,
+            unread_messages=unread_messages,
+            product_name=product_name,
+            user_id=user_id,
+            all_messages=unique_messages,
+            product_links=product_links
+        )
 
-        self.render('chat_room.html', current_user=username, friends=friends, broadcasts=broadcasts, unread_messages=unread_messages, product_name=product_name, user_id=user_id)
-        # Call send_stored_messages from ChatWebSocketHandler
-        ws_handler = ChatWebSocketHandler(self.application, self.request, mongo=self.mongo)
-        ws_handler.user_id = user_id
-        yield ws_handler.send_stored_messages()
-
-    def on_finish(self):
-        self.session.remove()
 
 class InitiateChatHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):

@@ -27,8 +27,13 @@ ws.onmessage = function(event) {
     } else {
         const fromUser = data.from_username || data.from_user_id;
         const toUser = data.to_username || data.to_user_id;
+        const timestamp = new Date(data.timestamp).toLocaleString();
         if (fromUser && data.message) {
-            displayMessage(`From ${fromUser} to ${toUser}: ${data.message}`);
+            if (data.from_user_id === userId) {
+                displayMessage(`我 ${timestamp}: ${data.message}`);
+            } else if (data.to_user_id === userId) {
+                displayMessage(`来自 ${fromUser} ${timestamp}: ${data.message}`);
+            }
             updateNotificationBadge();
         }
     }
@@ -64,7 +69,8 @@ sendButton.addEventListener('click', function() {
             product_name: productName
         }));
         messageInput.value = ''; // Clear input field
-        displayMessage(`To ${targetUserId}: ${message}`);
+        const timestamp = new Date().toLocaleString();
+        displayMessage(`我 ${timestamp}: ${message}`);
     }
 });
 
