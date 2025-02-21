@@ -1,0 +1,86 @@
+<!-- chat_room.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室</title>
+    <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="user">用户: {{ current_user }}</div>
+        <div class="status">在线</div>
+    </div>
+    <h1>消息 <a href="/chat_room?user_id={{ user_id }}">我的消息</a></h1>
+    <div class="chat-container">
+        <!-- 聊天框 -->
+        <div class="chat-box">
+            <div id="chat-messages" class="messages">
+                {% for message in all_messages %}
+                {% if message['from_user_id'] == user_id or message['to_user_id'] == user_id %}
+                <div class="message {% if message['status'] == 'unread' %}unread{% end %}">
+                    <strong>{{ '我' if message['from_user_id'] == user_id else '来自 ' + message['from_username'] }} {{ message['timestamp'] }}:</strong> {{ message['message'] }}
+                </div>
+                {% end %}
+                {% end %}
+            </div>
+            <div class="input-box">
+                <input type="text" id="message-input" placeholder="Type your message here">
+                <input type="hidden" id="product-name" value="{{ product_name }}"> <!-- Hidden input for product name -->
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+
+        <!-- 侧边栏：最近消息 & 广播列表 -->
+        <div class="sidebar">
+            <!-- 最近消息 -->
+            <div class="section">
+                <h3>最近消息</h3>
+                <ul id="recent-messages">
+                    {% for message in unread_messages %}
+                    <li class="unread-message">
+                        <a href="/chat_room?user_id={{ message.sender_id }}&product_id={{ message.product_id }}">
+                            {{ message.sender.username }}: {{ message.message }}
+                        </a>
+                    </li>
+                    {% end %}
+                </ul>
+            </div>
+
+            <!-- 系统广播 -->
+            <div class="section">
+                <h3>系统广播</h3>
+                <ul id="system-broadcasts">
+                {% for broadcast in broadcasts %}
+                <li class="system">
+                    <a href="/chat_room?user_id={{ user_id }}&product_id={{ broadcast['product_id'] }}">
+                        <img src="{{ broadcast['image'] }}" alt="{{ broadcast['product_name'] }}" />
+                        {{ broadcast['uploader'] }} 于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name'] }}
+                    </a>
+                </li>
+                {% end %}
+            </ul>
+            </div>
+
+            <!-- 用户产品链接 -->
+            <div class="section">
+                <h3>我的产品</h3>
+                <ul id="user-products">
+                    {% for product in product_links %}
+                    <li>
+                        <a href="/chat_room?user_id={{ user_id }}&product_id={{ product['product_id'] }}">
+                            {{ product['product_name'] }}
+                        </a>
+                    </li>
+                    {% end %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <a href="/main">返回主页</a> <!-- Updated link -->
+
+    <script src="{{ static_url('js/main.js') }}"></script>
+</body>
+</html>

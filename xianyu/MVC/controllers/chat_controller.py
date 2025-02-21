@@ -239,7 +239,8 @@ class ChatHandler(tornado.web.RequestHandler):
             product_name=product_name,
             user_id=user_id,
             all_messages=unique_messages,
-            product_links=product_links
+            product_links=product_links,
+            length=len  # Add the length filter to the context
         )
 
 
