@@ -1,18 +1,41 @@
+<!-- product_details.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Product Detail</title>
-    <link rel="stylesheet" href="{{ static_url('css/detail.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情</title>
+    <link rel="stylesheet" href="{{ static_url('css/product_details.css') }}">
 </head>
 <body>
-    <h1>{{ product['name'] }}</h1>
 
-    <p>Price: {{ product['price'] }}</p>
-    <p>Quantity: {{ product['quantity'] }}</p>
-    <p>Description: {{ product['description'] }}</p>
-    <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
-    <button class="want-button">想要</button>
-    <!-- Add more product details as needed -->
+<a href="/home_page?user_id={{ product.user_id }}">
+    {{ uploader.username }}
+</a>
+    <div class="product-details">
+        <h1>{{ product.name }}</h1>
+        <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
+        <p>价格: ￥{{ product.price }}</p>
+        <p>数量: {{ product.quantity }}</p>
+        <p>描述: {{ product.description }}</p>
+        <div class="debug-info">
+            当前用户ID：{{ user_id }} （类型：{{ user_id.__class__.__name__ }}）<br>
+            商品上传者ID：{{ product.user_id }} （类型：{{ product.user_id.__class__.__name__ }})
+        </div>
+        {% if product.user_id == user_id %}
+            <p class="uploaded-by-me">我上传的商品</p>
+        {% else %}
+            <button class="want-button" data-user-id="{{ product.user_id }}" data-product-id="{{ product.id }}" onclick="initiateChat(this)">想要</button>
+        {% end %}
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function initiateChat(button) {
+            const userId = button.getAttribute('data-user-id');
+            const productId = button.getAttribute('data-product-id');
+            window.location.href = `/initiate_chat?user_id=${userId}&product_id=${productId}`;
+        }
+    </script>
 </body>
 </html>

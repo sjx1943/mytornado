@@ -1,52 +1,62 @@
-import tornado.ioloop
+# app.py
+import sys
 import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+import logging_config
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import tornado.ioloop
 from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
+# from controllers.search_controller import AIQueryHandler,SearchHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
-from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, \
-    ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
-from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler
-from controllers.chat_controller import PublicChatHandler,EchoWebSocket,PrivateChatHandler, PrivateChatWebSocket
-# from controllers.product_controller import ProductListHandler, ProductDetailHandler,
-# from controllers.chat_controller import ChatHandler
 
+from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
+from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler
+from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler
+from motor import motor_tornado
 
-from views import *
+import redis
 
 settings = {
-    "static_path": os.path.join(os.path.dirname(__file__), "mystatics"),
+    'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
     "login_url": "/login",
-    'cookie_secret': 'sjxxx',
+    'cookie_secret': 'sjxxxx',
     'xsrf_cookies': True
 }
 
 def make_app():
+    mongo = motor_tornado.MotorClient('mongodb://localhost:27017').chat_app
+    redis_client = redis.StrictRedis()
+
     return Application([
         (r"/", MainHandler),
         (r"/main", MainHandler),
+        # (r"/search", SearchHandler),
         (r"/login", LoginHandler),
-        (r"/regist", RegisterHandler),
-        (r"/forgot", ForgotPasswordHandler),
-        (r"/reset", ResetPasswordHandler),
-        (r"/publish_product",ProductUploadHandler, dict(app_settings=settings)),
-        (r"/home_page", HomePageHandler),
+        (r"/register", RegisterHandler),
+        (r"/forgot_password", ForgotPasswordHandler),
+        (r"/reset_password", ResetPasswordHandler),
+        (r"/product/upload", ProductUploadHandler),
+        (r"/product/list", ProductListHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
-        (r'^/public_chat$', PublicChatHandler),
-        (r'^/chat$', EchoWebSocket),
-        (r"/private_chat$", PrivateChatHandler),
-        (r'^/chat1$', PrivateChatWebSocket),
-        # 静态文件路径配置
-        (r"/mystatics/(.*)", MyStaticFileHandler, {"path": settings["static_path"]}),
+        (r"/chat_room", ChatHandler, dict(mongo=mongo)),
+        (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
+        (r"/initiate_chat", InitiateChatHandler, dict(mongo=mongo)),
+        # (r"/ai_query", AIQueryHandler),
+        (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
     ],
-        ui_modules={'loginmodule':Loginmodule,
+        ui_modules={'loginmodule': Loginmodule,
                     'registmodule': Registmodule,
                     'forgotmodule': Forgotmodule
                     },
         **settings
     )
 
-#cookie_secret 对应键值的作用是加密cookie中的数据，默认为随机键值加密，安全考虑用固定键值
 if __name__ == "__main__":
     app = make_app()
     app.listen(8000)
     tornado.ioloop.IOLoop.current().start()
+
+    

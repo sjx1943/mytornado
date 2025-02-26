@@ -1,48 +1,41 @@
 import tornado.web
 import os
 from sqlalchemy.orm import Session
-from MVC.models.product import Product, ProductImage
+from models.product import Product, ProductImage
 from sqlalchemy.orm import sessionmaker, scoped_session
-from MVC.base.base import engine
-from MVC.models.user import User
+from base.base import engine
+from models.user import User
 import json
 import re
 
+Session = sessionmaker(bind=engine)
 
 class ProductDetailHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = Session(engine)
+        self.session = Session()
+
+    def get_current_user(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
 
     def get(self, product_id):
-        # Fetch product details from the database using product_id
         product = self.session.query(Product).filter_by(id=product_id).first()
+        uploader = self.session.query(User).filter_by(id=product.user_id).first()
+        user = self.get_current_user()
 
-        # If no product is found, handle accordingly (e.g., show a 404 page)
-        if not product:
-            self.set_status(404)
-            self.write("Product not found")
-            return
+        if user:
+            user_id = user.id
+        else:
+            user_id = None
 
-        # Convert the product object to a dictionary for template rendering
-        product_dict = {
-            'name': product.name,
-            'image': product.image,
-            'price': product.price,
-            'quantity': product.quantity,
-            'description': product.description
-        }
-
-        self.render("product_detail.html", product=product_dict)
-
-    def on_finish(self):
-        self.session.close()
-
+        self.render('product_detail.html', product=product, uploader=uploader, user_id=user_id)
 
 class ProductUploadHandler(tornado.web.RequestHandler):
     def initialize(self, app_settings):
         self.app_settings = app_settings
-        # self.settings = settings
-        self.session = Session(engine)
+        self.session = Session()
 
     def get(self):
         # 获取指定product_id的产品信息
@@ -56,8 +49,9 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         description = self.get_argument("description")
         price = float(self.get_argument("price"))
         quantity = int(self.get_argument("quantity"))
+        tag = self.get_argument("tag")  # Get the tag from the form
         images = self.request.files.get("images", [])
-        # images = self.get_argument('images', None)
+
         if not images:
             self.set_status(400)
             self.write({"error": "Missing 'image' argument"})
@@ -65,7 +59,6 @@ class ProductUploadHandler(tornado.web.RequestHandler):
 
         # Retrieve the user_id from the current logged-in user
         user_id = self.get_secure_cookie("user_id")
-        # Replace this with your method of retrieving the logged-in user's ID
         if user_id is None:
             self.set_status(400)
             self.write({'error': 'User not logged in'})
@@ -79,35 +72,29 @@ class ProductUploadHandler(tornado.web.RequestHandler):
                 description=description,
                 price=price,
                 user_id=user_id,
-                tag="生活用品",
+                tag=tag,  # Use the tag from the form
                 image="",  # Temporarily set image as an empty string
-                quantity = quantity,
-                status = "在售"
+                quantity=quantity,
+                status="在售"
             )
             self.session.add(new_product)
-            self.session.commit()  # Commit here to get the new_product.id
-
-            # Save product images
-            for image in images:
-                # Remove non-ASCII characters from the filename
-                filename = re.sub(r'[^\x00-\x7F]+', '', image['filename'])
-                filename = f"{new_product.id}_{filename}"
-                new_image = ProductImage(
-                    filename=filename,
-                    product_id=new_product.id
-                )
-                self.session.add(new_image)
-                with open(os.path.join(self.app_settings['static_path'], "images", filename), "wb") as f:
-                    f.write(image['body'])
-
-            # Update the product image
-            new_product.image = filename  # Use the filename with the id_ prefix
             self.session.commit()
+
+            # Save images and update the product image field
+            for image in images:
+                filename = image["filename"]
+                filepath = os.path.join(self.app_settings["static_path"], "images", filename)
+                with open(filepath, "wb") as f:
+                    f.write(image["body"])
+                new_product.image = filename
+                self.session.add(new_product)
+                self.session.commit()
 
             self.write(json.dumps({'product_id': new_product.id}))
         else:
             self.set_status(400)
-            self.write(json.dumps({'error': 'Invalid product data'}))
+            self.write({'error': 'Invalid product data'})
+
         self.redirect("/home_page")
 
     def validate_product_data(self, name, description, price, images, quantity):
@@ -120,30 +107,16 @@ class ProductUploadHandler(tornado.web.RequestHandler):
     def on_finish(self):
         self.session.close()
 
-
-#设计商品发布相关控制器，路由关联为/publish_product
-
-class HomePageHandler(tornado.web.RequestHandler):
+class ProductListHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.session = Session(engine)
-
-    def get_current_user(self):
-        username = self.get_secure_cookie("user")
-        if username is not None:
-            user = self.session.query(User).filter_by(
-                username=username.decode()).first()  # Query the user from the database using the username
-            return user
-        return None
+        self.session = scoped_session(Session)
 
     def get(self):
-        user = self.current_user
-        if user is None:
-            self.redirect("/login")
-            return
-
-        # Retrieve the latest products uploaded by the current user
-        products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
-        self.session.close()
+        tag = self.get_argument("tag", None)
+        if tag:
+            products = self.session.query(Product).filter(Product.tag == tag).all()
+        else:
+            products = self.session.query(Product).all()
 
         products_list = [
             {
@@ -153,9 +126,71 @@ class HomePageHandler(tornado.web.RequestHandler):
                 "price": product.price,
                 "tag": product.tag,
                 "image": product.image,
-                "quantity": product.quantity
+                "quantity": product.quantity,
+                "user_id": product.user_id
             }
             for product in products
         ]
 
-        self.render("home_page.html", products=products_list)
+        self.render("product_list.html", products=products_list)
+
+    def on_finish(self):
+        self.session.remove()
+
+class HomePageHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
+    def on_finish(self):
+        self.session.close()
+
+    def get(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            user_id = user_id.decode('utf-8')
+            user = self.session.query(User).filter_by(id=user_id).first()
+            products_list = self.session.query(Product).filter_by(user_id=user_id).all()
+            self.render("home_page.html", products=products_list, username=user.username)
+        else:
+            self.redirect("/login")
+
+# class HomePageHandler(tornado.web.RequestHandler):
+#     def initialize(self):
+#         self.session = Session()
+#
+#     def get_current_user(self):
+#         user_id = self.get_secure_cookie("user_id")
+#         if user_id is not None:
+#             user = self.session.query(User).filter_by(id=int(user_id)).first()
+#             return user
+#         return None
+#
+#     def get(self):
+#         user_id = self.get_argument("user_id", None)
+#         if user_id:
+#             user = self.session.query(User).filter_by(id=int(user_id)).first()
+#         else:
+#             user = self.get_current_user()
+#
+#         if user is None:
+#             self.redirect("/login")
+#             return
+#
+#         products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
+#         self.session.close()
+#
+#         products_list = [
+#             {
+#                 'id': product.id,
+#                 "name": product.name,
+#                 "description": product.description,
+#                 "price": product.price,
+#                 "tag": product.tag,
+#                 "image": product.image,
+#                 "quantity": product.quantity,
+#                 "user_id": product.user_id
+#             }
+#             for product in products
+#         ]
+#
+#         self.render("home_page.html", products=products_list, username=user.username)
