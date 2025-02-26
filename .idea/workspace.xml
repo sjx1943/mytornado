@@ -246,9 +246,9 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.chat" />
       <item itemvalue="Python.chat_controller" />
       <item itemvalue="Python.chat_server" />
-      <item itemvalue="Python.chat" />
       <item itemvalue="Python.guitar" />
       <item itemvalue="Python.app" />
     </list>
