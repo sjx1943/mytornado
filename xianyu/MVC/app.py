@@ -57,5 +57,5 @@ def make_app():
 if __name__ == "__main__":
     app = make_app()
     app.listen(8000)
-    print("后端已顺利启动")
+    print("后端已顺利启动啦")
     tornado.ioloop.IOLoop.current().start()
