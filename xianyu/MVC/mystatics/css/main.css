@@ -1,0 +1,130 @@
+/* 重置样式 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+.welcome-msg {
+    text-align: center;
+    padding: 10px;
+    background-color: #f2f2f2;
+}
+
+.search-form {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+.search-form input[type="text"] {
+    flex-grow: 1;
+    padding: 5px;
+}
+
+.search-form input[type="submit"] {
+    padding: 5px 10px;
+}
+
+.category-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 10px;
+    background-color: #f2f2f2;
+}
+
+.category-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+    background-color: #ddd;
+}
+
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.product-item {
+    width: 200px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.product-item img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.product-name {
+    font-weight: bold;
+    padding: 5px;
+}
+
+.product-price {
+    color: #f00;
+    padding: 5px;
+}
+
+.product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 5px;
+}
+
+.tag {
+    background-color: #ddd;
+    color: #333;
+    padding: 2px 5px;
+    margin: 2px;
+    border-radius: 3px;
+}
+
+.want-button {
+    /* 样式根据你的需求进行调整 */
+    background-color: #ea9c17;
+    color: #333;
+    padding: 2px 5px;
+    margin: 2px;
+    border-radius: 3px;
+}
+.main-footer {
+    display: flex;
+    justify-content: center;
+    background-color: #f2f2f2;
+    padding: 10px;
+}
+
+.main-footer a {
+    text-decoration: none;
+    color: #333;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+    background-color: #ddd;
+}
+
+.notification-badge {
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 10px;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 12px;
+}

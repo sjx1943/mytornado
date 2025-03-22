@@ -1,0 +1,18 @@
+<!-- message_details.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>消息详情</title>
+</head>
+<body>
+    <h1>互动消息详情</h1>
+    <ul>
+        {% for message in messages %}
+        <li>{{ message['sender']['username'] }}: {{ message['message'] }}</li>
+        {% end %}
+    </ul>
+    <a href="/chat_room?user_id=\{{ user_id }}">返回消息列表</a>
+</body>
+</html>
+

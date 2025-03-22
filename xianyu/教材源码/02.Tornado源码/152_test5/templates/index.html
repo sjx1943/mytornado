@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+</head>
+<body>
+    <input type="button" onclick="send();" value="发送"/>
+    <input type="button" onclick="closeSocket();" value="断开连接"/>
+
+
+    <script>
+        var ws = new WebSocket('ws://127.0.0.1:8000/websocket/');
+
+        ws.onopen = function () {
+            console.log('建立客户端连接');
+        }
+
+        ws.onmessage = function (evt) {
+            console.log('收到服务器端消息：'+evt.data);
+        }
+
+        ws.onclose = function (p1) {
+            console.log('正在断开连接');
+
+        }
+
+        function send(){
+            ws.send('你好，服务器端！');
+        }
+
+        function closeSocket(){
+            ws.close();
+        }
+
+
+
+
+    </script>
+</body>
+</html>

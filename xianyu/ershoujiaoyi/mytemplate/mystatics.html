@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>静态文件展示</title>
+<!--       <link rel="stylesheet" type="text/css" href="/mystatics/css/my.css"/>-->
+       <link rel="stylesheet" type="text/css" href="{{static_url('css/my.css')}}"/>
+   </head>
+   <body>
+       <img src="/mystatics/images/a.jpeg"/>
+<!--     第二种方式写路径，前提是py中配置了static_path = '静态文件的根目录',  -->
+       <img src="{{static_url('images/a.jpeg')}}"/>
+        <script type="text/javascript" src="{{static_url('js/my.js')}}"></script>
+   </body>
+ </html>
