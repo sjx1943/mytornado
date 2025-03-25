@@ -51,6 +51,14 @@ function displayMessage(message, type = 'normal') {
     chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
+  let targetUserId = null; // global variable
+
+  function selectChatUser(element) {
+    targetUserId = parseInt(element.getAttribute('data-user-id'));
+    console.log("Selected user: " + targetUserId);
+  }
+
+
 
 // Update notification badge when a new message arrives
 function updateNotificationBadge() {
@@ -63,20 +71,23 @@ function updateNotificationBadge() {
 // Send message on button click
 sendButton.addEventListener('click', function() {
     const message = messageInput.value;
-    const targetUserId = parseInt(prompt("请输入对方的用户 ID:").trim());
+    if (!targetUserId) {
+      displayMessage("No user selected. Please pick a user from the list.", "error");
+      return;
+    }
     const productName = document.getElementById('product-name')
-        ? document.getElementById('product-name').value
-        : 'Unknown Product';
+      ? document.getElementById('product-name').value
+      : "Unknown Product";
 
-    if (message && !isNaN(targetUserId) && productId && productName) {
-        ws.send(JSON.stringify({
-            target_user_id: targetUserId,
-            message: message,
-            product_id: productId,
-            product_name: productName
-        }));
-        messageInput.value = '';
-        console.log(`Sent message: \`${message}\``);
+    if (message && productId && productName) {
+      ws.send(JSON.stringify({
+        target_user_id: targetUserId,
+        message: message,
+        product_id: productId,
+        product_name: productName
+      }));
+      messageInput.value = "";
+      console.log("Sent message: " + message);
     }
 });
 

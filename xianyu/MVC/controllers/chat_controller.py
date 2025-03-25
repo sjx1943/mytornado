@@ -171,11 +171,13 @@ class ChatHandler(tornado.web.RequestHandler):
         friends = []
         for message in recent_messages:
             friend_id = message.receiver_id if message.sender_id == user_id else message.sender_id
-            friend = self.session.query(User).filter_by(id=friend_id).first()
-            friends.append({
-                "id": friend.id,
-                "username": friend.username
-            })
+            friend_obj = self.session.query(User).filter_by(id=friend_id).first()
+            if friend_obj:
+                friends.append({
+                    "id": friend_obj.id,
+                    "username": friend_obj.username
+                })
+
 
         unread_messages = self.session.query(ChatMessage).filter(
             ChatMessage.receiver_id == user_id,
