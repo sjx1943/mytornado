@@ -35,52 +35,38 @@
 
     <!-- 最近消息 -->
     <div class="section">
-        <h3>互动消息</h3>
+        <h3>最近消息</h3>
         <ul id="recent-messages">
+            {% for item in unread_group.values() %}
             <li class="unread-message">
-                <a href="/message_details?type=interaction">
+                <!-- /fix: Use dictionary indexing for friend_id and other keys -->
+                <a href="/message_details?friend_id={{ item['friend_id'] }}">
                     <div class="message-content">
-                        <div class="message-title">互动消息 <span style="font-size: smaller;">服务号</span></div>
-                        <div class="message-description">当前有{{ len(unread_messages) }}条互动消息~</div>
+                        <div class="message-title">{{ item['username'] }}:</div>
+                        <div class="message-description">{{ item['summary'] }}</div>
                     </div>
                 </a>
             </li>
+            {% end %}
         </ul>
     </div>
 
-    <!-- 私人消息 -->
-    <div class="chat-messages" id="chat-messages">
-        {% for message in all_messages %}
-        {% if message['from_user_id'] == user_id or message['to_user_id'] == user_id %}
-        <div class="message {% if message['status'] == 'unread' %}unread{% end %}">
-            <strong>
-                {{ '我' if message['from_user_id'] == user_id else '来自 ' + message['from_username'] }}
-                {{ message['timestamp'] }}:
-            </strong>
-            {{ message['message'] }}
-        </div>
-        {% end %}
-        {% end %}
+    <div class="section">
+        <h3>好友列表</h3>
+        <ul id="friend-list">
+            {% set seen_friend_ids = [] %}
+            {% for friend in friends %}
+            {% if friend['id'] not in seen_friend_ids %}
+            {% set seen_friend_ids = seen_friend_ids + [friend['id']] %}
+            <li>
+                <a href="/friend_profile?friend_id={{ friend['id'] }}">{{ friend['username'] }}</a>
+                <button class="delete-friend" data-friend-id="{{ friend['id'] }}" onclick="deleteFriend(this)">X
+                </button>
+            </li>
+            {% end %}
+            {% end %}
+        </ul>
     </div>
-<div class="section">
-  <h3>Interaction Messages</h3>
-  <!-- /fix: Display a list of users to chat with; clicking a name sets target user. -->
-  <ul id="interaction-users">
-    <!-- /fix Example Li: the server can generate these. -->
-    <!-- <li data-user-id="123" onclick="selectChatUser(this)">User 123</li> -->
-    {% for friend in friends %}
-    <li data-user-id="{{ friend['id'] }}" onclick="selectChatUser(this)">
-      {{ friend['username'] }}
-    </li>
-    {% end %}
-  </ul>
-</div>
-
- <div class="input-box">
-    <input type="text" id="message-input" placeholder="Type your message here" />
-    <button id="send-button">Send</button>
-</div>
-
     <!-- 我的产品 -->
     <div class="section">
         <h3>{{ username }}的产品</h3>

@@ -184,6 +184,22 @@ class ChatHandler(tornado.web.RequestHandler):
                  ChatMessage.status == "unread"
         ).all()
 
+        unread_group = {}
+        for msg in unread_messages:
+            friend_id = msg.receiver_id if msg.sender_id == user_id else msg.sender_id
+            if friend_id not in unread_group:
+                # Try to get friend username from friends list
+                friend_username = None
+                for friend in friends:
+                    if friend["id"] == friend_id:
+                        friend_username = friend["username"]
+                        break
+                if friend_username is None:
+                    friend_obj = self.session.query(User).filter_by(id=friend_id).first()
+                    friend_username = friend_obj.username if friend_obj else "Unknown"
+                truncated = msg.message if len(msg.message) <= 5 else msg.message[:5] + "..."
+                unread_group[friend_id] = {"friend_id": friend_id, "username": friend_username, "summary": truncated}
+
         user_products = self.session.query(Product).filter_by(user_id=user_id).all()
         product_links = [{"product_id": product.id, "product_name": product.name} for product in user_products]
 
@@ -240,6 +256,7 @@ class ChatHandler(tornado.web.RequestHandler):
             friends=friends,
             username=username,
             broadcasts=broadcasts,
+            unread_group=unread_group,
             unread_messages=unread_messages,
             product_name=product_name,
             user_id=user_id,
@@ -258,25 +275,59 @@ class MessageDetailsHandler(tornado.web.RequestHandler):
         user_id_cookie = self.get_secure_cookie("user_id")
         user_id = int(user_id_cookie.decode("utf-8")) if user_id_cookie else None
 
-        # Create a test message
-        messages = [
-            {"sender": {"username": "TestUser1"}, "message": "Hello, this is a test!"}
-        ]
+        friend_id_param = self.get_argument("friend_id", None)
+        messages = []
+        if friend_id_param:
+            friend_id = int(friend_id_param)
+            cursor = self.mongo.chat_messages.find({
+                "$or": [
+                    {"from_user_id": friend_id, "to_user_id": user_id},
+                    {"from_user_id": user_id, "to_user_id": friend_id}
+                ]
+            }).sort("timestamp", 1)
+            messages = yield cursor.to_list(length=None)
+            for msg in messages:
+                msg['_id'] = str(msg['_id'])
+                if 'timestamp' in msg:
+                    if isinstance(msg['timestamp'], datetime.datetime):
+                        msg['timestamp'] = msg['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        try:
+                            msg['timestamp'] = datetime.datetime.fromisoformat(msg['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
+                        except ValueError:
+                            logging.error(f"Invalid timestamp format: {msg['timestamp']}")
+                            msg['timestamp'] = "Invalid Date"
+                if "from_username" not in msg:
+                    msg["from_username"] = "未知"
+        else:
+            messages = yield self.mongo.chat_messages.find({
+                "to_user_id": user_id,
+                "status": "unread"
+            }).to_list(length=None)
 
-        # (Optional) Fetch unread messages
-        unread_cursor = self.mongo.chat_messages.find({
-            "to_user_id": user_id,
-            "status": "unread"
-        })
-        unread_list = yield unread_cursor.to_list(length=None)
-        for item in unread_list:
-            messages.append({
-                "sender": {"username": item.get("username", "Unknown")},
-                "message": item.get("message", "")
-            })
+        self.render('message_details.html', messages=messages, user_id=user_id)
 
-        self.render('message_details.html', messages=messages, user_id=user_id, unread_length=len(unread_list))
+class FriendProfileHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
 
+    def get(self):
+        friend_id = self.get_argument("friend_id", None)
+        if friend_id is None:
+            self.write("Invalid friend id")
+            return
+        try:
+            friend_id = int(friend_id)
+        except ValueError:
+            self.write("Invalid friend id format")
+            return
+
+        friend = self.session.query(User).filter_by(id=friend_id).first()
+        if friend:
+            # Pass an empty products list if no products are available.
+            self.render("friend_profile.html", friend=friend, products=[])
+        else:
+            self.write("Friend not found")
 
 class InitiateChatHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):

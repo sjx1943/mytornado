@@ -1,7 +1,7 @@
 const userId = parseInt(new URLSearchParams(window.location.search).get('user_id'));
 
-const productId = parseInt(new URLSearchParams(window.location.search).get('product_id')) || 'default_product_id';
-
+const productIdParam = new URLSearchParams(window.location.search).get('product_id');
+const productId = productIdParam ? parseInt(productIdParam) : 0;
 const chatBox = document.getElementById('chat-messages');
 
 const messageInput = document.getElementById('message-input');
@@ -100,6 +100,16 @@ ws.onclose = function() {
 messageInput.addEventListener('input', function() {
     sendButton.disabled = !messageInput.value.trim();
 });
+
+
+function deleteFriend(button) {
+    var friendId = button.getAttribute('data-friend-id');
+    // Perform AJAX request or redirect to delete friend
+    if(confirm("Are you sure you want to delete this friend?")) {
+        window.location.href = `/delete_friend?friend_id=${friendId}`;
+    }
+}
+
 
 // Optional function for chat initiation
 function initiateChat(button) {

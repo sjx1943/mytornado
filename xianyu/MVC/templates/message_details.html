@@ -1,18 +1,28 @@
-<!-- message_details.html -->
+<!-- xianyu/MVC/templates/message_details.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>消息详情</title>
+  <meta charset="UTF-8">
+  <title>消息详情</title>
 </head>
 <body>
-    <h1>互动消息详情</h1>
-    <ul>
-        {% for message in messages %}
-        <li>{{ message['sender']['username'] }}: {{ message['message'] }}</li>
-        {% end %}
-    </ul>
-    <a href="/chat_room?user_id=\{{ user_id }}">返回消息列表</a>
+  <h1>互动消息详情</h1>
+  <ul>
+    {% for msg in messages %}
+      <li>
+         <strong>
+            {{ "我" if msg["from_user_id"] == user_id else "来自 " + msg["from_username"] }}
+            {{ msg["timestamp"] }}:
+         </strong>
+         {{ msg["message"] }}
+      </li>
+    {% end %}
+  </ul>
+  <a href="/chat_room?user_id={{ user_id }}">返回消息列表</a>
+  <div class="input-box">
+      <input type="text" id="message-input" placeholder="Type your message here" />
+      <button id="send-button">Send</button>
+  </div>
+  <script src="{{ static_url('js/main.js') }}"></script>
 </body>
 </html>
-
