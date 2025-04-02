@@ -32,6 +32,7 @@ def make_app():
     mongo = motor_tornado.MotorClient('mongodb://localhost:27017').chat_app
     redis_client = redis.StrictRedis()
 
+
     return Application([
         (r"/", MainHandler),
         (r"/main", MainHandler),
@@ -50,7 +51,7 @@ def make_app():
         (r"/friend_profile", FriendProfileHandler),
         (r"/delete_friend", DeleteFriendHandler),
         (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
-    ],
+    ],  debug = True,
         ui_modules={'loginmodule': Loginmodule,
                     'registmodule': Registmodule,
                     'forgotmodule': Forgotmodule

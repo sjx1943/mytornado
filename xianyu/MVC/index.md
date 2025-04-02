@@ -86,7 +86,7 @@ class LoginHandler(tornado.web.RequestHandler):
 2025-2-25 添加了Item模型，加入搜索控制器试验大模型的能力，但目前跑不起来，到时候换个电脑试试。
 2025-3-22 聊天页消息可以及时展示和发送，但互动消息只能看插入的测试消息，且返回href需要调整为之前的窗口，互动消息的显示逻辑有待优化。
 2025-3-25 增加好友列表，点击对应用户可以成功发送消息，优化空间很大（好友重复显示，互动消息与Interaction Messages位置合并，点不同用户调出不同的互动消息窗口）
-2025-3-26 添加了好友的模型，而且msg详情也能看到互发的消息列表了，还是感觉基础不够扎实，后面边巩固边做吧。
+2025-3-26 添加了好友的模型，而且msg详情也能看到互发的消息列表了，还是感觉基础不够扎实，后面边巩固边做吧,可以利用HTTP的DELETE方法删除对应好友。
 下一步， 通过用点击”想要“后关联商品上传用户ID和登录用户ID建立私人对话模式，并在private_chat.html中看到消息提醒。
 此外，需要在private.html左侧中设计消息列表，卖家可在主页看到消息提醒，并实现消息的自动刷新。我的消息中可以查看私人消息，即卖家和买家的点对点通信。
 卖家获得提醒后可调用聊天chat控制器 相互发送聊天信息，交易成功后双方确认，卖家更新数据库中的商品数量和状态。
@@ -110,6 +110,7 @@ class LoginHandler(tornado.web.RequestHandler):
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Login</button>
+        
     </form>
 </body>
 </html>
