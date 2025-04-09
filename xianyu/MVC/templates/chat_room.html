@@ -21,11 +21,13 @@
         <ul id="system-broadcasts">
             {% for broadcast in broadcasts %}
             <li class="system">
-                <a href="/chat_room?user_id={{ user_id }}&product_id={{ broadcast['product_id'] }}">
-                    <img src="{{ broadcast['image'] }}" alt="{{ broadcast['product_name'] }}" />
+                <a href="/product/detail/{{ broadcast['product_id'] }}">
+                    <img src="{{ broadcast['image'] }}" alt="{{ broadcast['product_name'] }}"/>
                     <div class="message-content">
-                        <div class="message-title">{{ broadcast['uploader'] }} <span style="font-size: smaller;">服务号</span></div>
-                        <div class="message-description">于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name'] }}</div>
+                        <div class="message-title">{{ broadcast['uploader'] }}</div>
+                        <div class="message-description">于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name']
+                            }}
+                        </div>
                     </div>
                 </a>
             </li>
@@ -73,7 +75,7 @@
         <ul id="user-products">
             {% for product in product_links %}
             <li>
-                <a href="/chat_room?user_id={{ user_id }}&product_id={{ product['product_id'] }}">
+                <a href="/product/detail/{{ product['product_id'] }}">
                     {{ product['product_name'] }}
                 </a>
             </li>

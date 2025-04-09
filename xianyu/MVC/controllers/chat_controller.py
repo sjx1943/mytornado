@@ -4,7 +4,7 @@ import tornado.web
 import tornado.websocket
 import json
 from models.product import Product
-from models.chat import ChatMessage
+
 from models.user import User
 from sqlalchemy.orm import scoped_session, sessionmaker
 from base.base import engine
@@ -132,7 +132,12 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
 
             # Send to target user if connected
             if target_user_id in connections:
-                connections[target_user_id].write_message(json.dumps(message_data))
+                connections[target_user_id].write_message(json.dumps({
+                    "from_user_id": from_user_id,
+                    "message": message_content,
+                    "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                }))
+            self.write_message(json.dumps({"status": "Message sent successfully"}))
 
             # Also send back to sender so they see it immediately
             if from_user_id in connections:
@@ -152,25 +157,51 @@ class ChatHandler(tornado.web.RequestHandler):
         user_id = self.get_secure_cookie("user_id")
         username = self.get_secure_cookie("username")
         product_id = self.get_argument("product_id", None)
-        if product_id is None:
-            product_id =0
+        product_obj = self.session.query(Product).filter_by(id=product_id).first()
+
+        # Decode cookies safely
+        user_id = int(user_id.decode('utf-8')) if user_id else None
+        username = username.decode('utf-8') if username else None
+        if not product_id:
+            product_id = 0
         else:
             product_id = int(product_id)
         product_obj = self.session.query(Product).filter_by(id=product_id).first()
-        product_name = product_obj.name if product_obj else "Unknown Product"
+        # Handle product retrieval
 
-        if user_id is not None:
-            user_id = int(user_id.decode('utf-8'))
-        if username is not None:
-            username = username.decode('utf-8')
+        if not product_obj:
+            # Create a proper placeholder product object
+            class PlaceholderProduct:
+                def __init__(self):
+                    self.id = 0
+                    self.name = "Unknown Product"
+                    self.description = ""
+                    self.price = 0
+                    self.user_id = 0
+                    self.tag = ""
+                    self.image = ""
+                    self.quantity = 0
+                    self.status = ""
 
-        recent_messages = self.session.query(ChatMessage).filter(
-            (ChatMessage.sender_id == user_id) | (ChatMessage.receiver_id == user_id)
-        ).order_by(ChatMessage.id.desc()).limit(10).all()
+            product_obj = PlaceholderProduct()
+        else:
+            product_name = product_obj.name
+        # Fetch recent messages from MongoDB
+        try:
+            recent_messages = yield self.mongo.chat_messages.find({
+                "$or": [
+                    {"from_user_id": user_id},
+                    {"to_user_id": user_id}
+                ]
+            }).sort("timestamp", -1).limit(10).to_list(length=None)
+        except Exception as e:
+            logging.error(f"Error fetching recent messages: {e}")
+            recent_messages = []
 
+        # Process friends
         friends = []
         for message in recent_messages:
-            friend_id = message.receiver_id if message.sender_id == user_id else message.sender_id
+            friend_id = message['to_user_id'] if message['from_user_id'] == user_id else message['from_user_id']
             friend_obj = self.session.query(User).filter_by(id=friend_id).first()
             if friend_obj:
                 friends.append({
@@ -178,17 +209,16 @@ class ChatHandler(tornado.web.RequestHandler):
                     "username": friend_obj.username
                 })
 
-
-        unread_messages = self.session.query(ChatMessage).filter(
-            ChatMessage.receiver_id == user_id,
-                 ChatMessage.status == "unread"
-        ).all()
+        # Fetch unread messages
+        unread_messages = yield self.mongo.chat_messages.find({
+            "to_user_id": user_id,
+            "status": "unread"
+        }).to_list(length=None)
 
         unread_group = {}
         for msg in unread_messages:
-            friend_id = msg.receiver_id if msg.sender_id == user_id else msg.sender_id
+            friend_id = msg['to_user_id'] if msg['from_user_id'] == user_id else msg['from_user_id']
             if friend_id not in unread_group:
-                # Try to get friend username from friends list
                 friend_username = None
                 for friend in friends:
                     if friend["id"] == friend_id:
@@ -197,14 +227,18 @@ class ChatHandler(tornado.web.RequestHandler):
                 if friend_username is None:
                     friend_obj = self.session.query(User).filter_by(id=friend_id).first()
                     friend_username = friend_obj.username if friend_obj else "Unknown"
-                truncated = msg.message if len(msg.message) <= 5 else msg.message[:5] + "..."
-                unread_group[friend_id] = {"friend_id": friend_id, "username": friend_username, "summary": truncated}
+                truncated = msg['message'] if len(msg['message']) <= 5 else msg['message'][:5] + "..."
+                unread_group[friend_id] = {
+                    "friend_id": friend_id,
+                    "username": friend_username,
+                    "summary": truncated
+                }
 
+        # Fetch user products
         user_products = self.session.query(Product).filter_by(user_id=user_id).all()
-        product_links = [{"product_id": product.id, "product_name": product.name} for product in user_products]
+        product_links = [{"product_id": p.id, "product_name": p.name} for p in user_products]
 
-        # Fetch all messages for the chat room
-        # python
+        # Fetch all messages for the current product
         all_messages = yield self.mongo.chat_messages.find({
             "$or": [
                 {"from_user_id": user_id, "product_id": product_id},
@@ -212,44 +246,37 @@ class ChatHandler(tornado.web.RequestHandler):
             ]
         }).sort("timestamp", 1).to_list(length=None)
 
-        # Ensure all messages have from_username and to_username
         for message in all_messages:
             message['_id'] = str(message['_id'])
-
-            # 强制格式化时间戳
             if 'timestamp' in message:
                 if isinstance(message['timestamp'], datetime.datetime):
                     message['timestamp'] = message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
-                else:  # 如果是字符串，尝试解析并格式化
+                else:
                     try:
-                        message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime(
-                            "%Y-%m-%d %H:%M:%S")
+                        message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
                     except ValueError:
-                        # 如果解析失败，记录错误并使用原始值或提供默认值
                         logging.error(f"Invalid timestamp format: {message['timestamp']}")
-                        message['timestamp'] = "Invalid Date"  # 或者使用一个默认值
+                        message['timestamp'] = "Invalid Date"
             if 'from_username' not in message:
                 from_user = yield self.mongo.users.find_one({"_id": message['from_user_id']})
-                message['from_username'] = from_user['username'] if from_user else 'Unknown'
+                message['from_username'] = from_user['username'] if from_user else "Unknown"
             if 'to_username' not in message:
                 to_user = yield self.mongo.users.find_one({"_id": message['to_user_id']})
-                message['to_username'] = to_user['username'] if to_user else 'Unknown'
+                message['to_username'] = to_user['username'] if to_user else "Unknown"
 
-        # Remove duplicate messages
         unique_messages = {msg['_id']: msg for msg in all_messages}.values()
         broadcasts = []
         recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
-        for product in recent_products:
-            uploader = self.session.query(User).filter_by(id=product.user_id).first()
+        for p in recent_products:
+            uploader = self.session.query(User).filter_by(id=p.user_id).first()
             broadcasts.append({
-                "product_id": product.id,
-                "product_name": product.name,
+                "product_id": p.id,
+                "product_name": p.name,
                 "uploader": uploader.username if uploader else "Unknown",
-                "time": product.upload_time.strftime("%Y-%m-%d %H:%M:%S") if product.upload_time else "",
+                "time": p.upload_time.strftime("%Y-%m-%d %H:%M:%S") if p.upload_time else "",
                 "image": "/mystatics/images/c.png"
             })
 
-            # Render the template with broadcasts
         self.render(
             'chat_room.html',
             current_user=username,
@@ -262,8 +289,45 @@ class ChatHandler(tornado.web.RequestHandler):
             user_id=user_id,
             all_messages=unique_messages,
             product_links=product_links,
-            length=len  # Add the length filter to the context
+            product=product_obj,
+            length=len
         )
+
+
+
+class SendMessageHandler(tornado.web.RequestHandler):
+
+    def initialize(self, mongo):
+        self.mongo = mongo
+        self.session = scoped_session(Session)
+
+    def post(self):
+        user_id = self.get_argument("user_id")
+        friend_id = self.get_argument("friend_id")
+        message = self.get_argument("message")
+
+        if not all([user_id, friend_id, message]):
+            self.write({"error": "Missing required parameters"})
+            return
+
+        # 插入消息到 MongoDB
+        self.mongo.chat_messages.insert_one({
+            "user_id": user_id,
+            "friend_id": friend_id,
+            "message": message,
+            "timestamp": datetime.datetime.utcnow(),
+            "status": "unread"
+        })
+
+        # 通知目标用户（如果在线）
+        if int(friend_id) in connections:
+            connections[int(friend_id)].write_message(json.dumps({
+                "from_user_id": user_id,
+                "message": message,
+                "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            }))
+
+        self.write({"status": "消息发送成功！"})
 
 
 class MessageDetailsHandler(tornado.web.RequestHandler):
@@ -328,6 +392,7 @@ class FriendProfileHandler(tornado.web.RequestHandler):
             self.render("friend_profile.html", friend=friend, products=[])
         else:
             self.write("Friend not found")
+
 
 class InitiateChatHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):

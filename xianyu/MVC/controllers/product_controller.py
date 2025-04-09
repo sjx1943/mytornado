@@ -154,43 +154,26 @@ class HomePageHandler(tornado.web.RequestHandler):
         else:
             self.redirect("/login")
 
-# class HomePageHandler(tornado.web.RequestHandler):
-#     def initialize(self):
-#         self.session = Session()
-#
-#     def get_current_user(self):
-#         user_id = self.get_secure_cookie("user_id")
-#         if user_id is not None:
-#             user = self.session.query(User).filter_by(id=int(user_id)).first()
-#             return user
-#         return None
-#
-#     def get(self):
-#         user_id = self.get_argument("user_id", None)
-#         if user_id:
-#             user = self.session.query(User).filter_by(id=int(user_id)).first()
-#         else:
-#             user = self.get_current_user()
-#
-#         if user is None:
-#             self.redirect("/login")
-#             return
-#
-#         products = self.session.query(Product).filter_by(user_id=user.id).order_by(Product.id.desc()).all()
-#         self.session.close()
-#
-#         products_list = [
-#             {
-#                 'id': product.id,
-#                 "name": product.name,
-#                 "description": product.description,
-#                 "price": product.price,
-#                 "tag": product.tag,
-#                 "image": product.image,
-#                 "quantity": product.quantity,
-#                 "user_id": product.user_id
-#             }
-#             for product in products
-#         ]
-#
-#         self.render("home_page.html", products=products_list, username=user.username)
+class ElseHomePageHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
+    def get(self):
+        user_id = self.get_argument("user_id", None)
+        if user_id is None:
+            self.write("User ID is required")
+            return
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            self.write("Invalid User ID format")
+            return
+
+        user = self.session.query(User).filter_by(id=user_id).first()
+        if not user:
+            self.write("User not found")
+            return
+
+        products = self.session.query(Product).filter_by(user_id=user_id).all()
+        self.render("else_home_page.html", products=products, username=user.username)
