@@ -156,18 +156,22 @@ class ChatHandler(tornado.web.RequestHandler):
     def get(self):
         user_id = self.get_secure_cookie("user_id")
         username = self.get_secure_cookie("username")
-        product_id = self.get_argument("product_id", None)
-        product_obj = self.session.query(Product).filter_by(id=product_id).first()
+        product_id = self.get_argument("product_id", "0")  # 默认设为"0"
+        selected_friend_id = self.get_argument('friend_id', None)
 
-        # Decode cookies safely
+        # 解码cookies
         user_id = int(user_id.decode('utf-8')) if user_id else None
         username = username.decode('utf-8') if username else None
-        if not product_id:
-            product_id = 0
-        else:
+
+        # 处理product_id
+        try:
             product_id = int(product_id)
+        except ValueError:
+            product_id = 0
+
+        # 获取product_obj和product_name
         product_obj = self.session.query(Product).filter_by(id=product_id).first()
-        # Handle product retrieval
+        product_name = product_obj.name if product_obj else "所有消息"
 
         if not product_obj:
             # Create a proper placeholder product object
@@ -199,15 +203,18 @@ class ChatHandler(tornado.web.RequestHandler):
             recent_messages = []
 
         # Process friends
+        seen_friend_ids = set()
         friends = []
         for message in recent_messages:
             friend_id = message['to_user_id'] if message['from_user_id'] == user_id else message['from_user_id']
-            friend_obj = self.session.query(User).filter_by(id=friend_id).first()
-            if friend_obj:
-                friends.append({
-                    "id": friend_obj.id,
-                    "username": friend_obj.username
-                })
+            if friend_id not in seen_friend_ids and friend_id!=user_id:  # 添加去重判断
+                seen_friend_ids.add(friend_id)
+                friend_obj = self.session.query(User).filter_by(id=friend_id).first()
+                if friend_obj:
+                    friends.append({
+                        "id": friend_obj.id,
+                        "username": friend_obj.username
+                    })
 
         # Fetch unread messages
         unread_messages = yield self.mongo.chat_messages.find({
@@ -281,6 +288,7 @@ class ChatHandler(tornado.web.RequestHandler):
             'chat_room.html',
             current_user=username,
             friends=friends,
+            selected_friend_id=selected_friend_id,
             username=username,
             broadcasts=broadcasts,
             unread_group=unread_group,
@@ -333,16 +341,28 @@ class SendMessageHandler(tornado.web.RequestHandler):
 class MessageDetailsHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
         self.mongo = mongo
+        self.session = scoped_session(Session)  # 添加session初始化
 
     @tornado.gen.coroutine
     def get(self):
+        # 安全获取用户信息
         user_id_cookie = self.get_secure_cookie("user_id")
+        username_cookie = self.get_secure_cookie("username")
         user_id = int(user_id_cookie.decode("utf-8")) if user_id_cookie else None
+        username = username_cookie.decode("utf-8") if username_cookie else "未知用户"
 
         friend_id_param = self.get_argument("friend_id", None)
         messages = []
+        selected_friend = None
+
         if friend_id_param:
             friend_id = int(friend_id_param)
+            # 获取好友信息
+            selected_friend = self.session.query(User).filter_by(id=friend_id).first()
+            if not selected_friend:
+                selected_friend = yield self.mongo.users.find_one({"_id": friend_id})
+
+            # 获取聊天消息
             cursor = self.mongo.chat_messages.find({
                 "$or": [
                     {"from_user_id": friend_id, "to_user_id": user_id},
@@ -350,6 +370,8 @@ class MessageDetailsHandler(tornado.web.RequestHandler):
                 ]
             }).sort("timestamp", 1)
             messages = yield cursor.to_list(length=None)
+
+            # 处理消息格式
             for msg in messages:
                 msg['_id'] = str(msg['_id'])
                 if 'timestamp' in msg:
@@ -357,19 +379,28 @@ class MessageDetailsHandler(tornado.web.RequestHandler):
                         msg['timestamp'] = msg['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
                     else:
                         try:
-                            msg['timestamp'] = datetime.datetime.fromisoformat(msg['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
+                            msg['timestamp'] = datetime.datetime.fromisoformat(msg['timestamp']).strftime(
+                                "%Y-%m-%d %H:%M:%S")
                         except ValueError:
                             logging.error(f"Invalid timestamp format: {msg['timestamp']}")
                             msg['timestamp'] = "Invalid Date"
-                if "from_username" not in msg:
-                    msg["from_username"] = "未知"
-        else:
-            messages = yield self.mongo.chat_messages.find({
-                "to_user_id": user_id,
-                "status": "unread"
-            }).to_list(length=None)
 
-        self.render('message_details.html', messages=messages, user_id=user_id)
+                if "from_username" not in msg:
+                    from_user = yield self.mongo.users.find_one({"_id": msg['from_user_id']})
+                    msg["from_username"] = from_user['username'] if from_user else "未知"
+
+                if "to_username" not in msg:
+                    to_user = yield self.mongo.users.find_one({"_id": msg['to_user_id']})
+                    msg["to_username"] = to_user['username'] if to_user else "未知"
+
+        self.render(
+            'message_details.html',
+            messages=messages,
+            user_id=user_id,
+            username=username,
+            selected_friend=selected_friend,
+            current_user=username
+        )
 
 class FriendProfileHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -392,6 +423,52 @@ class FriendProfileHandler(tornado.web.RequestHandler):
             self.render("friend_profile.html", friend=friend, products=[])
         else:
             self.write("Friend not found")
+
+
+class MessageAPIHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+
+    @tornado.gen.coroutine
+    def get(self):
+        user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+        friend_id = int(self.get_argument("friend_id"))
+
+        messages = yield self.mongo.chat_messages.find({
+            "$or": [
+                {"from_user_id": user_id, "to_user_id": friend_id},
+                {"from_user_id": friend_id, "to_user_id": user_id}
+            ]
+        }).sort("timestamp", 1).to_list(length=None)
+
+        for msg in messages:
+            msg['_id'] = str(msg['_id'])
+            if isinstance(msg['timestamp'], datetime.datetime):
+                msg['timestamp'] = msg['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+
+        self.write(json.dumps(messages))
+
+
+class SendMessageAPIHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+
+    @tornado.gen.coroutine
+    def post(self):
+        user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+        data = json.loads(self.request.body)
+
+        message = {
+            "from_user_id": user_id,
+            "from_username": self.get_secure_cookie("username").decode("utf-8"),
+            "to_user_id": int(data["friend_id"]),
+            "message": data["message"],
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "status": "unread"
+        }
+
+        yield self.mongo.chat_messages.insert_one(message)
+        self.write({"status": "success"})
 
 
 class InitiateChatHandler(tornado.web.RequestHandler):

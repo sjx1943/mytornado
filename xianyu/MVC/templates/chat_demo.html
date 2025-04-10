@@ -1,86 +1,115 @@
-<!-- chat_room.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>聊天室</title>
-    <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
+    <title>Chat 页面布局</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        /* 顶部搜索框和广播消息 */
+        .top-section {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .broadcast-messages {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .broadcast-item {
+            margin-bottom: 5px;
+        }
+        /* 中间好友列表和消息 */
+        .middle-section {
+            flex-grow: 1;
+            display: flex;
+            border-bottom: 1px solid #ccc;
+        }
+        .friend-list {
+            width: 30%;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+        .friend-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .friend-item:hover {
+            background-color: #f0f0f0;
+        }
+        .message-area {
+            width: 70%;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .message-item {
+            margin-bottom: 10px;
+        }
+        /* 底部菜单栏 */
+        .bottom-menu {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-top: 1px solid #ccc;
+        }
+        .menu-item {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div class="user">用户: {{ current_user }}</div>
-        <div class="status">在线</div>
-    </div>
-    <h1>消息 <a href="/chat_room?user_id={{ user_id }}">我的消息</a></h1>
-    <div class="chat-container">
-        <!-- 聊天框 -->
-        <div class="chat-box">
-            <div id="chat-messages" class="messages">
-                {% for message in all_messages %}
-                {% if message['from_user_id'] == user_id or message['to_user_id'] == user_id %}
-                <div class="message {% if message['status'] == 'unread' %}unread{% end %}">
-                    <strong>{{ '我' if message['from_user_id'] == user_id else '来自 ' + message['from_username'] }} {{ message['timestamp'] }}:</strong> {{ message['message'] }}
-                </div>
-                {% end %}
-                {% end %}
-            </div>
-            <div class="input-box">
-                <input type="text" id="message-input" placeholder="Type your message here">
-                <input type="hidden" id="product-name" value="{{ product_name }}"> <!-- Hidden input for product name -->
-                <button id="send-button">Send</button>
+    <div class="container">
+        <!-- 顶部区域 -->
+        <div class="top-section">
+            <input type="text" class="search-bar" placeholder="搜索...">
+            <div class="broadcast-messages">
+                <!-- 示例广播消息 -->
+                <div class="broadcast-item">张三于2025-04-10上传了商品A</div>
+                <div class="broadcast-item">李四于2025-04-09上传了商品B</div>
+                <!-- 更多广播消息 -->
             </div>
         </div>
 
-        <!-- 侧边栏：最近消息 & 广播列表 -->
-        <div class="sidebar">
-            <!-- 最近消息 -->
-            <div class="section">
-                <h3>最近消息</h3>
-                <ul id="recent-messages">
-                    {% for message in unread_messages %}
-                    <li class="unread-message">
-                        <a href="/chat_room?user_id={{ message.sender_id }}&product_id={{ message.product_id }}">
-                            {{ message.sender.username }}: {{ message.message }}
-                        </a>
-                    </li>
-                    {% end %}
-                </ul>
+        <!-- 中间区域 -->
+        <div class="middle-section">
+            <!-- 好友列表 -->
+            <div class="friend-list">
+                <!-- 示例好友 -->
+                <div class="friend-item">张三</div>
+                <div class="friend-item">李四</div>
+                <div class="friend-item">王五</div>
+                <!-- 更多好友 -->
             </div>
 
-            <!-- 系统广播 -->
-            <div class="section">
-                <h3>系统广播</h3>
-                <ul id="system-broadcasts">
-                {% for broadcast in broadcasts %}
-                <li class="system">
-                    <a href="/chat_room?user_id={{ user_id }}&product_id={{ broadcast['product_id'] }}">
-                        <img src="{{ broadcast['image'] }}" alt="{{ broadcast['product_name'] }}" />
-                        {{ broadcast['uploader'] }} 于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name'] }}
-                    </a>
-                </li>
-                {% end %}
-            </ul>
-            </div>
-
-            <!-- 用户产品链接 -->
-            <div class="section">
-                <h3>我的产品</h3>
-                <ul id="user-products">
-                    {% for product in product_links %}
-                    <li>
-                        <a href="/chat_room?user_id={{ user_id }}&product_id={{ product['product_id'] }}">
-                            {{ product['product_name'] }}
-                        </a>
-                    </li>
-                    {% end %}
-                </ul>
+            <!-- 消息区域 -->
+            <div class="message-area">
+                <!-- 示例消息 -->
+                <div class="message-item">我：你好，张三！</div>
+                <div class="message-item">张三：你好！</div>
+                <!-- 更多消息 -->
             </div>
         </div>
+
+        <!-- 底部菜单栏 -->
+        <div class="bottom-menu">
+            <div class="menu-item">个人中心</div>
+            <div class="menu-item">平台主页</div>
+            <div class="menu-item">上传商品</div>
+        </div>
     </div>
-
-    <a href="/main">返回主页</a> <!-- Updated link -->
-
-    <script src="{{ static_url('js/main.js') }}"></script>
 </body>
 </html>

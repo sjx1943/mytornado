@@ -1,5 +1,5 @@
-# python
 # File: xianyu/MVC/controllers/friend_profile_controller.py
+from datetime import datetime
 from itertools import product
 
 import tornado.web
@@ -11,50 +11,77 @@ from base.base import engine
 
 Session = sessionmaker(bind=engine)
 
+
 class FriendProfileHandler(tornado.web.RequestHandler):
-    def initialize(self):
+    def initialize(self, mongo):
+        self.mongo = mongo
         self.session = scoped_session(Session)
 
+    @tornado.gen.coroutine
     def get(self):
         friend_id = self.get_argument("friend_id", None)
-        if friend_id is None:
+        user_id_cookie = self.get_secure_cookie("user_id")
+        user_id = int(user_id_cookie.decode("utf-8")) if user_id_cookie else None
+
+        if not friend_id:
             self.write("Invalid friend id")
             return
+
         try:
             friend_id = int(friend_id)
-        except ValueError:
-            self.write("Invalid friend id format")
-            return
+            friend = self.session.query(User).filter_by(id=friend_id).first()
 
-        friend = self.session.query(User).filter_by(id=friend_id).first()
+            if not friend:
+                self.write("Friend not found")
+                return
 
-        if friend:
-            # Retrieve user_id from secure cookie and pass it to the template.
+            # 获取聊天消息
+            messages = yield self.mongo.chat_messages.find({
+                "$or": [
+                    {"from_user_id": user_id, "to_user_id": friend_id},
+                    {"from_user_id": friend_id, "to_user_id": user_id}
+                ]
+            }).sort("timestamp", 1).to_list(length=None)
+
+            # 格式化消息
+            for msg in messages:
+                msg['_id'] = str(msg['_id'])
+                if isinstance(msg['timestamp'], datetime.datetime):
+                    msg['timestamp'] = msg['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+
+            # 获取好友产品
             products = self.session.query(Product).filter(Product.user_id == friend.id).all()
-            user_id_cookie = self.get_secure_cookie("user_id")
-            user_id = int(user_id_cookie.decode("utf-8")) if user_id_cookie else None
-            self.render("friend_profile.html", friend=friend, products=products, user_id=user_id)
-        else:
-            self.write("Friend not found")
+
+            self.render("chat_room.html",
+                        current_user=self.get_secure_cookie("username").decode("utf-8"),
+                        user_id=user_id,
+                        friend=friend,
+                        messages=messages,
+                        products=products
+                        )
+
+        except Exception as e:
+            self.write(f"Error: {str(e)}")
 
 class DeleteFriendHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = scoped_session(Session)
 
-    def get(self):
-        friend_id_arg = self.get_argument("friend_id", None)
-        user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
-        if friend_id_arg:
-            try:
-                friend_id = int(friend_id_arg)
-            except ValueError:
-                self.write("Invalid friend id")
-                return
-            friendship = self.session.query(Friendship).filter_by(user_id=user_id, friend_id=friend_id).first()
-            if friendship:
-                self.session.delete(friendship)
-                self.session.commit()
-            else:
-                self.write("Friendship record not found")
-                return
-        self.redirect("/chat_room")
+    def post(self):
+        try:
+            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+            friend_id = int(self.get_argument("friend_id"))
+
+            # 删除好友关系
+            self.session.query(Friendship).filter(
+                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
+                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
+            ).delete()
+
+            self.session.commit()
+            self.write({"status": "success"})
+        except Exception as e:
+            self.session.rollback()
+            self.write({"status": "error", "message": str(e)})
+        finally:
+            self.session.close()
