@@ -1,0 +1,33 @@
+/* recommended.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+#container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.book {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.book img {
+    float: left;
+    margin-right: 10px;
+}
+
+.book .title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.book .author {
+    color: #888;
+}
+
+.book .description {
+    margin-top: 10px;
+}

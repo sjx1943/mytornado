@@ -1,0 +1,25 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+#container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+header {
+    background-color: #f8f8f8;
+    padding: 20px;
+    text-align: center;
+}
+
+#content {
+    margin: 20px 0;
+}
+
+footer {
+    background-color: #f8f8f8;
+    padding: 10px;
+    text-align: center;
+}
