@@ -13,7 +13,7 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 # from controllers.message_details_controller import MessageDetailsHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler
-from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler
+from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler, MessageAPIHandler, SendMessageAPIHandler
 from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler
 
 from motor import motor_tornado
@@ -23,6 +23,8 @@ import redis
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
+    'upload_path': os.path.join(os.path.dirname(__file__), "mystatics/images"),
+        'max_file_size': 10 * 1024 * 1024,  # 10MB
     "login_url": "/login",
     'cookie_secret': 'sjxxxx',
     'xsrf_cookies': True
@@ -43,9 +45,11 @@ def make_app():
         (r"/register", RegisterHandler),
         (r"/forgot_password", ForgotPasswordHandler),
         (r"/reset_password", ResetPasswordHandler),
-        (r"/product/upload", ProductUploadHandler),
+        (r"/product/upload", ProductUploadHandler, dict(app_settings=settings)),
         (r"/product/list", ProductListHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
+        (r"/api/messages", MessageAPIHandler, dict(mongo=mongo)),
+        (r"/api/send_message", SendMessageAPIHandler, dict(mongo=mongo)),
         (r"/chat_room", ChatHandler, dict(mongo=mongo)),
         (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/initiate_chat", InitiateChatHandler, dict(mongo=mongo)),

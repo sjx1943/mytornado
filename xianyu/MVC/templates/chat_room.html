@@ -5,84 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>消息</title>
     <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .top-section {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .broadcast-messages {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .broadcast-item {
+            margin-bottom: 5px;
+        }
+        .middle-section {
+            flex-grow: 1;
+            display: flex;
+            border-bottom: 1px solid #ccc;
+        }
+        .friend-list {
+            width: 30%;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+        .friend-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .friend-item:hover {
+            background-color: #f0f0f0;
+        }
+        .message-area {
+            width: 70%;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .message-item {
+            margin-bottom: 10px;
+        }
+        .bottom-menu {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-top: 1px solid #ccc;
+        }
+        .menu-item {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <h1>消息</h1>
-        <a href="#">清除未读</a>
-    </div>
-    <div class="search-bar">
-        <input type="search" placeholder="搜索聊天记录/联系人/服务号">
-    </div>
+    <div class="container">
+        <!-- 顶部区域 -->
+        <div class="top-section">
+            <input type="text" class="search-bar" placeholder="搜索聊天记录/联系人/服务号">
+            <div class="broadcast-messages">
+                {% for broadcast in broadcasts %}
+                <div class="broadcast-item">
+                    <a href="/product/detail/{{ broadcast['product_id'] }}">
+                        {{ broadcast['uploader'] }} 于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name'] }}
+                    </a>
+                </div>
+                {% end %}
+            </div>
+        </div>
 
-    <!-- 系统广播 -->
-    <div class="section">
-        <h3>广播消息</h3>
-        <ul id="system-broadcasts">
-            {% for broadcast in broadcasts %}
-            <li class="system">
-                <a href="/product/detail/{{ broadcast['product_id'] }}">
-                    <img src="{{ broadcast['image'] }}" alt="{{ broadcast['product_name'] }}"/>
-                    <div class="message-content">
-                        <div class="message-title">{{ broadcast['uploader'] }}</div>
-                        <div class="message-description">于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name']
-                            }}
-                        </div>
-                    </div>
-                </a>
-            </li>
-            {% end %}
-        </ul>
-    </div>
+        <!-- 中间区域 -->
+        <div class="middle-section">
+            <!-- 好友列表 -->
+            <div class="friend-list">
+                {% for friend in friends %}
+                <div class="friend-item" data-friend-id="{{ friend['id'] }}">
+                    <span class="friend-name">{{ friend['username'] }}</span>
+                    <button class="delete-friend" data-friend-id="{{ friend['id'] }}">X</button>
+                </div>
+                {% end %}
+            </div>
 
-    <!-- 最近消息 -->
-    <div class="section">
-        <h3>最近消息</h3>
-        <ul id="recent-messages">
-            {% for item in unread_group.values() %}
-            <li class="unread-message">
-                <!-- /fix: Use dictionary indexing for friend_id and other keys -->
-                <a href="/message_details?friend_id={{ item['friend_id'] }}">
-                    <div class="message-content">
-                        <div class="message-title">{{ item['username'] }}:</div>
-                        <div class="message-description">{{ item['summary'] }}</div>
-                    </div>
-                </a>
-            </li>
-            {% end %}
-        </ul>
-    </div>
+            <!-- 消息区域 -->
+            <div class="message-area" id="chat-messages">
+                <!-- 示例消息 -->
+                <div class="message-item">我：你好，张三！</div>
+                <div class="message-item">张三：你好！</div>
+                <div class="message-input-area">
+                    <input type="text" class="message-input" id="message-input" placeholder="输入消息...">
+                    <button class="send-button" id="send-button">发送</button>
+                </div>
+                <!-- 更多消息 -->
+            </div>
+        </div>
 
-    <div class="section">
-        <h3>好友列表</h3>
-        <ul id="friend-list">
-            {% set seen_friend_ids = [] %}
-            {% for friend in friends %}
-            {% if friend['id'] not in seen_friend_ids %}
-            {% set seen_friend_ids = seen_friend_ids + [friend['id']] %}
-            <li>
-                <a href="/friend_profile?friend_id={{ friend['id'] }}">{{ friend['username'] }}</a>
-                <button class="delete-friend" data-friend-id="{{ friend['id'] }}" onclick="deleteFriend(this)">X
-                </button>
-            </li>
-            {% end %}
-            {% end %}
-        </ul>
+        <!-- 底部菜单栏 -->
+        <div class="bottom-menu">
+            <a href="/profile" class="menu-item">个人中心</a>
+            <a href="/main" class="menu-item">平台主页</a>
+            <a href="/product/upload" class="menu-item">上传商品</a>
+        </div>
     </div>
-    <!-- 我的产品 -->
-    <div class="section">
-        <h3>{{ username }}的产品</h3>
-        <ul id="user-products">
-            {% for product in product_links %}
-            <li>
-                <a href="/product/detail/{{ product['product_id'] }}">
-                    {{ product['product_name'] }}
-                </a>
-            </li>
-            {% end %}
-        </ul>
-    </div>
-    <a href="/main">返回主页</a>
     <script src="{{ static_url('js/main.js') }}"></script>
 </body>
 </html>
