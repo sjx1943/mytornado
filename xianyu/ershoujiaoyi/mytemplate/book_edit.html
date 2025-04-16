@@ -1,7 +1,9 @@
 {% extends "main.html" %}
 {% autoescape None %}
 
+
 {% block body %}
+<p>{{ header_text }}</p>
 <form method="POST">
     ISBN <input type="text" name="isbn"
         value="{{ book.get('isbn', '') }}"><br>

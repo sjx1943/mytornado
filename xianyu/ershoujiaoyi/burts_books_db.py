@@ -12,23 +12,7 @@ from pymongo import MongoClient
 
 define("port", default=8000, help="run on the given port", type=int)
 
-class Application(tornado.web.Application):
-    def __init__(self):
-        handlers = [
-            (r"/", MainHandler),
-            (r"/recommended/", RecommendedHandler),
-            (r"/edit/([0-9Xx\-]+)/?", BookEditHandler),
-            (r"/add",BookEditHandler)
-        ]
-        settings = dict(
-            template_path=os.path.join(os.path.dirname(__file__), "mytemplate"),
-            static_path=os.path.join(os.path.dirname(__file__), "mystatics"),
-            ui_modules={"Book": BookModule},
-            debug=True,
-        )
-        conn = MongoClient("localhost", 27017)
-        self.db = conn["bookstore"]
-        tornado.web.Application.__init__(self, handlers, **settings)
+
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -41,11 +25,12 @@ class MainHandler(tornado.web.RequestHandler):
 class RecommendedHandler(tornado.web.RequestHandler):
     def get(self):
         coll = self.application.db.books
+
         books = coll.find()
         self.render(
             "recommended.html",
             page_title = "Burt's Books | Recommended Reading",
-            header_text = "Recommended Reading",
+            header_text = "推荐读物",
             books = books,
 
         )
@@ -57,9 +42,9 @@ class BookModule(tornado.web.UIModule):
             book=book,
         )
     def css_files(self):
-        return "/mystatics/css/recommended.css"
+        return "/static/css/recommended.css"
     def javascript_files(self):
-        return "/mystatics/js/recommended.js"
+        return "/static/js/recommended.js"
 
 class BookEditHandler(tornado.web.RequestHandler):
     def get(self, isbn=None):
@@ -69,7 +54,7 @@ class BookEditHandler(tornado.web.RequestHandler):
             book = coll.find_one({"isbn": isbn})
         self.render("book_edit.html",
             page_title="Burt's Books",
-            header_text="Edit book",
+            header_text="添加图书信息",
             book=book)
 
     def post(self, isbn=None):
@@ -84,15 +69,46 @@ class BookEditHandler(tornado.web.RequestHandler):
             book[key] = self.get_argument(key, None)
 
         if isbn:
-            coll.save(book)
+            coll.replace_one({"isbn": isbn}, book)
         else:
             book['date_added'] = int(time.time())
-            coll.insert_one(book)  # Updated line
+            coll.insert_one(book)
         self.redirect("/recommended/")
+
+
+settings = {
+    'template_path': os.path.join(os.path.dirname(__file__), "mytemplate"),
+    'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
+    'ui_modules': {"Book": BookModule},
+    'debug': True,
+    'login_url': "/login",
+    'cookie_secret': 'sjxxx',
+    'xsrf_cookies': False
+}
+
+
+def make_app():
+    conn = MongoClient("localhost", 27017)
+    db = conn["bookstore"]
+
+    handlers = [
+        (r"/", MainHandler),
+        (r"/recommended/", RecommendedHandler),
+        (r"/edit/([0-9Xx\-]+)/?", BookEditHandler),
+        (r"/add", BookEditHandler),
+        (r"/mystatics/(.*)", tornado.web.StaticFileHandler,
+         {"path": settings['static_path']})
+    ]
+
+    app = tornado.web.Application(handlers, **settings)
+    app.db = db  # 将db实例附加到app上
+    return app
+
+
 
 if __name__ == "__main__":
     tornado.options.parse_command_line()
-    http_server = tornado.httpserver.HTTPServer(Application())
-    http_server.listen(options.port)
-    tornado.ioloop.IOLoop.instance().start()
-
+    app = make_app()
+    app.listen(options.port)
+    print("服务器已启动，监听端口:", options.port)
+    tornado.ioloop.IOLoop.current().start()
