@@ -1,4 +1,4 @@
-# app.py
+
 import sys
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
@@ -15,9 +15,7 @@ from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPas
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler
 from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler, MessageAPIHandler, SendMessageAPIHandler
 from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler
-
 from motor import motor_tornado
-
 import redis
 
 settings = {
@@ -46,7 +44,7 @@ def make_app():
         (r"/forgot_password", ForgotPasswordHandler),
         (r"/reset_password", ResetPasswordHandler),
         (r"/product/upload", ProductUploadHandler, dict(app_settings=settings)),
-        (r"/product/list", ProductListHandler),
+        (r"/product_list", ProductListHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r"/api/messages", MessageAPIHandler, dict(mongo=mongo)),
         (r"/api/send_message", SendMessageAPIHandler, dict(mongo=mongo)),
@@ -63,6 +61,7 @@ def make_app():
                     },
         **settings
     )
+
 
 if __name__ == "__main__":
     app = make_app()

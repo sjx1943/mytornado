@@ -43,7 +43,8 @@ class MainHandler(tornado.web.RequestHandler):
     def get_products(self):
         # 获取商品列表...
         products = self.session.query(Product).all()
-        # self.session.close()
+
+        logging.info(f"Retrieved {len(products)} products from the 数据库.")
 
         products_list = [
             {
@@ -65,7 +66,10 @@ class MainHandler(tornado.web.RequestHandler):
         user_id = self.get_secure_cookie("user_id")
         username = self.get_secure_cookie("username")
         products = self.get_products()
-        tags = [product['tag'] for product in products]
+        tags = []
+        for product in products:
+            if product['tag'] not in tags:
+                tags.append(product['tag'])
         if user_id is not None:
             user_id = user_id.decode('utf-8')
         if username is not None:

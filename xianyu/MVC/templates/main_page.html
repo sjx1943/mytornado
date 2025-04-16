@@ -18,42 +18,23 @@
     <nav class="category-nav">
         {% set unique_tags = [] %}
         {% for tag in tags %}
-        {% end %}
             {% if tag not in unique_tags %}
                 {% set unique_tags = unique_tags + [tag] %}
-                <a href="/product_list?tag={{ tag }}">{{ tag }}</a>
+                 <a href="#" data-tag="{{ tag }}" onclick="loadProducts('{{ tag }}'); return false;">{{ tag }}</a>
             {% end %}
-    </nav>
-    <div class="product-list">
-        {% for product in products %}
-            <div class="product-item" data-product-id="{{ product['id'] }}" data-uploader-id="{{ product['user_id'] }}">
-                <a href="/product/detail/{{ product['id'] }}">
-                    <img src="{{ static_url('images/' + product['image']) }}" alt="{{ product['name'] }}">
-                </a>
-                <p class="product-name">{{ product['name'] }}</p>
-                <p class="product-price">￥{{ product['price'] }}</p>
-                <p class="product-quantity">数量：{{ product['quantity'] }}</p>
-                <p class="product-tags">
-                    {% for tag in product['tag'] %}
-                        <span class="tag">{{ tag }}</span>
-                    {% end %}
-                </p>
-                     <div class="debug-info">
-                        当前用户ID：{{ user_id }} （类型：{{ user_id.__class__.__name__ }}）<br>
-                        商品上传者ID：{{ product['user_id'] }} （类型：{{ product['user_id'].__class__.__name__ }})
-                    </div>
-                {% if product['user_id'] == user_id %}
-                {% else %}
-                {% end %}
-                    <button class="want-button" data-user-id="{{ product['user_id'] }}" data-product-id="{{ product['id'] }}" onclick="initiateChat(this)">想要</button>
-                    <p class="uploaded-by-me">我上传的商品</p>
-            </div>
         {% end %}
+    </nav>
+
+
+    <div class="product-list" id="product-list">
+        <!-- 商品列表将通过 JavaScript 动态加载 -->
     </div>
+
+
     <footer class="main-footer">
         <a href="/main">主页</a>
-        <a href="/publish_product">发布商品</a>
-        <a href="/chat_room?user_id={{ user_id }}" id="my-messages-link">
+        <a href="/product/upload">发布商品</a>
+         <a href="/chat_room?user_id={{ user_id }}" id="my-messages-link">
             我的消息
         </a>
         <a href="/home_page">我的</a>

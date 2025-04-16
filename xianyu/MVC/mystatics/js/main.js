@@ -162,6 +162,47 @@ function deleteFriend(button) {
     }
 }
 
+function loadProducts(tags) {
+    // Make an AJAX request to get the product list
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/product_list' + (tags ? '?tag=' + tags.join('&tag=') : ''), true);
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            // Parse the JSON response and update the product list
+            var products = JSON.parse(xhr.responseText);
+            var productListDiv = document.getElementById('product-list');
+            productListDiv.innerHTML = ''; // Clear the current product list
+            products.forEach(function (product) {
+                // Create a new div for each product and add it to the product list
+                var productDiv = document.createElement('div');
+                productDiv.className = 'product-item';
+                productDiv.innerHTML = `
+                    
+                    <div class="product-info">
+                    <a href="/product/detail/${product.id}">
+                        <img src="/static/images/${product.image}" alt="${product.name}">
+                    </a>  
+                        <h2>${product.name}</h2>
+                        <p>￥${product.price}</p>
+                        <p>数量：${product.quantity}</p>
+                        <p>标签：${product.tag}</p>
+                        <p>商品上传者ID：${product.user_id}</p>
+                        <p>当前用户ID：${document.getElementById('logged-in-user-id').value}</p>
+                    </div>
+                    
+                    
+                `;
+                productListDiv.appendChild(productDiv);
+            });
+        }
+    };
+    xhr.send();
+}
+
+// Load the initial product list
+loadProducts();
+
+
 // 初始化聊天功能
 function initChat() {
     document.querySelectorAll('.friend-item').forEach(item => {

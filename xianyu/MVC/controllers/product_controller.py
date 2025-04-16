@@ -21,6 +21,7 @@ class ProductDetailHandler(tornado.web.RequestHandler):
         return None
 
     def get(self, product_id):
+
         product = self.session.query(Product).filter_by(id=product_id).first()
         uploader = self.session.query(User).filter_by(id=product.user_id).first()
         user = self.get_current_user()
@@ -30,7 +31,7 @@ class ProductDetailHandler(tornado.web.RequestHandler):
         else:
             user_id = None
 
-        self.render('product_detail.html', product=product, uploader=uploader, user_id=user_id)
+        self.render('product_detail.html', product=product, uploader=uploader, user_id=user_id, product_id=product_id)
 
 class ProductUploadHandler(tornado.web.RequestHandler):
     def initialize(self, app_settings):
@@ -107,14 +108,15 @@ class ProductUploadHandler(tornado.web.RequestHandler):
     def on_finish(self):
         self.session.close()
 
+
 class ProductListHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = scoped_session(Session)
 
     def get(self):
-        tag = self.get_argument("tag", None)
-        if tag:
-            products = self.session.query(Product).filter(Product.tag == tag).all()
+        tags= self.get_arguments("tag")  # 获取多个tag参数
+        if tags:
+            products = self.session.query(Product).filter(Product.tag.in_(tags)).all()
         else:
             products = self.session.query(Product).all()
 
@@ -131,11 +133,12 @@ class ProductListHandler(tornado.web.RequestHandler):
             }
             for product in products
         ]
+        self.write(json.dumps(products_list))
 
-        self.render("product_list.html", products=products_list)
 
     def on_finish(self):
         self.session.remove()
+
 
 class HomePageHandler(tornado.web.RequestHandler):
     def initialize(self):

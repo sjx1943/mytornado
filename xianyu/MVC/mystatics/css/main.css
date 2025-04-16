@@ -52,22 +52,31 @@ body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+    justify-items: center; /* 添加这行代码 */
+    align-items: center; /* 添加这行代码 */
 }
 
 .product-item {
-    width: 200px;
-    margin: 10px;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-    text-align: center;
+    padding: 10px;
+    width: calc(50% - 20px); /* 修改这行代码 */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 添加这行代码 */
+    border-radius: 5px; /* 添加这行代码 */
+    overflow: hidden; /* 添加这行代码 */
 }
 
 .product-item img {
     width: 100%;
     height: auto;
-    object-fit: contain;
+    object-fit: cover; /* 修改这行代码 */
+    border-radius: 5px 5px 0 0; /* 添加这行代码 */
 }
+
+.product-image {
+    max-width: 100%;
+    height: auto;
+}
+
 
 .product-name {
     font-weight: bold;
@@ -86,22 +95,37 @@ body {
     padding: 5px;
 }
 
+.product-info {
+    padding: 10px;
+}
+
+
 .tag {
-    background-color: #ddd;
-    color: #333;
-    padding: 2px 5px;
-    margin: 2px;
-    border-radius: 3px;
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 5px;
 }
 
 .want-button {
-    /* 样式根据你的需求进行调整 */
-    background-color: #ea9c17;
-    color: #333;
-    padding: 2px 5px;
-    margin: 2px;
-    border-radius: 3px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
+
+
+.want-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 修改这行代码 */
+}
+
 .main-footer {
     display: flex;
     justify-content: center;
