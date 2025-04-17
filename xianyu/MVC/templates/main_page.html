@@ -11,20 +11,20 @@
         <p class="welcome-msg">欢迎 {{ username }}，來到小区的二手交易平台!</p>
         <input type="hidden" id="logged-in-user-id" value="{{ user_id }}">
     {% end %}
-    <form action="/search" method="get" class="search-form">
-        <input type="text" name="query" placeholder="搜索商品、活动或信息">
-        <input type="submit" value="搜索">
+    <form id="search-form" class="search-form">
+        <input type="text" id="search-input" name="q" placeholder="输入商品名称或关键词">
+        <button type="submit">搜索</button>
     </form>
     <nav class="category-nav">
+        <a href="#" data-tag="all" onclick="loadProducts('all'); return false;">全部商品</a>
         {% set unique_tags = [] %}
         {% for tag in tags %}
             {% if tag not in unique_tags %}
                 {% set unique_tags = unique_tags + [tag] %}
-                 <a href="#" data-tag="{{ tag }}" onclick="loadProducts('{{ tag }}'); return false;">{{ tag }}</a>
+                <a href="#" data-tag="{{ tag }}" onclick="loadProducts('{{ tag }}'); return false;">{{ tag }}</a>
             {% end %}
         {% end %}
     </nav>
-
 
     <div class="product-list" id="product-list">
         <!-- 商品列表将通过 JavaScript 动态加载 -->
@@ -40,6 +40,6 @@
         <a href="/home_page">我的</a>
     </footer>
     <script src="{{ static_url('js/main.js') }}"></script>
-
+    <script src="{{ static_url('js/search.js') }}"></script>
 </body>
 </html>
