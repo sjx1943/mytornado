@@ -15,6 +15,7 @@ from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPas
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler
 from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler, MessageAPIHandler, SendMessageAPIHandler
 from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler
+from controllers.search_controller import SearchHandler
 from motor import motor_tornado
 import redis
 
@@ -47,6 +48,7 @@ def make_app():
         (r"/product_list", ProductListHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         (r"/api/messages", MessageAPIHandler, dict(mongo=mongo)),
+        (r"/api/search", SearchHandler),
         (r"/api/send_message", SendMessageAPIHandler, dict(mongo=mongo)),
         (r"/chat_room", ChatHandler, dict(mongo=mongo)),
         (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
@@ -54,11 +56,11 @@ def make_app():
         (r"/friend_profile", FriendProfileHandler),
         (r"/delete_friend", DeleteFriendHandler),
         (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
-    ],  debug = True,
+    ],
         ui_modules={'loginmodule': Loginmodule,
                     'registmodule': Registmodule,
                     'forgotmodule': Forgotmodule
-                    },
+                    }, debug = True,
         **settings
     )
 
