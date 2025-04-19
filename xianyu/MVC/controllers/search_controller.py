@@ -1,36 +1,49 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from tornado.web import RequestHandler
+import tornado.web
+import json
+import logging
+from sqlalchemy.orm import sessionmaker, scoped_session
+from base.base import engine
 from models.product import Product
-from tornado.escape import json_encode
-from sqlalchemy import or_, func
 
-class SearchHandler(RequestHandler):
-    async def get(self):
-        query = self.get_argument('q', '').strip()
+Session = sessionmaker(bind=engine)
 
-        if not query:
-            self.set_status(400)
-            return self.write({'error': '搜索内容不能为空'})
 
+class SearchHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
+    def get(self):
         try:
-            search_query = f"%{query}%"
-            products = self.application.db.query(Product).filter(
-                or_(
-                    Product.name.ilike(search_query),
-                    Product.description.ilike(search_query),
-                    Product.tag.ilike(search_query)
-                )
+            query = self.get_argument("q", "")
+            logging.info(f"搜索查询: {query}")
+
+            # 使用 LIKE 进行模糊搜索
+            search_results = self.session.query(Product).filter(
+                Product.name.like(f"%{query}%") |
+                Product.description.like(f"%{query}%") |
+                Product.tag.like(f"%{query}%")
             ).all()
 
-            self.write(json_encode([{
-                'id': p.id,
-                'name': p.name,
-                'price': str(p.price),
-                'image': p.image,
-                'tag': p.tag
-            } for p in products]))
+            # 将结果转换为 JSON 格式
+            results = []
+            for product in search_results:
+                results.append({
+                    'id': product.id,
+                    'name': product.name,
+                    'description': product.description,
+                    'price': product.price,
+                    'quantity': product.quantity,
+                    'tag': product.tag,
+                    'image': product.image,
+                    'user_id': product.user_id
+                })
 
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(results))
         except Exception as e:
+            logging.error(f"搜索处理时出错: {e}", exc_info=True)
             self.set_status(500)
-            self.write({'error': str(e)})
+            self.write(json.dumps({"error": "服务器内部错误，请稍后重试"}))
+
+    def on_finish(self):
+        self.session.remove()
