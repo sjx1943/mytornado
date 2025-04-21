@@ -5,69 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>消息</title>
     <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        .top-section {
-            border-bottom: 1px solid #ccc;
-            padding: 10px;
-        }
-        .search-bar {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        .broadcast-messages {
-            max-height: 100px;
-            overflow-y: auto;
-        }
-        .broadcast-item {
-            margin-bottom: 5px;
-        }
-        .middle-section {
-            flex-grow: 1;
-            display: flex;
-            border-bottom: 1px solid #ccc;
-        }
-        .friend-list {
-            width: 30%;
-            border-right: 1px solid #ccc;
-            overflow-y: auto;
-        }
-        .friend-item {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-        }
-        .friend-item:hover {
-            background-color: #f0f0f0;
-        }
-        .message-area {
-            width: 70%;
-            padding: 10px;
-            overflow-y: auto;
-        }
-        .message-item {
-            margin-bottom: 10px;
-        }
-        .bottom-menu {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            background-color: #f8f8f8;
-            border-top: 1px solid #ccc;
-        }
-        .menu-item {
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ static_url('css/main.css') }}">
+   
 </head>
 <body>
     <div class="container">
@@ -89,6 +28,7 @@
         <div class="middle-section">
             <!-- 好友列表 -->
             <div class="friend-list">
+                <div class="friend-list-header">我的好友</div>
                 {% for friend in friends %}
                 <div class="friend-item" data-friend-id="{{ friend['id'] }}">
                     <span class="friend-name">{{ friend['username'] }}</span>
@@ -110,11 +50,9 @@
             </div>
         </div>
 
-        <!-- 底部菜单栏 -->
-        <div class="bottom-menu">
-            <a href="/profile" class="menu-item">个人中心</a>
-            <a href="/main" class="menu-item">平台主页</a>
-            <a href="/product/upload" class="menu-item">上传商品</a>
+        <!-- 替换底部菜单为 foot.html -->
+        <div class="footer-container">
+            {% include "foot.html" %}
         </div>
     </div>
     <script src="{{ static_url('js/main.js') }}"></script>
