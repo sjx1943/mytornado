@@ -1,5 +1,4 @@
 #mysql数据库连接的基本操作
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 
