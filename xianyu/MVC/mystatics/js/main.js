@@ -75,167 +75,81 @@ function updateNotificationBadge() {
     }
 }
 
-// 加载好友消息
-function loadFriendMessages(friendId) {
-    if (friendId) {
-        fetch(`/api/messages?friend_id=${friendId}&user_id=${getUserId()}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch messages');
-                }
-                return response.json();
-            })
-            .then(messages => {
-                const messagesContainer = document.getElementById('chat-messages');
-                if (!messagesContainer) return;
 
-                messagesContainer.innerHTML = '';
-                messages.forEach(msg => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${msg.from_user_id == getUserId() ? 'sent' : 'received'}`;
-                    messageDiv.innerHTML = `
-                        <strong>${msg.from_username} ${msg.timestamp}:</strong>
-                        <p>${msg.message}</p>
-                    `;
-                    messagesContainer.appendChild(messageDiv);
-                });
-
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                document.querySelectorAll('.friend-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                const activeFriend = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
-                if (activeFriend) {
-                    activeFriend.classList.add('active');
-                    document.getElementById('current-friend').textContent =
-                        activeFriend.querySelector('.friend-name').textContent;
-                }
-            })
-            .catch(error => console.error('加载消息失败:', error));
-    } else {
-        console.error('Invalid friend ID');
-    }
-}
 
 // 发送消息
-function sendMessage() {
-    const message = messageInput?.value.trim();
-    const activeFriend = document.querySelector('.friend-item.active');
 
-    if (message && activeFriend) {
-        const friendId = activeFriend.dataset.friendId;
 
-        fetch('/api/send_message', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                friend_id: friendId,
-                message: message,
-                user_id: getUserId()
-            })
-        })
-        .then(() => {
-            if (messageInput) messageInput.value = '';
-            loadFriendMessages(friendId);
-        })
-        .catch(error => console.error('发送消息失败:', error));
-    }
-}
 
-// 删除好友
-function deleteFriend(button) {
-    const friendId = button.dataset.friendId;
-    if (confirm('确定要删除这个好友吗？')) {
-        fetch('/delete_friend', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({friend_id: friendId})
+
+
+function loadProducts(tag = 'all') {
+    // 使用fetch API替代XMLHttpRequest
+    fetch(`/product_list${tag && tag !== 'all' ? `?tag=${tag}` : ''}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                button.parentElement.remove();
+        .then(products => {
+            const productListDiv = document.getElementById('product-list');
+            productListDiv.innerHTML = '';
+
+            // 添加无商品提示
+            if (products.length === 0) {
+                productListDiv.innerHTML = '<p class="no-products">暂无相关商品</p>';
+                return;
             }
-        })
-        .catch(error => console.error('删除好友失败:', error));
-    }
-}
 
-function loadProducts(tags) {
-    // Make an AJAX request to get the product list
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/product_list' + (tags ? '?tag=' + tags.join('&tag=') : ''), true);
-    xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status < 300) {
-            // Parse the JSON response and update the product list
-            var products = JSON.parse(xhr.responseText);
-            var productListDiv = document.getElementById('product-list');
-            productListDiv.innerHTML = ''; // Clear the current product list
-            products.forEach(function (product) {
-                // Create a new div for each product and add it to the product list
-                var productDiv = document.createElement('div');
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
                 productDiv.className = 'product-item';
                 productDiv.innerHTML = `
-                    
                     <div class="product-info">
-                    <a href="/product/detail/${product.id}">
-                        <img src="/static/images/${product.image}" alt="${product.name}">
-                    </a>  
+                        <a href="/product/detail/${product.id}">
+                            <img src="/static/images/${product.image}" alt="${product.name}">
+                        </a>  
                         <h2>${product.name}</h2>
                         <p>￥${product.price}</p>
                         <p>数量：${product.quantity}</p>
                         <p>标签：${product.tag}</p>
                         <p>商品上传者ID：${product.user_id}</p>
                         <p>当前用户ID：${document.getElementById('logged-in-user-id').value}</p>
+                        ${product.user_id === parseInt(document.getElementById('logged-in-user-id').value) ? 
+                          '<button class="edit-product" data-id="${product.id}">编辑</button>' : ''}
                     </div>
-                    
-                    
                 `;
                 productListDiv.appendChild(productDiv);
             });
-        }
-    };
-    xhr.send();
+
+            // 更新活跃标签样式
+            updateActiveTag(tag);
+        })
+        .catch(error => {
+            console.error('加载商品失败:', error);
+            document.getElementById('product-list').innerHTML =
+                '<p class="error-msg">加载商品失败，请稍后重试</p>';
+        });
 }
 
-// Load the initial product list
-loadProducts();
+// 更新活跃标签样式
+function updateActiveTag(tag) {
+    document.querySelectorAll('.category-nav a').forEach(link => {
+        link.classList.toggle('active', link.dataset.tag === tag);
+    });
+}
 
-
-// 初始化聊天功能
-function initChat() {
-    document.querySelectorAll('.friend-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('delete-friend')) {
-                const friendId = this.dataset.friendId;
-                loadFriendMessages(friendId);
-                messageInput?.focus();
-            }
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', () => {
+    // 绑定标签点击事件
+    document.querySelectorAll('.category-nav a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadProducts(link.dataset.tag);
         });
     });
 
-    if (sendButton) {
-        sendButton.addEventListener('click', sendMessage);
-    }
-
-    if (messageInput) {
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    }
-}
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
-    initChat();
-
-    document.querySelectorAll('.delete-friend').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            deleteFriend(this);
-        });
-    });
+    // 初始加载所有商品
+    loadProducts();
 });
+
+

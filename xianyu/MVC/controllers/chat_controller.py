@@ -15,7 +15,7 @@ import datetime
 from tornado.websocket import WebSocketHandler
 import logging
 from bson.objectid import ObjectId
-
+from models.friendship import Friendship
 Session = sessionmaker(bind=engine)
 connections = {}
 
@@ -152,154 +152,196 @@ class ChatHandler(tornado.web.RequestHandler):
         self.mongo = mongo
         self.session = scoped_session(Session)
 
-    @coroutine
-    def get(self):
-        user_id = self.get_secure_cookie("user_id")
-        username = self.get_secure_cookie("username")
-        product_id = self.get_argument("product_id", "0")  # 默认设为"0"
-        selected_friend_id = self.get_argument('friend_id', None)
+    async def get(self):
+        user_id = self.get_argument("user_id", None)
+        if not user_id:
+            self.redirect("/login")
+            return
 
-        # 解码cookies
-        user_id = int(user_id.decode('utf-8')) if user_id else None
-        username = username.decode('utf-8') if username else None
-
-        # 处理product_id
-        try:
-            product_id = int(product_id)
-        except ValueError:
-            product_id = 0
-
-        # 获取product_obj和product_name
-        product_obj = self.session.query(Product).filter_by(id=product_id).first()
-        product_name = product_obj.name if product_obj else "所有消息"
-
-        if not product_obj:
-            # Create a proper placeholder product object
-            class PlaceholderProduct:
-                def __init__(self):
-                    self.id = 0
-                    self.name = "Unknown Product"
-                    self.description = ""
-                    self.price = 0
-                    self.user_id = 0
-                    self.tag = ""
-                    self.image = ""
-                    self.quantity = 0
-                    self.status = ""
-
-            product_obj = PlaceholderProduct()
-        else:
-            product_name = product_obj.name
-        # Fetch recent messages from MongoDB
-        try:
-            recent_messages = yield self.mongo.chat_messages.find({
-                "$or": [
-                    {"from_user_id": user_id},
-                    {"to_user_id": user_id}
-                ]
-            }).sort("timestamp", -1).limit(10).to_list(length=None)
-        except Exception as e:
-            logging.error(f"Error fetching recent messages: {e}")
-            recent_messages = []
-
-        # Process friends
-        seen_friend_ids = set()
-        friends = []
-        for message in recent_messages:
-            friend_id = message['to_user_id'] if message['from_user_id'] == user_id else message['from_user_id']
-            if friend_id not in seen_friend_ids and friend_id!=user_id:  # 添加去重判断
-                seen_friend_ids.add(friend_id)
-                friend_obj = self.session.query(User).filter_by(id=friend_id).first()
-                if friend_obj:
-                    friends.append({
-                        "id": friend_obj.id,
-                        "username": friend_obj.username
-                    })
-
-        # Fetch unread messages
-        unread_messages = yield self.mongo.chat_messages.find({
-            "to_user_id": user_id,
-            "status": "unread"
-        }).to_list(length=None)
-
-        unread_group = {}
-        for msg in unread_messages:
-            friend_id = msg['to_user_id'] if msg['from_user_id'] == user_id else msg['from_user_id']
-            if friend_id not in unread_group:
-                friend_username = None
-                for friend in friends:
-                    if friend["id"] == friend_id:
-                        friend_username = friend["username"]
-                        break
-                if friend_username is None:
-                    friend_obj = self.session.query(User).filter_by(id=friend_id).first()
-                    friend_username = friend_obj.username if friend_obj else "Unknown"
-                truncated = msg['message'] if len(msg['message']) <= 5 else msg['message'][:5] + "..."
-                unread_group[friend_id] = {
-                    "friend_id": friend_id,
-                    "username": friend_username,
-                    "summary": truncated
-                }
-
-        # Fetch user products
-        user_products = self.session.query(Product).filter_by(user_id=user_id).all()
-        product_links = [{"product_id": p.id, "product_name": p.name} for p in user_products]
-
-        # Fetch all messages for the current product
-        all_messages = yield self.mongo.chat_messages.find({
-            "$or": [
-                {"from_user_id": user_id, "product_id": product_id},
-                {"to_user_id": user_id, "product_id": product_id}
-            ]
-        }).sort("timestamp", 1).to_list(length=None)
-
-        for message in all_messages:
-            message['_id'] = str(message['_id'])
-            if 'timestamp' in message:
-                if isinstance(message['timestamp'], datetime.datetime):
-                    message['timestamp'] = message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
-                else:
-                    try:
-                        message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
-                    except ValueError:
-                        logging.error(f"Invalid timestamp format: {message['timestamp']}")
-                        message['timestamp'] = "Invalid Date"
-            if 'from_username' not in message:
-                from_user = yield self.mongo.users.find_one({"_id": message['from_user_id']})
-                message['from_username'] = from_user['username'] if from_user else "Unknown"
-            if 'to_username' not in message:
-                to_user = yield self.mongo.users.find_one({"_id": message['to_user_id']})
-                message['to_username'] = to_user['username'] if to_user else "Unknown"
-
-        unique_messages = {msg['_id']: msg for msg in all_messages}.values()
+        # 获取系统广播消息 - 异步处理
         broadcasts = []
-        recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
-        for p in recent_products:
-            uploader = self.session.query(User).filter_by(id=p.user_id).first()
+        broadcast_cursor = self.mongo.broadcast_messages.find().sort([('timestamp', -1)]).limit(5)
+
+        # 异步迭代游标
+        async for broadcast in broadcast_cursor:
+            if '_id' in broadcast:
+                broadcast['_id'] = str(broadcast['_id'])
             broadcasts.append({
-                "product_id": p.id,
-                "product_name": p.name,
-                "uploader": uploader.username if uploader else "Unknown",
-                "time": p.upload_time.strftime("%Y-%m-%d %H:%M:%S") if p.upload_time else "",
-                "image": "/mystatics/images/c.png"
+                'product_id': broadcast.get('product_id', ''),
+                'uploader': broadcast.get('uploader', '未知用户'),
+                'time': broadcast.get('timestamp', '未知时间'),
+                'product_name': broadcast.get('product_name', '')
             })
 
-        self.render(
-            'chat_room.html',
-            current_user=username,
-            friends=friends,
-            selected_friend_id=selected_friend_id,
-            username=username,
-            broadcasts=broadcasts,
-            unread_group=unread_group,
-            unread_messages=unread_messages,
-            product_name=product_name,
-            user_id=user_id,
-            all_messages=unique_messages,
-            product_links=product_links,
-            product=product_obj,
-            length=len
-        )
+        # 获取当前用户的好友列表
+        friendships = self.session.query(Friendship).filter_by(user_id=user_id).all()
+        friends = []
+        for friendship in friendships:
+            friend = self.session.query(User).filter_by(id=friendship.friend_id).first()
+            if friend:
+                friends.append({
+                    'id': friend.id,
+                    'username': friend.username
+                })
+
+        self.render("chat_room.html", user_id=user_id, broadcasts=broadcasts, friends=friends)
+
+    def on_finish(self):
+        self.session.remove()
+
+# class ChatHandler(tornado.web.RequestHandler):
+#     def initialize(self, mongo):
+#         self.mongo = mongo
+#         self.session = scoped_session(Session)
+#
+#     @coroutine
+#     def get(self):
+#         user_id = self.get_secure_cookie("user_id")
+#         username = self.get_secure_cookie("username")
+#         product_id = self.get_argument("product_id", "0")  # 默认设为"0"
+#         selected_friend_id = self.get_argument('friend_id', None)
+#
+#         # 解码cookies
+#         user_id = int(user_id.decode('utf-8')) if user_id else None
+#         username = username.decode('utf-8') if username else None
+#
+#         # 处理product_id
+#         try:
+#             product_id = int(product_id)
+#         except ValueError:
+#             product_id = 0
+#
+#         # 获取product_obj和product_name
+#         product_obj = self.session.query(Product).filter_by(id=product_id).first()
+#         product_name = product_obj.name if product_obj else "所有消息"
+#
+#         if not product_obj:
+#             # Create a proper placeholder product object
+#             class PlaceholderProduct:
+#                 def __init__(self):
+#                     self.id = 0
+#                     self.name = "Unknown Product"
+#                     self.description = ""
+#                     self.price = 0
+#                     self.user_id = 0
+#                     self.tag = ""
+#                     self.image = ""
+#                     self.quantity = 0
+#                     self.status = ""
+#
+#             product_obj = PlaceholderProduct()
+#         else:
+#             product_name = product_obj.name
+#         # Fetch recent messages from MongoDB
+#         try:
+#             recent_messages = yield self.mongo.chat_messages.find({
+#                 "$or": [
+#                     {"from_user_id": user_id},
+#                     {"to_user_id": user_id}
+#                 ]
+#             }).sort("timestamp", -1).limit(10).to_list(length=None)
+#         except Exception as e:
+#             logging.error(f"Error fetching recent messages: {e}")
+#             recent_messages = []
+#
+#         # Process friends
+#         seen_friend_ids = set()
+#         friends = []
+#         for message in recent_messages:
+#             friend_id = message['to_user_id'] if message['from_user_id'] == user_id else message['from_user_id']
+#             if friend_id not in seen_friend_ids and friend_id!=user_id:  # 添加去重判断
+#                 seen_friend_ids.add(friend_id)
+#                 friend_obj = self.session.query(User).filter_by(id=friend_id).first()
+#                 if friend_obj:
+#                     friends.append({
+#                         "id": friend_obj.id,
+#                         "username": friend_obj.username
+#                     })
+#
+#         # Fetch unread messages
+#         unread_messages = yield self.mongo.chat_messages.find({
+#             "to_user_id": user_id,
+#             "status": "unread"
+#         }).to_list(length=None)
+#
+#         unread_group = {}
+#         for msg in unread_messages:
+#             friend_id = msg['to_user_id'] if msg['from_user_id'] == user_id else msg['from_user_id']
+#             if friend_id not in unread_group:
+#                 friend_username = None
+#                 for friend in friends:
+#                     if friend["id"] == friend_id:
+#                         friend_username = friend["username"]
+#                         break
+#                 if friend_username is None:
+#                     friend_obj = self.session.query(User).filter_by(id=friend_id).first()
+#                     friend_username = friend_obj.username if friend_obj else "Unknown"
+#                 truncated = msg['message'] if len(msg['message']) <= 5 else msg['message'][:5] + "..."
+#                 unread_group[friend_id] = {
+#                     "friend_id": friend_id,
+#                     "username": friend_username,
+#                     "summary": truncated
+#                 }
+#
+#         # Fetch user products
+#         user_products = self.session.query(Product).filter_by(user_id=user_id).all()
+#         product_links = [{"product_id": p.id, "product_name": p.name} for p in user_products]
+#
+#         # Fetch all messages for the current product
+#         all_messages = yield self.mongo.chat_messages.find({
+#             "$or": [
+#                 {"from_user_id": user_id, "product_id": product_id},
+#                 {"to_user_id": user_id, "product_id": product_id}
+#             ]
+#         }).sort("timestamp", 1).to_list(length=None)
+#
+#         for message in all_messages:
+#             message['_id'] = str(message['_id'])
+#             if 'timestamp' in message:
+#                 if isinstance(message['timestamp'], datetime.datetime):
+#                     message['timestamp'] = message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+#                 else:
+#                     try:
+#                         message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
+#                     except ValueError:
+#                         logging.error(f"Invalid timestamp format: {message['timestamp']}")
+#                         message['timestamp'] = "Invalid Date"
+#             if 'from_username' not in message:
+#                 from_user = yield self.mongo.users.find_one({"_id": message['from_user_id']})
+#                 message['from_username'] = from_user['username'] if from_user else "Unknown"
+#             if 'to_username' not in message:
+#                 to_user = yield self.mongo.users.find_one({"_id": message['to_user_id']})
+#                 message['to_username'] = to_user['username'] if to_user else "Unknown"
+#
+#         unique_messages = {msg['_id']: msg for msg in all_messages}.values()
+#         broadcasts = []
+#         recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
+#         for p in recent_products:
+#             uploader = self.session.query(User).filter_by(id=p.user_id).first()
+#             broadcasts.append({
+#                 "product_id": p.id,
+#                 "product_name": p.name,
+#                 "uploader": uploader.username if uploader else "Unknown",
+#                 "time": p.upload_time.strftime("%Y-%m-%d %H:%M:%S") if p.upload_time else "",
+#                 "image": "/mystatics/images/c.png"
+#             })
+#
+#         self.render(
+#             'chat_room.html',
+#             current_user=username,
+#             friends=friends,
+#             selected_friend_id=selected_friend_id,
+#             username=username,
+#             broadcasts=broadcasts,
+#             unread_group=unread_group,
+#             unread_messages=unread_messages,
+#             product_name=product_name,
+#             user_id=user_id,
+#             all_messages=unique_messages,
+#             product_links=product_links,
+#             product=product_obj,
+#             length=len
+#         )
 
 
 

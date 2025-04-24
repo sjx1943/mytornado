@@ -18,6 +18,8 @@ from controllers.friend_profile_controller import FriendProfileHandler, DeleteFr
 from controllers.search_controller import SearchHandler
 from motor import motor_tornado
 import redis
+from models.friendship import Friendship
+from models.user import User
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),

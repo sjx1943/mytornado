@@ -1,7 +1,7 @@
 # File: xianyu/MVC/controllers/friend_profile_controller.py
 from datetime import datetime
 from itertools import product
-
+import json
 import tornado.web
 from sqlalchemy.orm import scoped_session, sessionmaker
 from models.user import User
@@ -63,25 +63,35 @@ class FriendProfileHandler(tornado.web.RequestHandler):
         except Exception as e:
             self.write(f"Error: {str(e)}")
 
+
 class DeleteFriendHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = scoped_session(Session)
 
     def post(self):
         try:
+            # 解析请求数据
+            data = json.loads(self.request.body)
+            friend_id = int(data.get("friend_id"))
             user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
-            friend_id = int(self.get_argument("friend_id"))
 
-            # 删除好友关系
+            # 验证参数
+            if not friend_id or not user_id:
+                self.write({"status": "error", "error": "缺少必要参数"})
+                return
+
+
+            # 只删除当前用户指向好友的关系
             self.session.query(Friendship).filter(
-                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
-                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
-            ).delete()
+                (Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)
+            ).delete(synchronize_session=False)
 
             self.session.commit()
             self.write({"status": "success"})
+
         except Exception as e:
             self.session.rollback()
-            self.write({"status": "error", "message": str(e)})
+            self.write({"status": "error", "error": str(e)})
+
         finally:
-            self.session.close()
+            self.session.remove()

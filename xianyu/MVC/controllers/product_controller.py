@@ -144,18 +144,20 @@ class HomePageHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = scoped_session(Session)
 
-    def on_finish(self):
-        self.session.close()
-
     def get(self):
         user_id = self.get_secure_cookie("user_id")
         if user_id:
             user_id = user_id.decode('utf-8')
             user = self.session.query(User).filter_by(id=user_id).first()
             products_list = self.session.query(Product).filter_by(user_id=user_id).all()
-            self.render("home_page.html", products=products_list, username=user.username)
+
+            # 修改这行，添加 user_id 参数
+            self.render("home_page.html", products=products_list, username=user.username, user_id=user_id)
         else:
             self.redirect("/login")
+
+    def on_finish(self):
+        self.session.remove()
 
 class ElseHomePageHandler(tornado.web.RequestHandler):
     def initialize(self):

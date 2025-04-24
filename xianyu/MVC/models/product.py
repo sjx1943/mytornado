@@ -51,6 +51,6 @@ class ProductImage(Base):
     filename = Column(String(255), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
 
-# # Create the products table after xu_user table
+# Create the products table after xu_user table
 # if __name__ == '__main__':
 #     Base.metadata.create_all(engine)
