@@ -38,15 +38,18 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
     def send_stored_messages(self):
         try:
             user_id = self.user_id
-            product_id = self.get_argument("product_id")
-            if not user_id or not product_id:
+            product_id = self.get_argument("product_id", None)
+            if not user_id:
                 return
-            messages = yield self.mongo.chat_messages.find({
-                "to_user_id": user_id,
-                "product_id": int(product_id),
-                "status": "unread"
-            }).to_list(length=None)
-            logging.info(f"Found {len(messages)} unread messages for user_id: {user_id} and product_id: {product_id}")
+
+            # 构建查询条件
+            query = {"to_user_id": user_id, "status": "unread"}
+            if product_id:  # 如果有product_id则添加到查询中
+                query["product_id"] = int(product_id)
+
+            messages = yield self.mongo.chat_messages.find(query).to_list(length=None)
+            logging.info(f"Found {len(messages)} unread messages for user_id: {user_id}")
+
             for message in messages:
                 message['_id'] = str(message['_id'])
 
@@ -59,9 +62,8 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                             message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime(
                                 "%Y-%m-%d %H:%M:%S")
                         except ValueError:
-                            # 如果解析失败，记录错误并使用原始值或提供默认值
                             logging.error(f"Invalid timestamp format: {message['timestamp']}")
-                            message['timestamp'] = "Invalid Date"  # 或者使用一个默认值
+                            message['timestamp'] = "Invalid Date"
 
                 from_user_id = message['from_user_id']
                 to_user_id = message['to_user_id']
@@ -153,10 +155,15 @@ class ChatHandler(tornado.web.RequestHandler):
         self.session = scoped_session(Session)
 
     async def get(self):
-        user_id = self.get_argument("user_id", None)
-        if not user_id:
+        user_id_cookie = self.get_secure_cookie("user_id")
+        username_cookie = self.get_secure_cookie("username")
+
+        if not user_id_cookie:
             self.redirect("/login")
             return
+
+        user_id = int(user_id_cookie.decode("utf-8"))
+        username = username_cookie.decode("utf-8") if username_cookie else None
 
         # 获取系统广播消息 - 异步处理
         broadcasts = []
@@ -173,9 +180,35 @@ class ChatHandler(tornado.web.RequestHandler):
                 'product_name': broadcast.get('product_name', '')
             })
 
-        # 获取当前用户的好友列表
-        friendships = self.session.query(Friendship).filter_by(user_id=user_id).all()
+        # 第一步：从MongoDB查询给当前用户发过消息的用户ID
+        message_senders = set()
+        async for message in self.mongo.chat_messages.find({"to_user_id": user_id}):
+            message_senders.add(message.get("from_user_id"))
+
+        # 第二步：将这些用户添加为好友（如果还不是好友）
+        existing_friendships = self.session.query(Friendship).filter_by(user_id=user_id).all()
+        existing_friend_ids = {friendship.friend_id for friendship in existing_friendships}
+
+        for sender_id in message_senders:
+            if sender_id != user_id and sender_id not in existing_friend_ids:
+                try:
+                    new_friendship = Friendship(user_id=user_id, friend_id=sender_id)
+                    self.session.add(new_friendship)
+                    self.session.flush()
+                except Exception as e:
+                    self.session.rollback()
+                    logging.error(f"添加好友关系失败: {e}")
+
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            logging.error(f"提交好友关系失败: {e}")
+
+        # 第三步：查询更新后的好友列表
         friends = []
+        friendships = self.session.query(Friendship).filter_by(user_id=user_id).all()
+
         for friendship in friendships:
             friend = self.session.query(User).filter_by(id=friendship.friend_id).first()
             if friend:
@@ -184,10 +217,15 @@ class ChatHandler(tornado.web.RequestHandler):
                     'username': friend.username
                 })
 
-        self.render("chat_room.html", user_id=user_id, broadcasts=broadcasts, friends=friends)
+        self.render("chat_room.html",
+                    current_user=username,
+                    user_id=user_id,
+                    broadcasts=broadcasts,
+                    friends=friends)
 
     def on_finish(self):
         self.session.remove()
+
 
 # class ChatHandler(tornado.web.RequestHandler):
 #     def initialize(self, mongo):

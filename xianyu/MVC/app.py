@@ -55,7 +55,7 @@ def make_app():
         (r"/chat_room", ChatHandler, dict(mongo=mongo)),
         (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/initiate_chat", InitiateChatHandler, dict(mongo=mongo)),
-        (r"/friend_profile", FriendProfileHandler),
+        (r"/friend_profile", FriendProfileHandler, dict(mongo=mongo)),
         (r"/delete_friend", DeleteFriendHandler),
         (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
     ],
