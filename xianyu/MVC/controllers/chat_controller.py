@@ -99,29 +99,18 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             from_user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
             from_username = self.get_secure_cookie("username").decode("utf-8")
             message_content = data.get("message")
-            product_id = int(data.get("product_id"))
-            product_name = data.get("product_name")
+            product_id = int(data.get("product_id", 0))  # 默认值为0
+            product_name = data.get("product_name", "")  # 默认值为空字符串
 
-            if not all([target_user_id, message_content, product_id, product_name]):
-                self.write_message(json.dumps({"error": "Missing required parameters"}))
+            if not all([target_user_id, message_content]):
+                self.write_message(json.dumps({"error": "缺少必要参数"}))
                 return
+
+            # 使用中国时区
             china_tz = datetime.timezone(datetime.timedelta(hours=8))
-            # timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             timestamp = datetime.datetime.now(china_tz).strftime("%Y-%m-%d %H:%M:%S")
 
-            self.mongo.chat_messages.insert_one({
-                "from_user_id": from_user_id,
-                "from_username": from_username,
-                "to_user_id": target_user_id,
-                "to_username": "Will be looked up",
-                "message": message_content,
-                "product_id": product_id,
-                "product_name": product_name,
-                "timestamp": timestamp,
-                "status": "unread"
-            })
-
-            # Construct a message payload
+            # 构建消息数据结构
             message_data = {
                 "from_user_id": from_user_id,
                 "from_username": from_username,
@@ -129,22 +118,25 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                 "message": message_content,
                 "product_id": product_id,
                 "product_name": product_name,
-                "timestamp": timestamp
+                "timestamp": timestamp,
+                "status": "unread"  # 设置消息状态为未读
             }
 
-            # Send to target user if connected
+            # 保存到数据库
+            yield self.mongo.chat_messages.insert_one(message_data)
+
+            # 如果目标用户在线，发送消息
             if target_user_id in connections:
-                connections[target_user_id].write_message(json.dumps({
-                    "from_user_id": from_user_id,
-                    "message": message_content,
-                    "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-                }))
+                connections[target_user_id].write_message(json.dumps(message_data))
+
+            # 发送成功的响应
             self.write_message(json.dumps({"status": "Message sent successfully"}))
 
-            # Also send back to sender so they see it immediately
-            if from_user_id in connections:
-                connections[from_user_id].write_message(json.dumps(message_data))
-
+            # 也发回给发送者
+            if from_user_id in connections and from_user_id != target_user_id:
+                sender_data = message_data.copy()
+                sender_data["status"] = "read"  # 发送者看到的消息默认为已读
+                connections[from_user_id].write_message(json.dumps(sender_data))
         except Exception as e:
             self.write_message(json.dumps({"error": str(e)}))
 
@@ -166,10 +158,22 @@ class ChatHandler(tornado.web.RequestHandler):
         username = username_cookie.decode("utf-8") if username_cookie else None
 
         # 获取系统广播消息 - 异步处理
-        broadcasts = []
-        broadcast_cursor = self.mongo.broadcast_messages.find().sort([('timestamp', -1)]).limit(5)
 
-        # 异步迭代游标
+        broadcast_cursor = self.mongo.broadcast_messages.find().sort([('timestamp', -1)]).limit(5)
+        broadcasts = []
+        recent_products = self.session.query(Product).order_by(Product.id.desc()).limit(10).all()
+        for p in recent_products:
+            uploader = self.session.query(User).filter_by(id=p.user_id).first()
+            broadcasts.append({
+                "product_id": p.id,
+                "product_name": p.name,
+                "uploader": uploader.username if uploader else "Unknown",
+                "time": p.upload_time.strftime("%Y-%m-%d %H:%M:%S") if p.upload_time else "",
+                "image": "/mystatics/images/c.png"
+            })
+
+        # 获取MongoDB中的广播消息
+        broadcast_cursor = self.mongo.broadcast_messages.find().sort([('timestamp', -1)]).limit(5)
         async for broadcast in broadcast_cursor:
             if '_id' in broadcast:
                 broadcast['_id'] = str(broadcast['_id'])
@@ -482,27 +486,33 @@ class MessageDetailsHandler(tornado.web.RequestHandler):
             current_user=username
         )
 
-class FriendProfileHandler(tornado.web.RequestHandler):
-    def initialize(self):
-        self.session = scoped_session(Session)
 
-    def get(self):
-        friend_id = self.get_argument("friend_id", None)
-        if friend_id is None:
-            self.write("Invalid friend id")
-            return
+class MarkMessagesReadHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+
+    @tornado.gen.coroutine
+    def post(self):
         try:
-            friend_id = int(friend_id)
-        except ValueError:
-            self.write("Invalid friend id format")
-            return
+            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+            data = json.loads(self.request.body)
+            friend_id = int(data.get("friend_id"))
 
-        friend = self.session.query(User).filter_by(id=friend_id).first()
-        if friend:
-            # Pass an empty products list if no products are available.
-            self.render("friend_profile.html", friend=friend, products=[])
-        else:
-            self.write("Friend not found")
+            # 更新消息状态为已读
+            result = yield self.mongo.chat_messages.update_many(
+                {
+                    "from_user_id": friend_id,
+                    "to_user_id": user_id,
+                    "status": "unread"
+                },
+                {"$set": {"status": "read"}}
+            )
+
+            self.write({"status": "success", "updated_count": result.modified_count})
+        except Exception as e:
+            self.write({"status": "error", "error": str(e)})
+
+
 
 
 class MessageAPIHandler(tornado.web.RequestHandler):

@@ -13,12 +13,18 @@
     <div class="top-section">
         <input type="text" class="search-bar" placeholder="搜索聊天记录/联系人/服务号">
         <div class="broadcast-messages">
+            {% if broadcasts and len(broadcasts) > 0 %}
             {% for broadcast in broadcasts %}
             <div class="broadcast-item">
-                <a href="/product/detail/{{ broadcast['product_id'] }}">
-                    {{ broadcast['uploader'] }} 于 {{ broadcast['time'] }} 上传了 {{ broadcast['product_name'] }}
+                <a href="/product/detail/{{ broadcast.get('product_id', '') }}">
+                    {{ broadcast.get('uploader', '未知用户') }}
+                    于 {{ broadcast.get('time', '未知时间') }}
+                    上传了 {{ broadcast.get('product_name', '未知商品') }}
                 </a>
             </div>
+            {% end %}
+            {% else %}
+            <div class="broadcast-item">暂无系统广播</div>
             {% end %}
         </div>
     </div>
@@ -41,15 +47,13 @@
         </div>
 
         <!-- 消息区域 -->
+
         <div class="message-area" id="chat-messages">
-            <!-- 示例消息 -->
-            <div class="message-item">我：你好，张三！</div>
-            <div class="message-item">张三：你好！</div>
+            <div class="no-chat-selected">未选择聊天</div>
             <div class="message-input-area">
                 <input type="text" class="message-input" id="message-input" placeholder="输入消息...">
                 <button class="send-button" id="send-button">发送</button>
             </div>
-            <!-- 更多消息 -->
         </div>
     </div>
 
