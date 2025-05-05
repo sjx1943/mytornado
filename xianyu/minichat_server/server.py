@@ -73,7 +73,7 @@ class ChatWebSocket(tornado.websocket.WebSocketHandler):
         clients[self] = openid
         print(f"用户 {openid} 已连接，当前连接数: {len(clients)}")
         # 广播用户加入消息
-        self.broadcast_system_message(f"用户 {openid} 加入了聊天室le")
+        self.broadcast_system_message(f"用户 {openid} 加入了聊天室")
 
     def on_message(self, message):
         try:
