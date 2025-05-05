@@ -13,11 +13,13 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 # from controllers.message_details_controller import MessageDetailsHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler
-from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler, MessageAPIHandler, SendMessageAPIHandler
+from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler, MessageAPIHandler, SendMessageAPIHandler, MarkMessagesReadHandler
 from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler
 from controllers.search_controller import SearchHandler
 from motor import motor_tornado
 import redis
+from models.friendship import Friendship
+from models.user import User
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
@@ -53,8 +55,9 @@ def make_app():
         (r"/chat_room", ChatHandler, dict(mongo=mongo)),
         (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/initiate_chat", InitiateChatHandler, dict(mongo=mongo)),
-        (r"/friend_profile", FriendProfileHandler),
-        (r"/delete_friend", DeleteFriendHandler),
+        (r"/friend_profile", FriendProfileHandler, dict(mongo=mongo)),
+        (r"/delete_friend", DeleteFriendHandler,dict(mongo=mongo)),
+        (r"/api/mark_messages_read", MarkMessagesReadHandler, dict(mongo=mongo)),
         (r"/static/(.*)", MyStaticFileHandler, {"path": settings['static_path']}),
     ],
         ui_modules={'loginmodule': Loginmodule,

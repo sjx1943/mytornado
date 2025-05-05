@@ -1,7 +1,7 @@
 # File: xianyu/MVC/controllers/friend_profile_controller.py
 from datetime import datetime
 from itertools import product
-
+import json
 import tornado.web
 from sqlalchemy.orm import scoped_session, sessionmaker
 from models.user import User
@@ -10,6 +10,7 @@ from models.friendship import Friendship
 from base.base import engine
 
 Session = sessionmaker(bind=engine)
+
 
 
 class FriendProfileHandler(tornado.web.RequestHandler):
@@ -63,25 +64,45 @@ class FriendProfileHandler(tornado.web.RequestHandler):
         except Exception as e:
             self.write(f"Error: {str(e)}")
 
+
+
 class DeleteFriendHandler(tornado.web.RequestHandler):
-    def initialize(self):
+    def initialize(self, mongo):
+        self.mongo = mongo
         self.session = scoped_session(Session)
 
     def post(self):
         try:
-            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
-            friend_id = int(self.get_argument("friend_id"))
+            # 解析请求数据
+            data = json.loads(self.request.body)
+            friend_id = int(data.get("friend_id"))
+            user_id = int(data.get("user_id")) # 从请求体中获取 user_id
+            # user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+
+            # 验证参数
+            if not friend_id or not user_id:
+                self.write({"status": "error", "error": "缺少必要参数"})
+                return
 
             # 删除好友关系
             self.session.query(Friendship).filter(
-                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
-                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
-            ).delete()
+                (Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)
+            ).delete(synchronize_session=False)
+
+            # 同步删除MongoDB中的消息
+            self.mongo.chat_messages.delete_many({
+                "$or": [
+                    {"from_user_id": user_id, "to_user_id": friend_id},
+                    {"from_user_id": friend_id, "to_user_id": user_id}
+                ]
+            })
 
             self.session.commit()
             self.write({"status": "success"})
+
         except Exception as e:
             self.session.rollback()
-            self.write({"status": "error", "message": str(e)})
+            self.write({"status": "error", "error": str(e)})
+
         finally:
-            self.session.close()
+            self.session.remove()

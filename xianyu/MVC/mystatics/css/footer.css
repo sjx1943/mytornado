@@ -1,0 +1,56 @@
+/* 底部导航样式 */
+.main-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: #f8f8f8;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    border-top: 1px solid #ddd;
+    z-index: 100;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    white-space: nowrap; /* 防止文字换行 */
+    overflow: hidden; /* 隐藏溢出的内容 */
+    text-overflow: ellipsis; /* 使用省略号表示溢出的内容 */
+    max-width: 100%; /* 设置最大宽度为100% */
+}
+
+
+.main-footer a {
+    text-decoration: none;
+    color: #333;
+    padding: 5px 10px;
+    margin: 0 15px;
+    text-align: center;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-footer a img {
+    display: block;
+    margin: 0 auto 5px;
+    max-width: 25px;
+    max-height: 25px;
+}
+
+.footer-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.footer-info {
+    text-align: center;
+    width: 100%;
+    padding: 5px 0;
+    font-size: 12px;
+    color: #777;
+    margin-top: 10px;
+}
+
+
+/* 容器高度调整，确保在小屏幕上也能正常显示 */

@@ -75,92 +75,12 @@ function updateNotificationBadge() {
     }
 }
 
-// 加载好友消息
-function loadFriendMessages(friendId) {
-    if (friendId) {
-        fetch(`/api/messages?friend_id=${friendId}&user_id=${getUserId()}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch messages');
-                }
-                return response.json();
-            })
-            .then(messages => {
-                const messagesContainer = document.getElementById('chat-messages');
-                if (!messagesContainer) return;
 
-                messagesContainer.innerHTML = '';
-                messages.forEach(msg => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${msg.from_user_id == getUserId() ? 'sent' : 'received'}`;
-                    messageDiv.innerHTML = `
-                        <strong>${msg.from_username} ${msg.timestamp}:</strong>
-                        <p>${msg.message}</p>
-                    `;
-                    messagesContainer.appendChild(messageDiv);
-                });
-
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                document.querySelectorAll('.friend-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                const activeFriend = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
-                if (activeFriend) {
-                    activeFriend.classList.add('active');
-                    document.getElementById('current-friend').textContent =
-                        activeFriend.querySelector('.friend-name').textContent;
-                }
-            })
-            .catch(error => console.error('加载消息失败:', error));
-    } else {
-        console.error('Invalid friend ID');
-    }
-}
 
 // 发送消息
-function sendMessage() {
-    const message = messageInput?.value.trim();
-    const activeFriend = document.querySelector('.friend-item.active');
 
-    if (message && activeFriend) {
-        const friendId = activeFriend.dataset.friendId;
 
-        fetch('/api/send_message', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                friend_id: friendId,
-                message: message,
-                user_id: getUserId()
-            })
-        })
-        .then(() => {
-            if (messageInput) messageInput.value = '';
-            loadFriendMessages(friendId);
-        })
-        .catch(error => console.error('发送消息失败:', error));
-    }
-}
 
-// 删除好友
-function deleteFriend(button) {
-    const friendId = button.dataset.friendId;
-    if (confirm('确定要删除这个好友吗？')) {
-        fetch('/delete_friend', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({friend_id: friendId})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                button.parentElement.remove();
-            }
-        })
-        .catch(error => console.error('删除好友失败:', error));
-    }
-}
 
 
 function loadProducts(tag = 'all') {
@@ -233,39 +153,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// 初始化聊天功能
-function initChat() {
-    document.querySelectorAll('.friend-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('delete-friend')) {
-                const friendId = this.dataset.friendId;
-                loadFriendMessages(friendId);
-                messageInput?.focus();
-            }
-        });
-    });
-
-    if (sendButton) {
-        sendButton.addEventListener('click', sendMessage);
-    }
-
-    if (messageInput) {
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    }
-}
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
-    initChat();
-
-    document.querySelectorAll('.delete-friend').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            deleteFriend(this);
-        });
-    });
-});

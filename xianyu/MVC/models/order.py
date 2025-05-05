@@ -9,7 +9,7 @@ from product import Product
 
 
 class Order(Base):
-    __tablename__ = 'orders'
+    __tablename__ = 'orders1'
 
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.id'))
@@ -20,4 +20,4 @@ class Order(Base):
     product = relationship('Product', back_populates='orders')
     user = relationship('User', back_populates='orders')
 
-# Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)

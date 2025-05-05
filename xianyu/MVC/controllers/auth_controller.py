@@ -9,13 +9,11 @@ import bcrypt
 import uuid,smtplib,secrets
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from tornado import gen
-from sqlalchemy.ext.asyncio import async_sessionmaker
+
 
 # Create a session
-AsyncSession = async_sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine)
+
 
 
 class Loginmodule(UIModule):
@@ -23,49 +21,37 @@ class Loginmodule(UIModule):
         result = kwargs.get('result', '')
         return self.render_string('modules/login_module.html', result=result)
 
-
 class LoginHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = Session()  # 创建新的会话
+        # logging.basicConfig(level=logging.INFO)
 
-    async def prepare(self):
-        self.session = AsyncSession(bind = engine)
-        await self.session.begin()
+    def on_finish(self):
+        self.session.close()  # 关闭会话
 
-
-    async def on_finish(self):
-        if hasattr(self, 'session'):
-            await self.session.close()
-
-
-    async def get(self):
+    def get(self):
         self.render("login.html", message="", result=None)
 
+    def post(self):
+        username = self.get_argument("username")
+        password = self.get_argument("password")
+        # logging.info(f"Attempting to log in user: {username}")
 
-    async def post(self):
+        user = self.session.query(User).filter_by(username=username).first()
+        # logging.info(f"User query completed. User found: {user is not None}")
+
         try:
-            username = self.get_argument("username")
-            password = self.get_argument("password")
-
-            stmt = select(User).where(User.username == username)
-            result = await self.session.execute(stmt)
-            user = result.scalars().first()
-
             if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                await self.session.commit()
-                self.set_secure_cookie("user_id", str(user.id))
-                self.set_secure_cookie("username", user.username)
+                # logging.info("Password is correct.")
+                self.set_secure_cookie("user_id", str(user.id), expires_days=1)
+                self.set_secure_cookie("username", user.username, expires_days=1)
                 self.redirect("/main")
             else:
-                await self.session.rollback()
-                self.render("login.html", message="用户名或密码错误")
+                # logging.warning("Invalid username or password.")
+                self.render("login.html", message="Invalid username or password", result="用户名或密码错误")
         except Exception as e:
-            await self.session.rollback()
-            self.render("login.html", message=f"登录失败: {str(e)}")
-        finally:
-            if hasattr(self, 'session'):
-                await self.session.close()
-
-
-
+            # logging.error(f"Error occurred during login for user {username}: {e}")
+            self.render("login.html", message="An error occurred", result=str(e))
 
 def generate_reset_token():
     """生成一个简单的重置令牌"""
