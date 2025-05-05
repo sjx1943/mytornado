@@ -1,6 +1,6 @@
 
 # -*- coding: utf-8 -*-
-
+import ssl
 import json
 import time
 import jwt
@@ -8,15 +8,14 @@ import requests
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from tornado.escape import json_encode, json_decode
+from tornado.escape import json_decode
 
-# 微信小程序AppID和AppSecret
-APPID = 'wxff27c7465f5e99bd'
-APPSECRET = '8d5f677433c60a1f1543b219d2c560da'
-JWT_SECRET = 'c21sgmT8K0lmuN8h9FvF7OuHCPmltH8UkhjmeCNEVpw'  # 自定义JWT签名密钥
+APPID = 'wx4be72cc6e4cc1e59'
+APPSECRET = '28d71914d9525c2403807a870e13b2f2'
+JWT_SECRET = 'z8zZc9dmJ-NxncYMh7NIenqFUTjwVar1GUIxtHnHS2M'
 
-# 保存所有连接的WebSocket客户端
-clients = set()
+
+clients = dict()  # {websocket: openid}
 
 def get_openid_session(code):
     url = f'https://api.weixin.qq.com/sns/jscode2session?appid={APPID}&secret={APPSECRET}&js_code={code}&grant_type=authorization_code'
@@ -30,10 +29,9 @@ def get_openid_session(code):
 def create_jwt(openid):
     payload = {
         'openid': openid,
-        'exp': int(time.time()) + 3600 * 2  # 2小时有效期
+        'exp': int(time.time()) + 3600 * 2
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
-    # PyJWT 2.x 返回str，1.x返回bytes，兼容处理
     if isinstance(token, bytes):
         token = token.decode('utf-8')
     return token
@@ -54,7 +52,7 @@ class LoginHandler(tornado.web.RequestHandler):
                 self.set_status(400)
                 self.finish({'error': '缺少code'})
                 return
-            openid, session_key = get_openid_session(code)
+            openid, _ = get_openid_session(code)
             token = create_jwt(openid)
             self.finish({'token': token})
         except Exception as e:
@@ -63,36 +61,45 @@ class LoginHandler(tornado.web.RequestHandler):
 
 class ChatWebSocket(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
-        # 允许跨域访问，生产环境请根据需求限制
-        return True
+        return True  # 允许跨域
 
     def open(self):
-        # 从URL参数获取token
         token = self.get_argument('token', None)
         openid = verify_jwt(token)
         if not openid:
             self.close(code=4001, reason='认证失败')
             return
         self.openid = openid
-        clients.add(self)
+        clients[self] = openid
         print(f"用户 {openid} 已连接，当前连接数: {len(clients)}")
+        # 广播用户加入消息
+        self.broadcast_system_message(f"用户 {openid} 加入了聊天室")
 
     def on_message(self, message):
         try:
             data = json.loads(message)
-            # 附加发送者openid
             data['from'] = self.openid
-            broadcast_msg = json.dumps(data)
-            # 广播给所有连接客户端
-            for client in clients:
-                if client.ws_connection and client.ws_connection.is_active():
-                    client.write_message(broadcast_msg)
+            data['timestamp'] = int(time.time())
+            broadcast_msg = json.dumps({'type': 'chat', 'data': data})
+            self.broadcast_message(broadcast_msg)
         except Exception as e:
             print(f"消息处理异常: {e}")
 
     def on_close(self):
-        clients.discard(self)
-        print(f"用户 {getattr(self, 'openid', '未知')} 断开连接，当前连接数: {len(clients)}")
+        openid = clients.get(self, '未知')
+        if self in clients:
+            del clients[self]
+        print(f"用户 {openid} 断开连接，当前连接数: {len(clients)}")
+        self.broadcast_system_message(f"用户 {openid} 离开了聊天室")
+
+    def broadcast_message(self, message):
+        for client in clients:
+            if client.ws_connection and client.ws_connection.stream and not client.ws_connection.stream.closed():
+                client.write_message(message)
+
+    def broadcast_system_message(self, content):
+        msg = json.dumps({'type': 'system', 'data': {'content': content, 'timestamp': int(time.time())}})
+        self.broadcast_message(msg)
 
 def make_app():
     return tornado.web.Application([
@@ -100,8 +107,17 @@ def make_app():
         (r"/ws", ChatWebSocket),
     ])
 
+
+
 if __name__ == "__main__":
     app = make_app()
-    app.listen(5001)  # 监听5001端口，HTTP和WebSocket共用
-    print("Tornado服务器启动，监听端口5001")
+    ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_ctx.load_cert_chain(
+        "/etc/letsencrypt/live/ser74785.ddns.net/fullchain.pem",
+        "/etc/letsencrypt/live/ser74785.ddns.net/privkey.pem"
+    )
+    app.listen(5001, ssl_options=ssl_ctx)
+    print("Tornado服务器启动，监听端口5001（HTTPS/WSS）")
     tornado.ioloop.IOLoop.current().start()
+
+
