@@ -83,9 +83,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                     )
                 else:
                     break
-            if self.ws_connection:  # Check if WebSocket connection is open
-                self.write_message(
-                    json.dumps({"info": f"Offline messages pushed successfully, total: {len(messages)}"}))
+
         except Exception as e:
             logging.error(f"Error sending stored messages: {e}")
             if self.ws_connection:  # Check if WebSocket connection is open

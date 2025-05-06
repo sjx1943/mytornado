@@ -199,3 +199,21 @@ body {
     display: flex;
     border-top: 1px solid #eee;
 }
+
+.red-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: red;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.friend-item.unread .red-dot {
+    display: inline-block; /* 确保未读消息时显示红点 */
+}
+
+.friend-item .red-dot {
+    display: none; /* 初始状态隐藏红点 */
+}
