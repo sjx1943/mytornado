@@ -34,6 +34,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
         logging.warning(f"WebSocket connection established, user_id: {self.user_id}")
         self.send_stored_messages()
 
+
     @coroutine
     def send_stored_messages(self):
         try:
@@ -44,7 +45,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
 
             # 构建查询条件
             query = {"to_user_id": user_id, "status": "unread"}
-            if product_id:  # 如果有product_id则添加到查询中
+            if product_id:
                 query["product_id"] = int(product_id)
 
             messages = yield self.mongo.chat_messages.find(query).to_list(length=None)
@@ -53,11 +54,11 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             for message in messages:
                 message['_id'] = str(message['_id'])
 
-                # 强制格式化时间戳
+                # 格式化时间戳
                 if 'timestamp' in message:
                     if isinstance(message['timestamp'], datetime.datetime):
                         message['timestamp'] = message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
-                    else:  # 如果是字符串，尝试解析并格式化
+                    else:
                         try:
                             message['timestamp'] = datetime.datetime.fromisoformat(message['timestamp']).strftime(
                                 "%Y-%m-%d %H:%M:%S")
@@ -65,20 +66,24 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
                             logging.error(f"Invalid timestamp format: {message['timestamp']}")
                             message['timestamp'] = "Invalid Date"
 
-                from_user_id = message['from_user_id']
-                to_user_id = message['to_user_id']
-                # Fetch usernames if not present
-                if 'from_username' not in message:
-                    from_user = yield self.mongo.users.find_one({"_id": from_user_id})
+                # 添加isSelf字段并处理发送方显示名称
+                message['isSelf'] = message['from_user_id'] == user_id
+                if message['isSelf']:
+
+                    # 修改为"我（用户名）"格式
+                    from_user = yield self.mongo.users.find_one({"_id": message['from_user_id']})
+                    username = from_user['username'] if from_user else '未知用户'
+                    message['from_username'] = f'我({username})'
+                else:
+                    # 获取发送方用户名
+                    from_user = yield self.mongo.users.find_one({"_id": message['from_user_id']})
                     message['from_username'] = from_user['username'] if from_user else '未知发件人'
-                if 'to_username' not in message:
-                    to_user = yield self.mongo.users.find_one({"_id": to_user_id})
-                    message['to_username'] = to_user['username'] if to_user else '未知收件人'
+
                 if self.ws_connection:
                     self.write_message(json.dumps(message))
                     # 更新消息状态为已读
                     yield self.mongo.chat_messages.update_one(
-                        {"_id": ObjectId(message['_id'])},  # 使用 ObjectId
+                        {"_id": ObjectId(message['_id'])},
                         {"$set": {"status": "read"}}
                     )
                 else:
@@ -86,7 +91,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
 
         except Exception as e:
             logging.error(f"Error sending stored messages: {e}")
-            if self.ws_connection:  # Check if WebSocket connection is open
+            if self.ws_connection:
                 self.write_message(json.dumps({"error": str(e)}))
 
     @coroutine
@@ -531,6 +536,7 @@ class MessageAPIHandler(tornado.web.RequestHandler):
 
         for msg in messages:
             msg['_id'] = str(msg['_id'])
+            msg['isSelf'] = msg['from_user_id'] == user_id
             if isinstance(msg['timestamp'], datetime.datetime):
                 msg['timestamp'] = msg['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
 

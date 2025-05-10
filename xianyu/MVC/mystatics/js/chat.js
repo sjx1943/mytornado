@@ -99,25 +99,46 @@ function selectFriend(friendId, element) {
 // 加载与指定好友的聊天记录
 function loadMessages(friendId) {
     fetch(`/api/messages?friend_id=${friendId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(messages => {
             const messageContent = document.getElementById('message-content');
+            if (!messageContent) {
+                console.error('找不到消息内容容器');
+                return;
+            }
             messageContent.innerHTML = '';
 
-            if (messages.length === 0) {
+            if (!messages || messages.length === 0) {
                 messageContent.innerHTML = '<div class="no-messages">暂无消息记录</div>';
                 return;
             }
 
             messages.forEach(msg => {
-                const isMe = msg.from_user_id === getUserId();
-                appendMessage(isMe ? '我' : msg.from_username, msg.message, isMe, msg.timestamp);
+                try {
+                    const isSelf = msg.from_user_id == getUserId();
+                    const displayName = isSelf ? '我' : msg.from_username;
+                    appendMessage(displayName, msg.message, isSelf, msg.timestamp);
+                } catch (e) {
+                    console.error('处理消息时出错:', e, msg);
+                }
             });
         })
         .catch(error => {
             console.error('获取消息失败:', error);
             const messageContent = document.getElementById('message-content');
-            messageContent.innerHTML = '<div class="error">获取消息失败，请刷新页面重试</div>';
+            if (messageContent) {
+                messageContent.innerHTML = `
+                    <div class="error">
+                        获取消息失败: ${error.message}<br>
+                        请刷新页面重试
+                    </div>
+                `;
+            }
         });
 }
 
