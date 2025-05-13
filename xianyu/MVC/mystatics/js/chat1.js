@@ -1,9 +1,7 @@
 let currentFriendId = null; // 当前选中好友ID
 let pollingAbortController = null; // 用于取消轮询请求
 let lastPollTimestamp = 0; // 最后轮询时间戳
-let pendingMessages = new Set(); // 用于跟踪已发送但尚未通过轮询确认的消息
-// 添加全局变量记录已显示的消息ID
-const displayedMessageIds = new Set();
+
 
 // 初始化聊天界面
 document.addEventListener('DOMContentLoaded', function() {
@@ -119,20 +117,33 @@ function startLongPolling(friendId) {
 
     const poll = async () => {
         try {
-            const response = await fetch(`/api/messages?friend_id=${friendId}&since=${lastPollTimestamp}`);
+            const response = await fetch(`/api/messages?friend_id=${friendId}&since=${lastPollTimestamp}`, {
+                signal: signal
+            });
+
+            if (!response.ok) throw new Error('请求失败');
+
             const messages = await response.json();
 
             if (messages && messages.length > 0) {
+                // 更新最后轮询时间戳
                 lastPollTimestamp = new Date(messages[messages.length-1].timestamp).getTime();
 
-                messages.forEach(msg => {
-                    // 检查是否是pending消息或新消息
-                    if ((msg.temp_id && !pendingMessages.has(msg.temp_id)) || !msg.temp_id) {
+                // 如果是当前选中好友，更新消息区域
+                if (friendId === currentFriendId) {
+                    const messageContent = document.getElementById('message-content');
+                    messages.forEach(msg => {
                         const isSelf = msg.from_user_id == getUserId();
                         const displayName = isSelf ? '我' : msg.from_username;
-                        appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id || msg.temp_id);
-                     }
-                });
+                        appendMessage(displayName, msg.message, isSelf, msg.timestamp);
+                    });
+
+                    // 标记为已读
+                    markMessagesRead(friendId);
+                } else {
+                    // 更新未读消息提醒
+                    updateUnreadIndicator(friendId, messages.length);
+                }
             }
 
             // 继续轮询
@@ -170,8 +181,12 @@ function updateUnreadIndicator(friendId, count) {
 // 加载与指定好友的聊天记录
 function loadMessages(friendId) {
     fetch(`/api/messages?friend_id=${friendId}`)
-        .then(response => response.json())
-
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(messages => {
             const messageContent = document.getElementById('message-content');
             if (!messageContent) {
@@ -189,14 +204,24 @@ function loadMessages(friendId) {
                 try {
                     const isSelf = msg.from_user_id == getUserId();
                     const displayName = isSelf ? '我' : msg.from_username;
-                    appendMessage(displayName, msg.message, isSelf, msg.timestamp,msg._id);
+                    appendMessage(displayName, msg.message, isSelf, msg.timestamp);
                 } catch (e) {
                     console.error('处理消息时出错:', e, msg);
                 }
             });
+        })
+        .catch(error => {
+            console.error('获取消息失败:', error);
+            const messageContent = document.getElementById('message-content');
+            if (messageContent) {
+                messageContent.innerHTML = `
+                    <div class="error">
+                        获取消息失败: ${error.message}<br>
+                        请刷新页面重试
+                    </div>
+                `;
+            }
         });
-
-
 }
 
 // 获取当前激活的好友ID
@@ -206,15 +231,7 @@ function getActiveFriendId() {
 }
 
 // 添加消息到聊天区域
-function appendMessage(sender, content, isSelf, timestamp = null,messageId = null) {
-    if (messageId && displayedMessageIds.has(messageId)) {
-        return; // 如果消息已显示则跳过
-    }
-
-    if (messageId) {
-        displayedMessageIds.add(messageId); // 记录已显示的消息ID
-    }
-
+function appendMessage(sender, content, isSelf, timestamp = null) {
     const messageContent = document.getElementById('message-content');
     const chatMessages = messageContent || document.getElementById('chat-messages');
 
@@ -302,8 +319,6 @@ function sendMessage() {
     const friendId = getActiveFriendId();
 
     if (!message || !friendId) return;
-    const tempId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-    pendingMessages.add(tempId);
 
     fetch('/api/send_message', {
         method: 'POST',
@@ -311,18 +326,16 @@ function sendMessage() {
             'Content-Type': 'application/json',
             'X-XSRFToken': getCookie('_xsrf')
         },
-        body: JSON.stringify({ friend_id: friendId, message: message,tempId: tempId})
+        body: JSON.stringify({ friend_id: friendId, message: message })
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-
+            appendMessage('我', message, true);
             document.getElementById('message-input').value = '';
-            pendingMessages.delete(tempId);
         }
     })
     .catch(error => console.error("发送消息失败:", error));
-    pendingMessages.delete(tempId);
 }
 
 // 标记消息为已读
