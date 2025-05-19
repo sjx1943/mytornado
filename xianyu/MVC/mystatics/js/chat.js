@@ -8,6 +8,16 @@ const displayedMessageIds = new Set();
 // 初始化聊天界面
 document.addEventListener('DOMContentLoaded', function() {
     initChat();
+    
+    // 检查URL参数中的好友ID并自动选择
+    const urlParams = new URLSearchParams(window.location.search);
+    const friendId = urlParams.get('friend_id');
+    if (friendId) {
+        const friendElement = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
+        if (friendElement) {
+            selectFriend(friendId, friendElement);
+        }
+    }
 
     const sendButton = document.getElementById('send-button');
     if (sendButton) {
@@ -27,7 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 为所有好友项添加点击事件
     const friendItems = document.querySelectorAll('.friend-item');
     friendItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function(e) {
+            // 如果点击的是删除按钮则不处理
+            if (e.target.classList.contains('delete-friend')) {
+                return;
+            }
             const friendId = this.dataset.friendId;
             selectFriend(friendId, this);
         });
@@ -68,6 +82,16 @@ function showMessageInputArea() {
 
 // 选择好友聊天，轮询时这里要慎重修改
 function selectFriend(friendId, element) {
+    // 更新URL参数
+    const url = new URL(window.location.href);
+    url.searchParams.set('friend_id', friendId);
+    window.history.replaceState(null, '', url.toString());
+    
+    // 如果点击的是当前已选中的好友，则不做任何操作
+    if (currentFriendId === friendId) {
+        return;
+    }
+    
     // 移除其他好友项的选中状态
     currentFriendId = friendId;
     document.querySelectorAll('.friend-item').forEach(item => {
@@ -83,27 +107,36 @@ function selectFriend(friendId, element) {
         if (redDot) {
             redDot.classList.remove('show');
         }
-    }
 
-    // 获取聊天消息
-    const chatMessages = document.getElementById('chat-messages');
-    const noChat = document.getElementById('no-chat-message');
-    const messageContent = document.getElementById('message-content');
+        // 获取聊天消息
+        const chatMessages = document.getElementById('chat-messages');
+        const noChat = document.getElementById('no-chat-message');
+        const messageContent = document.getElementById('message-content');
 
-    if (chatMessages && noChat && messageContent) {
-        noChat.style.display = 'none';
-        messageContent.style.display = 'block';
-        messageContent.innerHTML = '<div class="loading">加载消息中...</div>';
-        showMessageInputArea();
+        if (chatMessages && noChat && messageContent) {
+            noChat.style.display = 'none';
+            messageContent.style.display = 'block';
+            messageContent.innerHTML = '<div class="loading">加载消息中...</div>';
+            showMessageInputArea();
 
-        // 加载与该好友的聊天记录
-        loadMessages(friendId);
+            // 加载与该好友的聊天记录
+            loadMessages(friendId);
 
-        // 标记该好友的消息为已读
-        markMessagesRead(friendId);
+            // 标记该好友的消息为已读
+            markMessagesRead(friendId);
 
-         // 启动长轮询
-        startLongPolling(friendId);
+            // 启动长轮询
+            startLongPolling(friendId);
+        }
+    } else {
+        // 未选择好友时，确保消息区域显示"未选择聊天"
+        const noChat = document.getElementById('no-chat-message');
+        const messageContent = document.getElementById('message-content');
+        if (noChat && messageContent) {
+            noChat.style.display = 'block';
+            messageContent.style.display = 'none';
+            hideMessageInputArea();
+        }
     }
 }
 
@@ -254,7 +287,7 @@ function deleteFriend(button) {
     const friendId = button.dataset.friendId;
     const userId = getUserId();
     console.log('Delete button clicked');
-    if (confirm('删除好友时会同步删除聊天消息，确定吗？')) {
+    if (confirm('删除好友时会同步删除聊天消息，ni确定吗？')) {
         const xsrfToken = getCookie('_xsrf');
         fetch('/delete_friend', {
             method: 'POST',

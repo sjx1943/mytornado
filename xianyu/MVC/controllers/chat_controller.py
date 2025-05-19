@@ -43,6 +43,10 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             if not user_id:
                 return
 
+            # 检查是否有选中的好友
+            if not hasattr(self, 'selected_friend_id') or not self.selected_friend_id:
+                return
+
             # 构建查询条件
             query = {"to_user_id": user_id, "status": "unread"}
             if product_id:
