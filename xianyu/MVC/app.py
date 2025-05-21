@@ -13,7 +13,7 @@ from controllers.main_controller import MainHandler, MyStaticFileHandler
 # from controllers.message_details_controller import MessageDetailsHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
 from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler
-from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageDetailsHandler, MessageAPIHandler, SendMessageAPIHandler, MarkMessagesReadHandler
+from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageAPIHandler, SendMessageAPIHandler, MarkMessagesReadHandler
 from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler
 from controllers.search_controller import SearchHandler
 from motor import motor_tornado
@@ -41,7 +41,7 @@ def make_app():
         (r"/main", MainHandler),
         (r"/home_page", HomePageHandler),
         (r"/else_home_page", ElseHomePageHandler),
-        (r"/message_details", MessageDetailsHandler,dict(mongo=mongo)),
+
         (r"/login", LoginHandler),
         (r"/register", RegisterHandler),
         (r"/forgot_password", ForgotPasswordHandler),

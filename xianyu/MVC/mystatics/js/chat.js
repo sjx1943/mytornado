@@ -87,13 +87,7 @@ function selectFriend(friendId, element) {
     url.searchParams.set('friend_id', friendId);
     window.history.replaceState(null, '', url.toString());
     
-    // 如果点击的是当前已选中的好友，则不做任何操作
-    if (currentFriendId === friendId) {
-        return;
-    }
-    
     // 移除其他好友项的选中状态
-    currentFriendId = friendId;
     document.querySelectorAll('.friend-item').forEach(item => {
         item.classList.remove('active');
     });
@@ -119,6 +113,9 @@ function selectFriend(friendId, element) {
             messageContent.innerHTML = '<div class="loading">加载消息中...</div>';
             showMessageInputArea();
 
+            // 清空已显示的消息ID缓存
+            displayedMessageIds.clear();
+            
             // 加载与该好友的聊天记录
             loadMessages(friendId);
 
@@ -138,6 +135,9 @@ function selectFriend(friendId, element) {
             hideMessageInputArea();
         }
     }
+    
+    // 更新当前好友ID
+    currentFriendId = friendId;
 }
 
 // 启动长轮询
@@ -158,14 +158,23 @@ function startLongPolling(friendId) {
             if (messages && messages.length > 0) {
                 lastPollTimestamp = new Date(messages[messages.length-1].timestamp).getTime();
 
-                messages.forEach(msg => {
-                    // 检查是否是pending消息或新消息
-                    if ((msg.temp_id && !pendingMessages.has(msg.temp_id)) || !msg.temp_id) {
-                        const isSelf = msg.from_user_id == getUserId();
-                        const displayName = isSelf ? '我' : msg.from_username;
-                        appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id || msg.temp_id);
-                     }
-                });
+                // 如果是当前选中好友，更新消息区域
+                if (friendId === currentFriendId) {
+                    messages.forEach(msg => {
+                        // 检查是否是pending消息或新消息
+                        if ((msg.temp_id && !pendingMessages.has(msg.temp_id)) || !msg.temp_id) {
+                            const isSelf = msg.from_user_id == getUserId();
+                            const displayName = isSelf ? '我' : msg.from_username;
+                            appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id || msg.temp_id);
+                        }
+                    });
+
+                    // 标记为已读
+                    markMessagesRead(friendId);
+                } else {
+                    // 更新未读消息提醒
+                    updateUnreadIndicator(friendId, messages.length);
+                }
             }
 
             // 继续轮询
