@@ -4,7 +4,6 @@ import tornado.web
 import tornado.websocket
 import json
 from models.product import Product
-
 from models.user import User
 from sqlalchemy.orm import scoped_session, sessionmaker
 from base.base import engine
@@ -325,3 +324,52 @@ class InitiateChatHandler(tornado.web.RequestHandler):
         # Your logic to initiate chat
         self.redirect(f"/chat_room?user_id={user_id}&product_id={product_id}")
 
+
+class DeleteMessagesHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+
+    @tornado.gen.coroutine
+    def post(self):
+        try:
+            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+            data = json.loads(self.request.body)
+            message_ids = data.get("message_ids", [])
+            friend_id = data.get("friend_id")
+
+            if not message_ids:
+                self.write({"status": "error", "error": "没有提供消息ID"})
+                return
+
+            # 验证用户是否有权限删除这些消息
+            query = {
+                "_id": {"$in": [ObjectId(msg_id) for msg_id in message_ids]},
+                "$or": [
+                    {"from_user_id": user_id},
+                    {"to_user_id": user_id}
+                ]
+            }
+
+            if friend_id:
+                query["$or"].append({
+                    "$and": [
+                        {"from_user_id": int(friend_id)},
+                        {"to_user_id": user_id}
+                    ]
+                })
+                query["$or"].append({
+                    "$and": [
+                        {"from_user_id": user_id},
+                        {"to_user_id": int(friend_id)}
+                    ]
+                })
+
+            # 删除消息
+            result = yield self.mongo.chat_messages.delete_many(query)
+
+            self.write({
+                "status": "success",
+                "deleted_count": result.deleted_count
+            })
+        except Exception as e:
+            self.write({"status": "error", "error": str(e)})

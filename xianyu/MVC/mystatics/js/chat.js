@@ -8,7 +8,10 @@ const displayedMessageIds = new Set();
 // 初始化聊天界面
 document.addEventListener('DOMContentLoaded', function() {
     initChat();
-    
+    // 初始化右键菜单
+    initContextMenu();
+    // 添加长按事件监听
+    setupLongPress();
     // 检查URL参数中的好友ID并自动选择
     const urlParams = new URLSearchParams(window.location.search);
     const friendId = urlParams.get('friend_id');
@@ -62,6 +65,180 @@ function initChat() {
     console.log('初始化聊天界面');
     // 默认隐藏消息输入区域
     hideMessageInputArea();
+}
+// 初始化右键菜单
+function initContextMenu() {
+    const contextMenu = document.getElementById('context-menu');
+
+    // 隐藏右键菜单
+    document.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+    });
+
+    // 阻止默认右键菜单
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+
+    // 消息区域右键菜单
+    const messageContent = document.getElementById('message-content');
+    if (messageContent) {
+        messageContent.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.message-bubble')) {
+                const messageBubble = e.target.closest('.message-bubble');
+                messageBubble.classList.toggle('selected');
+
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${e.pageX}px`;
+                contextMenu.style.top = `${e.pageY}px`;
+                e.preventDefault();
+            }
+        });
+    }
+
+    // 右键菜单项点击事件
+    document.getElementById('delete-selected').addEventListener('click', deleteSelectedMessages);
+    document.getElementById('delete-all').addEventListener('click', deleteAllMessages);
+}
+
+// 设置长按事件
+function setupLongPress() {
+    const messageContent = document.getElementById('message-content');
+    if (!messageContent) return;
+
+    let pressTimer;
+    const longPressDuration = 800; // 长按时间(毫秒)
+
+    messageContent.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.message-bubble')) {
+            const messageBubble = e.target.closest('.message-bubble');
+            pressTimer = setTimeout(() => {
+                messageBubble.classList.add('selected');
+                showMobileActionSheet();
+            }, longPressDuration);
+        }
+    });
+
+    messageContent.addEventListener('touchend', () => {
+        clearTimeout(pressTimer);
+    });
+
+    messageContent.addEventListener('touchmove', () => {
+        clearTimeout(pressTimer);
+    });
+}
+
+// 显示移动端操作菜单
+function showMobileActionSheet() {
+    const actionSheet = document.createElement('div');
+    actionSheet.className = 'mobile-action-sheet';
+    actionSheet.innerHTML = `
+        <div class="action-sheet-content">
+            <button class="action-sheet-button" id="delete-selected-mobile">删除选中消息</button>
+            <button class="action-sheet-button" id="delete-all-mobile">删除所有消息</button>
+            <button class="action-sheet-button cancel">取消</button>
+        </div>
+    `;
+
+    document.body.appendChild(actionSheet);
+
+    // 添加事件监听
+    document.getElementById('delete-selected-mobile').addEventListener('click', deleteSelectedMessages);
+    document.getElementById('delete-all-mobile').addEventListener('click', deleteAllMessages);
+    document.querySelector('.mobile-action-sheet .cancel').addEventListener('click', () => {
+        document.body.removeChild(actionSheet);
+        clearMessageSelection();
+    });
+}
+
+// 删除选中消息
+function deleteSelectedMessages() {
+    const selectedMessages = document.querySelectorAll('.message-bubble.selected');
+    if (selectedMessages.length === 0) {
+        alert('请先选择要删除的消息');
+        return;
+    }
+
+    if (confirm(`确定要删除选中的 ${selectedMessages.length} 条消息吗？`)) {
+        const messageIds = [];
+        selectedMessages.forEach(msg => {
+            const messageId = msg.dataset.messageId;
+            if (messageId) messageIds.push(messageId);
+        });
+
+        deleteMessagesFromServer(messageIds);
+        clearMessageSelection();
+    }
+}
+
+// 删除所有消息
+function deleteAllMessages() {
+    const messages = document.querySelectorAll('.message-bubble');
+    if (messages.length === 0) {
+        alert('没有消息可删除');
+        return;
+    }
+
+    if (confirm('确定要删除所有消息吗？')) {
+        const messageIds = [];
+        messages.forEach(msg => {
+            const messageId = msg.dataset.messageId;
+            if (messageId) messageIds.push(messageId);
+        });
+
+        deleteMessagesFromServer(messageIds);
+    }
+}
+
+// 从服务器删除消息
+function deleteMessagesFromServer(messageIds) {
+    if (messageIds.length === 0) return;
+
+    fetch('/api/delete_messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRFToken': getCookie('_xsrf')
+        },
+        body: JSON.stringify({
+            message_ids: messageIds,
+            friend_id: currentFriendId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // 从DOM中移除已删除的消息
+            messageIds.forEach(id => {
+                const msgElement = document.querySelector(`.message-bubble[data-message-id="${id}"]`);
+                if (msgElement) msgElement.remove();
+            });
+
+            // 如果没有消息了，显示提示
+            const messageContent = document.getElementById('message-content');
+            if (messageContent && messageContent.children.length === 0) {
+                messageContent.innerHTML = '<div class="no-messages">暂无消息记录</div>';
+            }
+        } else {
+            alert('删除消息失败: ' + (data.error || '未知错误'));
+        }
+    })
+    .catch(error => {
+        console.error('删除消息失败:', error);
+        alert('删除消息请求失败，请稍后再试');
+    });
+}
+
+// 清除消息选择状态
+function clearMessageSelection() {
+    document.querySelectorAll('.message-bubble.selected').forEach(msg => {
+        msg.classList.remove('selected');
+    });
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu) contextMenu.style.display = 'none';
+
+    const actionSheet = document.querySelector('.mobile-action-sheet');
+    if (actionSheet) document.body.removeChild(actionSheet);
 }
 
 // 隐藏消息输入区域
@@ -261,9 +438,20 @@ function appendMessage(sender, content, isSelf, timestamp = null,messageId = nul
     const chatMessages = messageContent || document.getElementById('chat-messages');
 
     if (!chatMessages) return;
+    // 确保消息区域可见
+    messageContent.style.display = 'block';
+
+    // 如果当前显示的是"未选择聊天"或"加载中"，清除它们
+    if (chatMessages.querySelector('.no-chat-selected') || chatMessages.querySelector('.loading')) {
+        chatMessages.innerHTML = '';
+    }
+
 
     const messageDiv = document.createElement('div');
     messageDiv.className = isSelf ? 'message-bubble self' : 'message-bubble';
+    if (messageId) {
+        messageDiv.dataset.messageId = messageId;
+    }
 
     // 格式化时间
     const time = timestamp || new Date().toLocaleString('zh-CN', {
@@ -283,11 +471,8 @@ function appendMessage(sender, content, isSelf, timestamp = null,messageId = nul
         <div class="message-text">${content}</div>
     `;
 
-    if (messageContent) {
-        messageContent.appendChild(messageDiv);
-    } else {
-        chatMessages.appendChild(messageDiv);
-    }
+    messageContent.appendChild(messageDiv);
+    // 滚动到底部
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
