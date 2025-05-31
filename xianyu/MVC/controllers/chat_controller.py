@@ -373,3 +373,46 @@ class DeleteMessagesHandler(tornado.web.RequestHandler):
             })
         except Exception as e:
             self.write({"status": "error", "error": str(e)})
+
+# 获取未读消息数量
+class UnreadCountHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+
+    @tornado.gen.coroutine
+    def get(self):
+        try:
+            user_id = int(self.get_argument("user_id"))
+            
+            # 查询所有好友的未读消息数量
+            pipeline = [
+                {
+                    "$match": {
+                        "to_user_id": user_id,
+                        "status": "unread"
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": "$from_user_id",
+                        "count": {"$sum": 1}
+                    }
+                }
+            ]
+
+            results = yield self.mongo.chat_messages.aggregate(pipeline).to_list(length=None)
+            
+            counts = {
+                str(result["_id"]): result["count"]
+                for result in results
+            }
+            
+            self.write({
+                "status": "success",
+                "counts": counts
+            })
+        except Exception as e:
+            self.write({
+                "status": "error",
+                "error": str(e)
+            })

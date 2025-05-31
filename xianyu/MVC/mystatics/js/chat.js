@@ -66,7 +66,7 @@ function initChat() {
     // 默认隐藏消息输入区域
     hideMessageInputArea();
 }
-// 初始化右键菜单
+// 初始��右键菜单
 function initContextMenu() {
     const contextMenu = document.getElementById('context-menu');
 
@@ -296,7 +296,7 @@ function selectFriend(friendId, element) {
             // 加载与该好友的聊天记录
             loadMessages(friendId);
 
-            // 标记该好友的消息为已读
+            // 标记该好友的消息���已读
             markMessagesRead(friendId);
 
             // 启动长轮询
@@ -317,6 +317,11 @@ function selectFriend(friendId, element) {
     currentFriendId = friendId;
 }
 
+// 全局变量记录未读消息数量
+let unreadMessageCounts = {};
+// 底部菜单栏未读消息计数元素
+const bottomMenuUnreadCount = document.getElementById('bottom-menu-unread-count');
+
 // 启动长轮询
 function startLongPolling(friendId) {
     // 取消现有轮询
@@ -329,6 +334,21 @@ function startLongPolling(friendId) {
 
     const poll = async () => {
         try {
+            const user_id = getUserId();
+            if (!user_id) {
+                console.error('用户ID未获取');
+                return;
+            }
+            
+            // 获取未读消息数量
+            const unreadResponse = await fetch(`/api/unread_count?user_id=${user_id}`);
+            const unreadData = await unreadResponse.json();
+            
+            if (unreadData.status === 'success') {
+                unreadMessageCounts = unreadData.counts;
+                updateBottomMenuUnreadCount();
+            }
+
             const response = await fetch(`/api/messages?friend_id=${friendId}&since=${lastPollTimestamp}`);
             const messages = await response.json();
 
@@ -348,6 +368,9 @@ function startLongPolling(friendId) {
 
                     // 标记为已读
                     markMessagesRead(friendId);
+                    // 更新未读消息计数
+                    unreadMessageCounts[friendId] = 0;
+                    updateBottomMenuUnreadCount();
                 } else {
                     // 更新未读消息提醒
                     updateUnreadIndicator(friendId, messages.length);
@@ -367,6 +390,15 @@ function startLongPolling(friendId) {
     };
 
     poll();
+}
+
+// 更新底部菜单栏未读消息计数
+function updateBottomMenuUnreadCount() {
+    let totalUnread = Object.values(unreadMessageCounts).reduce((sum, count) => sum + count, 0);
+    if (bottomMenuUnreadCount) {
+        bottomMenuUnreadCount.textContent = totalUnread > 0 ? totalUnread : '';
+        bottomMenuUnreadCount.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+    }
 }
 
 // 更新未读消息指示器
