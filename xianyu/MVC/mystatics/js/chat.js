@@ -4,6 +4,9 @@ let lastPollTimestamp = 0; // 最后轮询时间戳
 let pendingMessages = new Set(); // 用于跟踪已发送但尚未通过轮询确认的消息
 // 添加全局变量记录已显示的消息ID
 const displayedMessageIds = new Set();
+let currentUserId = null;
+let unreadCheckInterval = null;
+
 
 // 初始化聊天界面
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // 检查URL参数中的好友ID并自动选择
     const urlParams = new URLSearchParams(window.location.search);
     const friendId = urlParams.get('friend_id');
+    currentUserId = document.body.getAttribute('data-user-id') ||
+                   new URLSearchParams(window.location.search).get('user_id');
+    if (currentUserId) {
+        startUnreadCheck();
+    }
+
     if (friendId) {
         const friendElement = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
         if (friendElement) {
@@ -148,6 +157,46 @@ function showMobileActionSheet() {
     document.querySelector('.mobile-action-sheet .cancel').addEventListener('click', () => {
         document.body.removeChild(actionSheet);
         clearMessageSelection();
+    });
+}
+
+// 启动未读消息检查
+function startUnreadCheck() {
+    // 先立即检查一次
+    checkUnreadMessages();
+
+    // 然后每10秒检查一次
+    unreadCheckInterval = setInterval(checkUnreadMessages, 10000);
+}
+
+// 检查未读消息
+function checkUnreadMessages() {
+    if (!currentUserId) return;
+
+    fetch(`/api/unread_count?user_id=${currentUserId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateUnreadIndicators(data.counts);
+            }
+        })
+        .catch(error => console.error('Error checking unread messages:', error));
+}
+
+// 更新未读指示器
+function updateUnreadIndicators(counts) {
+    document.querySelectorAll('.friend-item').forEach(item => {
+        const friendId = item.getAttribute('data-friend-id');
+        const redDot = item.querySelector('.red-dot');
+
+        if (counts[friendId] > 0) {
+            item.classList.add('unread');
+            redDot.style.display = 'inline-block';
+            redDot.setAttribute('title', `${counts[friendId]}条未读消息`);
+        } else {
+            item.classList.remove('unread');
+            redDot.style.display = 'none';
+        }
     });
 }
 

@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="{{ static_url('css/chatroom.css') }}">
     <link rel="stylesheet" href="{{ static_url('css/main.css') }}">
 </head>
-<body>
+<!-- 在body标签添加data-user-id属性 -->
+<body data-user-id="{{ user_id }}">
 <div class="container">
     <!-- 顶部区域 -->
     <div class="top-section">

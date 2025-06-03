@@ -25,6 +25,7 @@ if (userId && !isNaN(userId)) {
 
     ws.onopen = function() {
         console.log("WebSocket connection established");
+        checkUnreadMessages();
     };
 
     ws.onmessage = function(event) {
@@ -40,14 +41,45 @@ if (userId && !isNaN(userId)) {
                 displayMessage(`你 ${timestamp}: ${data.message}`, 'sent');
             } else {
                 displayMessage(`${fromUser} ${timestamp}: ${data.message}`, 'received');
+                 // 更新未读消息计数
                 updateNotificationBadge();
+                // 如果是新消息且不是自己发送的，触发未读检查
+                checkUnreadMessages();
             }
         }
     };
+     // 添加未读消息检查函数
+    function checkUnreadMessages() {
+        fetch('/api/unread_count?user_id=' + userId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateUnreadIndicators(data.counts);
+                }
+            })
+            .catch(error => console.error('Error checking unread messages:', error));
+    }
+
+    // 更新未读指示器
+    function updateUnreadIndicators(counts) {
+        // 这里可以根据实际DOM结构更新未读提示
+        if (notificationBadge) {
+            const totalUnread = Object.values(counts).reduce((sum, count) => sum + count, 0);
+            notificationBadge.textContent = totalUnread > 0 ? totalUnread : '';
+            notificationBadge.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+        }
+    }
 
     ws.onclose = function() {
         console.log("WebSocket connection closed");
+        // 尝试重新连接
+        setTimeout(() => {
+            if (userId && !isNaN(userId)) {
+                ws = new WebSocket(ws.url);
+            }
+        }, 5000);
     };
+
 
     ws.onerror = function(error) {
         console.error("WebSocket error:", error);
