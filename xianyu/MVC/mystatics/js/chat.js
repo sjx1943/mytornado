@@ -185,6 +185,7 @@ function checkUnreadMessages() {
 
 // 更新未读指示器
 function updateUnreadIndicators(counts) {
+    // 更新好友列表中的未读计数
     document.querySelectorAll('.friend-item').forEach(item => {
         const friendId = item.getAttribute('data-friend-id');
         const redDot = item.querySelector('.red-dot');
@@ -198,6 +199,14 @@ function updateUnreadIndicators(counts) {
             redDot.style.display = 'none';
         }
     });
+    
+    // 更新底部菜单中的未读计数
+    const bottomMenuCount = document.getElementById('bottom-menu-unread-count');
+    if (bottomMenuCount) {
+        const totalUnread = Object.values(counts).reduce((sum, count) => sum + count, 0);
+        bottomMenuCount.textContent = totalUnread > 0 ? totalUnread : '';
+        bottomMenuCount.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+    }
 }
 
 // 删除选中消息
@@ -444,9 +453,11 @@ function startLongPolling(friendId) {
 // 更新底部菜单栏未读消息计数
 function updateBottomMenuUnreadCount() {
     let totalUnread = Object.values(unreadMessageCounts).reduce((sum, count) => sum + count, 0);
+    const bottomMenuUnreadCount = document.getElementById('bottom-menu-unread-count');
     if (bottomMenuUnreadCount) {
         bottomMenuUnreadCount.textContent = totalUnread > 0 ? totalUnread : '';
         bottomMenuUnreadCount.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+        bottomMenuUnreadCount.className = totalUnread > 0 ? 'unread-count active' : 'unread-count';
     }
 }
 
