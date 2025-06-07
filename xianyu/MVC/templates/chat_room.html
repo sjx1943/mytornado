@@ -39,7 +39,7 @@
             {% for friend in friends %}
             <div class="friend-item" data-friend-id="{{ friend['id'] }}">
                 <span class="friend-name">{{ friend['username'] }}</span>
-                <span class="red-dot"></span>  <!-- 红点容器 -->
+                <span class="red-dot"></span>
                 <button class="delete-friend" data-friend-id="{{ friend['id'] }}">X</button>
             </div>
             {% end %}

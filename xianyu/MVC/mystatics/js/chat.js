@@ -450,33 +450,6 @@ function startLongPolling(friendId) {
     poll();
 }
 
-// 更新底部菜单栏未读消息计数
-function updateBottomMenuUnreadCount() {
-    let totalUnread = Object.values(unreadMessageCounts).reduce((sum, count) => sum + count, 0);
-    const bottomMenuUnreadCount = document.getElementById('bottom-menu-unread-count');
-    if (bottomMenuUnreadCount) {
-        bottomMenuUnreadCount.textContent = totalUnread > 0 ? totalUnread : '';
-        bottomMenuUnreadCount.style.display = totalUnread > 0 ? 'inline-block' : 'none';
-        bottomMenuUnreadCount.className = totalUnread > 0 ? 'unread-count active' : 'unread-count';
-    }
-}
-
-// 更新未读消息指示器
-function updateUnreadIndicator(friendId, count) {
-    const friendItem = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
-    if (!friendItem) return;
-
-    let redDot = friendItem.querySelector('.red-dot');
-    if (!redDot) {
-        redDot = document.createElement('span');
-        redDot.className = 'red-dot';
-        friendItem.appendChild(redDot);
-    }
-
-    redDot.classList.add('show');
-    redDot.textContent = count > 0 ? count : '';
-}
-
 
 // 加载与指定好友的聊天记录
 function loadMessages(friendId) {

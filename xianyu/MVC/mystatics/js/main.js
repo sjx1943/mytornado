@@ -182,6 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始加载所有商品
     loadProducts();
+    
+    // 检查未读消息并设置轮询
+    checkUnreadMessages();
+    setInterval(checkUnreadMessages, 30000);
 });
-
-
