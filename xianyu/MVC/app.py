@@ -32,7 +32,7 @@ settings = {
 }
 
 def make_app():
-    mongo = motor_tornado.MotorClient('mongodb://localhost:27017').chat_app
+    mongo = motor_tornado.MotorClient('mongodb://ser74785.ddns.net:27017').chat_app
     redis_client = redis.StrictRedis()
 
 

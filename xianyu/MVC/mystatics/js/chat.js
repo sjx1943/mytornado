@@ -1,29 +1,35 @@
-let currentFriendId = null; // 当前选中好友ID
-let pollingAbortController = null; // 用于取消轮询请求
-let lastPollTimestamp = 0; // 最后轮询时间戳
-let pendingMessages = new Set(); // 用于跟踪已发送但尚未通过轮询确认的消息
-// 添加全局变量记录已显示的消息ID
+let currentFriendId = null;
+let pollingAbortController = null;
+let lastPollTimestamp = 0;
+let pendingMessages = new Set();
 const displayedMessageIds = new Set();
 let currentUserId = null;
 let unreadCheckInterval = null;
-
+let ws;
 
 // 初始化聊天界面
 document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const friendList = document.querySelectorAll('.friend-item');
+    const noChatMessage = document.getElementById('no-chat-message');
+    const messageContent = document.getElementById('message-content');
+    const messageInputArea = document.getElementById('message-input-area');
+
+    currentUserId = document.body.getAttribute('data-user-id');
     initChat();
-    // 初始化右键菜单
     initContextMenu();
-    // 添加长按事件监听
     setupLongPress();
-    // 检查URL参数中的好友ID并自动选择
-    const urlParams = new URLSearchParams(window.location.search);
-    const friendId = urlParams.get('friend_id');
-    currentUserId = document.body.getAttribute('data-user-id') ||
-                   new URLSearchParams(window.location.search).get('user_id');
+    initWebSocket();
+
     if (currentUserId) {
         startUnreadCheck();
     }
 
+    // 检查 URL 参数中的好友 ID 并自动选择
+    const urlParams = new URLSearchParams(window.location.search);
+    const friendId = urlParams.get('friend_id');
     if (friendId) {
         const friendElement = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
         if (friendElement) {
@@ -31,12 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const sendButton = document.getElementById('send-button');
     if (sendButton) {
         sendButton.addEventListener('click', sendMessage);
     }
 
-    const messageInput = document.getElementById('message-input');
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -47,8 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 为所有好友项添加点击事件
-    const friendItems = document.querySelectorAll('.friend-item');
-    friendItems.forEach(item => {
+    friendList.forEach(item => {
         item.addEventListener('click', function(e) {
             // 如果点击的是删除按钮则不处理
             if (e.target.classList.contains('delete-friend')) {
@@ -67,7 +70,46 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteFriend(this);
         });
     });
+
+    // 监听新消息事件
+    document.addEventListener('newMessage', (e) => {
+        const data = e.detail;
+        if (data.from_user_id === currentFriendId) {
+            appendMessage(data.from_username, data.message, false, data.timestamp, data._id);
+            markMessagesRead(currentFriendId);
+        }
+    });
 });
+
+// 初始化 WebSocket 连接
+function initWebSocket() {
+    if (currentUserId) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat_room?user_id=${currentUserId}`);
+
+        ws.onopen = function() {
+            console.log("WebSocket connection established");
+        };
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const messageEvent = new CustomEvent('newMessage', { detail: data });
+            document.dispatchEvent(messageEvent);
+        };
+
+        ws.onclose = function() {
+            console.log("WebSocket connection closed");
+            // 尝试重新连接
+            setTimeout(initWebSocket, 2000);
+        };
+
+        ws.onerror = function(error) {
+            console.error("WebSocket error:", error);
+        };
+    } else {
+        console.error("User ID not found, WebSocket connection cannot be established");
+    }
+}
 
 // 初始化聊天
 function initChat() {
@@ -75,7 +117,8 @@ function initChat() {
     // 默认隐藏消息输入区域
     hideMessageInputArea();
 }
-// 初始��右键菜单
+
+// 初始化右键菜单
 function initContextMenu() {
     const contextMenu = document.getElementById('context-menu');
 
@@ -165,8 +208,8 @@ function startUnreadCheck() {
     // 先立即检查一次
     checkUnreadMessages();
 
-    // 然后每10秒检查一次
-    unreadCheckInterval = setInterval(checkUnreadMessages, 10000);
+    // 然后每 2 秒检查一次
+    unreadCheckInterval = setInterval(checkUnreadMessages, 2000);
 }
 
 // 检查未读消息
@@ -199,7 +242,7 @@ function updateUnreadIndicators(counts) {
             redDot.style.display = 'none';
         }
     });
-    
+
     // 更新底部菜单中的未读计数
     const bottomMenuCount = document.getElementById('bottom-menu-unread-count');
     if (bottomMenuCount) {
@@ -266,7 +309,7 @@ function deleteMessagesFromServer(messageIds) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            // 从DOM中移除已删除的消息
+            // 从 DOM 中移除已删除的消息
             messageIds.forEach(id => {
                 const msgElement = document.querySelector(`.message-bubble[data-message-id="${id}"]`);
                 if (msgElement) msgElement.remove();
@@ -317,11 +360,12 @@ function showMessageInputArea() {
 
 // 选择好友聊天，轮询时这里要慎重修改
 function selectFriend(friendId, element) {
-    // 更新URL参数
+    console.log('开始选择好友，好友 ID:', friendId);
+    // 更新 URL 参数
     const url = new URL(window.location.href);
     url.searchParams.set('friend_id', friendId);
     window.history.replaceState(null, '', url.toString());
-    
+
     // 移除其他好友项的选中状态
     document.querySelectorAll('.friend-item').forEach(item => {
         item.classList.remove('active');
@@ -330,35 +374,46 @@ function selectFriend(friendId, element) {
     // 添加选中状态到当前点击的好友项
     if (element) {
         element.classList.add('active');
+        console.log('好友项添加选中状态');
 
         // 移除红点提示(如果有)
         const redDot = element.querySelector('.red-dot');
         if (redDot) {
-            redDot.classList.remove('show');
+            redDot.style.display = 'none';
         }
 
-        // 获取聊天消息
-        const chatMessages = document.getElementById('chat-messages');
+        // 获取聊天消息相关 DOM 元素
         const noChat = document.getElementById('no-chat-message');
         const messageContent = document.getElementById('message-content');
+        const chatMessages = document.getElementById('chat-messages');
 
-        if (chatMessages && noChat && messageContent) {
+        if (noChat && messageContent && chatMessages) {
             noChat.style.display = 'none';
             messageContent.style.display = 'block';
             messageContent.innerHTML = '<div class="loading">加载消息中...</div>';
             showMessageInputArea();
+            console.log('显示消息输入区域，开始加载消息');
 
-            // 清空已显示的消息ID缓存
+            // 清空已显示的消息 ID 缓存
             displayedMessageIds.clear();
-            
-            // 加载与该好友的聊天记录
-            loadMessages(friendId);
 
-            // 标记该好友的消息���已读
+            // 加载与该好友的聊天记录
+            loadMessages(friendId)
+              .then(() => {
+                    console.log('消息加载成功');
+                })
+              .catch((error) => {
+                    console.error('消息加载失败:', error);
+                    messageContent.innerHTML = '<div class="error">加载聊天记录失败，请稍后重试</div>';
+                });
+
+            // 标记该好友的消息为已读
             markMessagesRead(friendId);
 
             // 启动长轮询
             startLongPolling(friendId);
+        } else {
+            console.error('关键 DOM 元素未找到');
         }
     } else {
         // 未选择好友时，确保消息区域显示"未选择聊天"
@@ -370,15 +425,10 @@ function selectFriend(friendId, element) {
             hideMessageInputArea();
         }
     }
-    
-    // 更新当前好友ID
+
+    // 更新当前好友 ID
     currentFriendId = friendId;
 }
-
-// 全局变量记录未读消息数量
-let unreadMessageCounts = {};
-// 底部菜单栏未读消息计数元素
-const bottomMenuUnreadCount = document.getElementById('bottom-menu-unread-count');
 
 // 启动长轮询
 function startLongPolling(friendId) {
@@ -392,33 +442,31 @@ function startLongPolling(friendId) {
 
     const poll = async () => {
         try {
-            const user_id = getUserId();
-            if (!user_id) {
-                console.error('用户ID未获取');
+            if (!currentUserId) {
+                console.error('用户 ID 未获取');
                 return;
             }
-            
+
             // 获取未读消息数量
-            const unreadResponse = await fetch(`/api/unread_count?user_id=${user_id}`);
+            const unreadResponse = await fetch(`/api/unread_count?user_id=${currentUserId}`);
             const unreadData = await unreadResponse.json();
-            
+
             if (unreadData.status === 'success') {
-                unreadMessageCounts = unreadData.counts;
-                updateBottomMenuUnreadCount();
+                updateUnreadIndicators(unreadData.counts);
             }
 
             const response = await fetch(`/api/messages?friend_id=${friendId}&since=${lastPollTimestamp}`);
             const messages = await response.json();
 
             if (messages && messages.length > 0) {
-                lastPollTimestamp = new Date(messages[messages.length-1].timestamp).getTime();
+                lastPollTimestamp = new Date(messages[messages.length - 1].timestamp).getTime();
 
                 // 如果是当前选中好友，更新消息区域
                 if (friendId === currentFriendId) {
                     messages.forEach(msg => {
-                        // 检查是否是pending消息或新消息
+                        // 检查是否是 pending 消息或新消息
                         if ((msg.temp_id && !pendingMessages.has(msg.temp_id)) || !msg.temp_id) {
-                            const isSelf = msg.from_user_id == getUserId();
+                            const isSelf = msg.from_user_id == currentUserId;
                             const displayName = isSelf ? '我' : msg.from_username;
                             appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id || msg.temp_id);
                         }
@@ -426,9 +474,6 @@ function startLongPolling(friendId) {
 
                     // 标记为已读
                     markMessagesRead(friendId);
-                    // 更新未读消息计数
-                    unreadMessageCounts[friendId] = 0;
-                    updateBottomMenuUnreadCount();
                 } else {
                     // 更新未读消息提醒
                     updateUnreadIndicator(friendId, messages.length);
@@ -436,13 +481,13 @@ function startLongPolling(friendId) {
             }
 
             // 继续轮询
-            setTimeout(poll, 3000);
+            setTimeout(poll, 1000);
 
         } catch (err) {
             if (err.name !== 'AbortError') {
                 console.error('轮询错误:', err);
                 // 出错后延迟重试
-                setTimeout(poll, 5000);
+                setTimeout(poll, 2000);
             }
         }
     };
@@ -450,17 +495,20 @@ function startLongPolling(friendId) {
     poll();
 }
 
-
 // 加载与指定好友的聊天记录
 function loadMessages(friendId) {
-    fetch(`/api/messages?friend_id=${friendId}`)
-        .then(response => response.json())
-
-        .then(messages => {
+    return fetch(`/api/messages?friend_id=${friendId}`)
+      .then(response => {
+            console.log('消息请求响应状态:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+      .then(messages => {
             const messageContent = document.getElementById('message-content');
             if (!messageContent) {
-                console.error('找不到消息内容容器');
-                return;
+                throw new Error('找不到消息内容容器');
             }
             messageContent.innerHTML = '';
 
@@ -471,46 +519,43 @@ function loadMessages(friendId) {
 
             messages.forEach(msg => {
                 try {
-                    const isSelf = msg.from_user_id == getUserId();
+                    const isSelf = msg.from_user_id == currentUserId;
                     const displayName = isSelf ? '我' : msg.from_username;
-                    appendMessage(displayName, msg.message, isSelf, msg.timestamp,msg._id);
+                    appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id);
                 } catch (e) {
                     console.error('处理消息时出错:', e, msg);
                 }
             });
+        })
+      .catch(error => {
+            console.error('加载聊天记录失败:', error);
+            const messageContent = document.getElementById('message-content');
+            if (messageContent) {
+                messageContent.innerHTML = '<div class="error">加载聊天记录失败，请稍后重试</div>';
+            }
+            throw error;
         });
-
-
-}
-
-// 获取当前激活的好友ID
-function getActiveFriendId() {
-    const activeFriend = document.querySelector('.friend-item.active');
-    return activeFriend ? activeFriend.dataset.friendId : null;
 }
 
 // 添加消息到聊天区域
-function appendMessage(sender, content, isSelf, timestamp = null,messageId = null) {
+function appendMessage(sender, content, isSelf, timestamp = null, messageId = null) {
     if (messageId && displayedMessageIds.has(messageId)) {
         return; // 如果消息已显示则跳过
     }
 
     if (messageId) {
-        displayedMessageIds.add(messageId); // 记录已显示的消息ID
+        displayedMessageIds.add(messageId); // 记录已显示的消息 ID
     }
 
     const messageContent = document.getElementById('message-content');
-    const chatMessages = messageContent || document.getElementById('chat-messages');
-
-    if (!chatMessages) return;
+    if (!messageContent) return;
     // 确保消息区域可见
     messageContent.style.display = 'block';
 
     // 如果当前显示的是"未选择聊天"或"加载中"，清除它们
-    if (chatMessages.querySelector('.no-chat-selected') || chatMessages.querySelector('.loading')) {
-        chatMessages.innerHTML = '';
+    if (messageContent.querySelector('.no-chat-selected') || messageContent.querySelector('.loading')) {
+        messageContent.innerHTML = '';
     }
-
 
     const messageDiv = document.createElement('div');
     messageDiv.className = isSelf ? 'message-bubble self' : 'message-bubble';
@@ -538,15 +583,13 @@ function appendMessage(sender, content, isSelf, timestamp = null,messageId = nul
 
     messageContent.appendChild(messageDiv);
     // 滚动到底部
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    messageContent.scrollTop = messageContent.scrollHeight;
 }
 
 // 删除好友功能
 function deleteFriend(button) {
     const friendId = button.dataset.friendId;
-    const userId = getUserId();
-    console.log('Delete button clicked');
-    if (confirm('删除好友时会同步删除聊天消息，ni确定吗？')) {
+    if (confirm('删除好友时会同步删除聊天消息，你确定吗？')) {
         const xsrfToken = getCookie('_xsrf');
         fetch('/delete_friend', {
             method: 'POST',
@@ -554,46 +597,46 @@ function deleteFriend(button) {
                 'Content-Type': 'application/json',
                 'X-XSRFToken': xsrfToken
             },
-            body: JSON.stringify({ user_id: userId, friend_id: friendId })
+            body: JSON.stringify({ user_id: currentUserId, friend_id: friendId })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // 从DOM中移除对应的好友项
-                const friendItem = button.closest('.friend-item');
-                if (friendItem) {
-                    friendItem.remove();
+          .then(response => response.json())
+          .then(data => {
+                if (data.status === 'success') {
+                    // 从 DOM 中移除对应的好友项
+                    const friendItem = button.closest('.friend-item');
+                    if (friendItem) {
+                        friendItem.remove();
+                    }
+                    // 若好友列表为空则显示提示
+                    const friendList = document.querySelector('.friend-list');
+                    if (friendList && friendList.querySelectorAll('.friend-item').length === 0) {
+                        const noFriendsMsg = document.createElement('div');
+                        noFriendsMsg.className = 'no-friends-message';
+                        noFriendsMsg.innerText = '暂无好友';
+                        friendList.appendChild(noFriendsMsg);
+                    }
+                    // 删除当前选中好友时清空聊天区域
+                    const chatMessages = document.getElementById('chat-messages');
+                    chatMessages.innerHTML = '<div class="no-chat-selected" id="no-chat-message">未选择聊天</div>';
+                    // 隐藏消息输入区域
+                    hideMessageInputArea();
+                } else {
+                    alert('删除好友失败：' + (data.error || '未知错误'));
                 }
-                // 若好友列表为空则显示提示
-                const friendList = document.querySelector('.friend-list');
-                if (friendList && friendList.querySelectorAll('.friend-item').length === 0) {
-                    const noFriendsMsg = document.createElement('div');
-                    noFriendsMsg.className = 'no-friends-message';
-                    noFriendsMsg.innerText = '暂无好友';
-                    friendList.appendChild(noFriendsMsg);
-                }
-                // 删除当前选中好友时清空聊天区域
-                const chatMessages = document.getElementById('chat-messages');
-                chatMessages.innerHTML = '<div class="no-chat-selected" id="no-chat-message">未选择聊天</div>';
-                // 隐藏消息输入区域
-                hideMessageInputArea();
-            } else {
-                alert('删除好友失败：' + (data.error || '未知错误'));
-            }
-        })
-        .catch(error => {
-            console.error('删除好友失败:', error);
-            alert('删除好友请求失败，请稍后再试');
-        });
+            })
+          .catch(error => {
+                console.error('删除好友失败:', error);
+                alert('删除好友请求失败，请稍后再试');
+            });
     }
 }
 
 // 发送消息
 function sendMessage() {
-    const message = document.getElementById('message-input').value.trim();
-    const friendId = getActiveFriendId();
+    const messageInput = document.getElementById('message-input');
+    const message = messageInput.value.trim();
 
-    if (!message || !friendId) return;
+    if (!message || !currentFriendId) return;
     const tempId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     pendingMessages.add(tempId);
 
@@ -603,18 +646,16 @@ function sendMessage() {
             'Content-Type': 'application/json',
             'X-XSRFToken': getCookie('_xsrf')
         },
-        body: JSON.stringify({ friend_id: friendId, message: message,tempId: tempId})
+        body: JSON.stringify({ friend_id: currentFriendId, message: message, tempId: tempId })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-
-            document.getElementById('message-input').value = '';
-            pendingMessages.delete(tempId);
-        }
-    })
-    .catch(error => console.error("发送消息失败:", error));
-    pendingMessages.delete(tempId);
+      .then(response => response.json())
+      .then(data => {
+            if (data.status === 'success') {
+                messageInput.value = '';
+                pendingMessages.delete(tempId);
+            }
+        })
+      .catch(error => console.error("发送消息失败:", error));
 }
 
 // 标记消息为已读
@@ -627,28 +668,16 @@ function markMessagesRead(friendId) {
         },
         body: JSON.stringify({ friend_id: friendId })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            console.log(`标记来自用户${friendId}的消息为已读`);
-        }
-    })
-    .catch(error => console.error("标记消息为已读失败:", error));
+      .then(response => response.json())
+      .then(data => {
+            if (data.status === 'success') {
+                console.log(`标记来自用户${friendId}的消息为已读`);
+            }
+        })
+      .catch(error => console.error("标记消息为已读失败:", error));
 }
 
-// 获取当前用户ID
-function getUserId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('user_id');
-    if (userId) return userId;
-    const cookieUser = document.cookie.split('; ').find(row => row.startsWith('user_id='));
-    if (cookieUser) {
-        return cookieUser.split('=')[1];
-    }
-    return null;
-}
-
-// 获取Cookie
+// 获取 Cookie
 function getCookie(name) {
     const cookie = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return cookie ? cookie.pop() : '';
