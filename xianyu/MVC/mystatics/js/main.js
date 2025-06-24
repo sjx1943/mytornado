@@ -67,6 +67,34 @@ function updateActiveTag(tag) {
     });
 }
 
+// 获取未读消息数量
+async function getUnreadMessageCount() {
+    try {
+        const response = await fetch('/api/unread_count');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        const unreadCount = data.count;
+        const unreadCountElement = document.getElementById('unread-count');
+
+        if (unreadCount > 0) {
+            unreadCountElement.textContent = unreadCount;
+            unreadCountElement.style.display = 'inline-block';
+        } else {
+            unreadCountElement.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('获取未读消息数量失败:', error);
+    }
+}
+
+// 处理新消息事件
+function handleNewMessage() {
+    getUnreadMessageCount();
+}
+
+// 监听新消息自定义事件
+document.addEventListener('newMessage', handleNewMessage);
+
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', () => {
     // 绑定标签点击事件
@@ -79,4 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始加载所有商品
     loadProducts();
+    // 初始获取未读消息数量
+    getUnreadMessageCount();
+
 });
+

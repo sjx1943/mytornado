@@ -1,6 +1,6 @@
-
 import sys
 import os
+import configparser
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import logging_config
@@ -25,16 +25,25 @@ settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
     'upload_path': os.path.join(os.path.dirname(__file__), "mystatics/images"),
-        'max_file_size': 10 * 1024 * 1024,  # 10MB
+    'max_file_size': 10 * 1024 * 1024,  # 10MB
     "login_url": "/login",
     'cookie_secret': 'sjxxxx',
     'xsrf_cookies': True
 }
 
 def make_app():
-    mongo = motor_tornado.MotorClient('mongodb://ser74785.ddns.net:27017').chat_app
-    redis_client = redis.StrictRedis()
+    # 读取配置文件
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
 
+    # 获取 MongoDB 连接信息
+    mongo_host = config.get('mongodb', 'host')
+    mongo_port = config.getint('mongodb', 'port')
+    mongo_db = config.get('mongodb', 'database')
+
+    mongo = motor_tornado.MotorClient(f'mongodb://{mongo_host}:{mongo_port}')[mongo_db]
+
+    redis_client = redis.StrictRedis()
 
     return Application([
         (r"/", MainHandler),

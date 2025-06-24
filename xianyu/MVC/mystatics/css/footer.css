@@ -54,6 +54,7 @@
 
 
 /* 未读消息计数样式 */
+
 .unread-count {
     background-color: red;
     color: white;
@@ -70,6 +71,7 @@
     min-height: 18px;
     text-align: center;
     line-height: 14px;
+    display: none; /* 默认隐藏 */
 }
 
 /* 容器高度调整，确保在小屏幕上也能正常显示 */

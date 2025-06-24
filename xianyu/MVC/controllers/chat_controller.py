@@ -382,8 +382,7 @@ class UnreadCountHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def get(self):
         try:
-            user_id = int(self.get_argument("user_id"))
-            
+            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
             # 查询所有好友的未读消息数量
             pipeline = [
                 {
@@ -401,15 +400,11 @@ class UnreadCountHandler(tornado.web.RequestHandler):
             ]
 
             results = yield self.mongo.chat_messages.aggregate(pipeline).to_list(length=None)
-            
-            counts = {
-                str(result["_id"]): result["count"]
-                for result in results
-            }
-            
+            total_count = sum(result["count"] for result in results)  # 计算总未读消息数
+
             self.write({
                 "status": "success",
-                "counts": counts
+                "count": total_count
             })
         except Exception as e:
             self.write({
