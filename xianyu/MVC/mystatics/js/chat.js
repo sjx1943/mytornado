@@ -29,8 +29,16 @@ document.addEventListener('DOMContentLoaded', function() {
     currentUserId = document.body.getAttribute('data-user-id') || userIdFromUrl;
 
     // 确保 currentUserId 是有效的数字
-    if (typeof currentUserId === 'number' && isNaN(currentUserId)) {
-        currentUserId = null;
+    if (typeof currentUserId === 'undefined') {
+        let currentUserId = document.body.getAttribute('data-user-id') ||
+                           document.getElementById('logged-in-user-id')?.value;
+
+        // 确保 currentUserId 是有效的数字
+        if (currentUserId && !isNaN(parseInt(currentUserId))) {
+            currentUserId = parseInt(currentUserId);
+        } else {
+            currentUserId = null;
+        }
     }
 
 
@@ -92,11 +100,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // 监听新消息事件
     document.addEventListener('newMessage', (e) => {
         const data = e.detail;
-        console.log('Handling new message event, currentFriendId:', currentFriendId, 'from_user_id:', data.from_user_id); // 添加日志，方便调试
-        if (data.from_user_id === currentFriendId) {
-                    appendMessage(data.from_username, data.message, false, data.timestamp, data._id);
-                    markMessagesRead(currentFriendId);
-                }
+        console.log('Handling new message event, currentFriendId:', currentFriendId, 'from_user_id:', data.from_user_id);
+
+        // 检查是否是pending消息
+        if (data.temp_id && pendingMessages.has(data.temp_id)) {
+            return;
+        }
+
+        if (data.from_user_id === currentFriendId || data.from_user_id === currentUserId) {
+            const isSelf = data.from_user_id === currentUserId;
+            const displayName = isSelf ? '我' : data.from_username;
+            appendMessage(displayName, data.message, isSelf, data.timestamp, data._id);
+            if (!isSelf) {
+                markMessagesRead(currentFriendId);
+            }
+        }
     });
 });
 
@@ -668,7 +686,7 @@ function deleteFriend(button) {
     }
 }
 
-// 发送消息
+// 修改sendMessage函数
 function sendMessage() {
     const messageInput = document.getElementById('message-input');
     const message = messageInput.value.trim();
@@ -677,7 +695,7 @@ function sendMessage() {
     const tempId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     pendingMessages.add(tempId);
 
-    // 先本地添加消息到聊天区域**
+    // 先本地添加消息到聊天区域
     appendMessage('我', message, true, null, tempId);
 
     fetch('/api/send_message', {
@@ -686,26 +704,31 @@ function sendMessage() {
             'Content-Type': 'application/json',
             'X-XSRFToken': getCookie('_xsrf')
         },
-        body: JSON.stringify({ friend_id: currentFriendId, message: message, tempId: tempId })
+        body: JSON.stringify({
+            friend_id: currentFriendId,
+            message: message,
+            tempId: tempId
+        })
     })
-      .then(response => response.json())
-      .then(data => {
-            if (data.status === 'success') {
-                messageInput.value = '';
-                pendingMessages.delete(tempId);
-// 如果服务器返回真实消息 ID，更新本地消息的 ID**
-                if (data.messageId) {
-                    const messageElement = document.querySelector(`.message-bubble[data-message-id="${tempId}"]`);
-                    if (messageElement) {
-                        messageElement.dataset.messageId = data.messageId;
-                        displayedMessageIds.delete(tempId);
-                        displayedMessageIds.add(data.messageId);
-                    }
+    .then(response => response.json())
+    .then(data => {
+        messageInput.value = '';
+        if (data.status === 'success') {
+            pendingMessages.delete(tempId);
+            // 如果服务器返回真实消息ID，更新本地消息的ID
+            if (data.messageId) {
+                const messageElement = document.querySelector(`.message-bubble[data-message-id="${tempId}"]`);
+                if (messageElement) {
+                    messageElement.dataset.messageId = data.messageId;
+                    displayedMessageIds.delete(tempId);
+                    displayedMessageIds.add(data.messageId);
                 }
             }
-        })
-      .catch(error => console.error("发送消息失败:", error));
+        }
+    })
+    .catch(error => console.error("发送消息失败:", error));
 }
+
 
 // 标记消息为已读
 function markMessagesRead(friendId) {

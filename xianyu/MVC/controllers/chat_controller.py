@@ -297,20 +297,46 @@ class SendMessageAPIHandler(tornado.web.RequestHandler):
 
     @tornado.gen.coroutine
     def post(self):
-        user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
-        data = json.loads(self.request.body)
+        try:
+            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+            data = json.loads(self.request.body)
 
-        message = {
-            "from_user_id": user_id,
-            "from_username": self.get_secure_cookie("username").decode("utf-8"),
-            "to_user_id": int(data["friend_id"]),
-            "message": data["message"],
-            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "status": "unread"
-        }
+            temp_id = data.get("tempId")
 
-        yield self.mongo.chat_messages.insert_one(message)
-        self.write({"status": "success"})
+            message = {
+                "from_user_id": user_id,
+                "from_username": self.get_secure_cookie("username").decode("utf-8"),
+                "to_user_id": int(data["friend_id"]),
+                "message": data["message"],
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "status": "unread",
+                "temp_id": temp_id
+            }
+
+            # 插入消息到数据库
+            result = yield self.mongo.chat_messages.insert_one(message)
+            message_id = str(result.inserted_id)
+
+            # 检查目标用户是否在线且WebSocket连接正常
+            target_user_id = int(data["friend_id"])
+            if target_user_id in connections and connections[target_user_id].ws_connection:
+                message_data = message.copy()
+                message_data["_id"] = message_id
+                connections[target_user_id].write_message(json.dumps(message_data))
+
+            # 也发回给发送者
+            if user_id in connections and connections[user_id].ws_connection:
+                sender_data = message.copy()
+                sender_data["_id"] = message_id
+                sender_data["status"] = "read"
+                connections[user_id].write_message(json.dumps(sender_data))
+
+            self.write({
+                "status": "success",
+                "messageId": message_id
+            })
+        except Exception as e:
+            self.write({"status": "error", "error": str(e)})
 
 #点击感兴趣的商品，触发聊天
 class InitiateChatHandler(tornado.web.RequestHandler):
