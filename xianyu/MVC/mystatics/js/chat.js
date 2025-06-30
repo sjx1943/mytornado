@@ -256,10 +256,21 @@ function checkUnreadMessages() {
     if (!currentUserId) return;
 
     fetch(`/api/unread_count?user_id=${currentUserId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.status === 'success' && data.counts) {
-                updateUnreadIndicators(data.counts);
+            if (data.status === 'success' && data.count !== undefined) {
+                // 假设后端返回的 count 是一个数字，将其转换为符合 updateUnreadIndicators 期望的格式
+                const counts = {};
+                // 这里需要根据实际情况将 count 分配到对应的好友 ID 上
+                // 示例：假设只有一个好友，好友 ID 为 1
+                const friendId = '1';
+                counts[friendId] = data.count;
+                updateUnreadIndicators(counts);
             } else {
                 console.warn('未收到有效的未读消息计数数据:', data);
                 // 可以选择传入空对象作为默认值
@@ -269,22 +280,26 @@ function checkUnreadMessages() {
         .catch(error => console.error('Error checking unread messages:', error));
 }
 
-
 // 更新未读指示器
 function updateUnreadIndicators(counts = {}) {
+    console.log('更新未读消息指示器，未读计数:', counts); // 添加日志，方便调试
     // 更新好友列表中的未读计数
     document.querySelectorAll('.friend-item').forEach(item => {
         const friendId = item.getAttribute('data-friend-id');
         const redDot = item.querySelector('.red-dot');
         const friendCount = counts[friendId] || 0;
 
-        if (friendCount > 0) {
-            item.classList.add('unread');
-            redDot.style.display = 'inline-block';
-            redDot.setAttribute('title', `${friendCount}条未读消息`);
-        } else {
-            item.classList.remove('unread');
-            redDot.style.display = 'none';
+        if (redDot) {
+            if (friendCount > 0) {
+                item.classList.add('unread');
+                redDot.style.display = 'inline-block';
+                redDot.setAttribute('title', `${friendCount}条未读消息`);
+                console.log(`好友 ${friendId} 有 ${friendCount} 条未读消息，显示红点`); // 添加日志，方便调试
+            } else {
+                item.classList.remove('unread');
+                redDot.style.display = 'none';
+                console.log(`好友 ${friendId} 没有未读消息，隐藏红点`); // 添加日志，方便调试
+            }
         }
     });
 

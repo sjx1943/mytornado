@@ -5,6 +5,7 @@ const userIdFromUrl = parseInt(urlParams.get('user_id'));
 // DOM元素
 const productListDiv = document.getElementById('product-list');
 
+
 // 当前用户ID，优先从body的data属性获取，其次从URL获取
 const currentUserId = document.body.getAttribute('data-user-id') || userIdFromUrl;
 
