@@ -3,7 +3,7 @@ let pollingAbortController = null;
 let lastPollTimestamp = 0;
 let pendingMessages = new Set();
 const displayedMessageIds = new Set();
-let currentUserId = null;
+
 let unreadCheckInterval = null;
 let ws;
 
@@ -17,27 +17,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageContent = document.getElementById('message-content');
     const messageInputArea = document.getElementById('message-input-area');
 
-//    // 当前用户ID，优先从body的data属性获取，其次从URL获取
-//    currentUserId = document.body.getAttribute('data-user-id')
+
 
 // 提前定义 urlParams
     const urlParams = new URLSearchParams(window.location.search);
     const userIdFromUrlParam = urlParams.get('user_id');
     const userIdFromUrl = userIdFromUrlParam ? parseInt(userIdFromUrlParam) : null;
 
-    // 当前用户ID，优先从body的data属性获取，其次从URL获取
-    currentUserId = document.body.getAttribute('data-user-id') || userIdFromUrl;
+//    // 当前用户ID，优先从body的data属性获取，其次从URL获取
+//    currentUserId = document.body.getAttribute('data-user-id') || userIdFromUrl;
 
     // 确保 currentUserId 是有效的数字
-    if (typeof currentUserId === 'undefined') {
-        let currentUserId = document.body.getAttribute('data-user-id') ||
+    if (typeof window.currentUserId === 'undefined') {
+        window.currentUserId = document.body.getAttribute('data-user-id') ||
                            document.getElementById('logged-in-user-id')?.value;
 
         // 确保 currentUserId 是有效的数字
-        if (currentUserId && !isNaN(parseInt(currentUserId))) {
-            currentUserId = parseInt(currentUserId);
+        if (window.currentUserId && !isNaN(parseInt(window.currentUserId))) {
+            window.currentUserId = parseInt(window.currentUserId);
         } else {
-            currentUserId = null;
+            window.currentUserId = null;
         }
     }
 
@@ -47,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupLongPress();
     initWebSocket();
 
-    if (currentUserId) {
+    if (window.currentUserId) {
         startUnreadCheck();
     }
 
@@ -107,8 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (data.from_user_id === currentFriendId || data.from_user_id === currentUserId) {
-            const isSelf = data.from_user_id === currentUserId;
+        if (data.from_user_id === currentFriendId || data.from_user_id === window.currentUserId) {
+            const isSelf = data.from_user_id === window.currentUserId;
             const displayName = isSelf ? '我' : data.from_username;
             appendMessage(displayName, data.message, isSelf, data.timestamp, data._id);
             if (!isSelf) {
@@ -120,9 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 初始化 WebSocket 连接
 function initWebSocket() {
-    if (currentUserId) {
+    if (window.currentUserId) {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat_room?user_id=${currentUserId}`);
+        ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat_room?user_id=${window.currentUserId}`);
 
         ws.onopen = function() {
             console.log("WebSocket connection established");
@@ -253,15 +252,10 @@ function startUnreadCheck() {
 
 // 检查未读消息
 function checkUnreadMessages() {
-    if (!currentUserId) return;
+    if (!window.currentUserId) return;
 
-    fetch(`/api/unread_count?user_id=${currentUserId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+    fetch(`/api/unread_count?user_id=${window.currentUserId}`)
+        .then(response => response.json())
         .then(data => {
             if (data.status === 'success' && data.count !== undefined) {
                 // 假设后端返回的 count 是一个数字，将其转换为符合 updateUnreadIndicators 期望的格式
@@ -504,20 +498,19 @@ function startLongPolling(friendId) {
 
     const poll = async () => {
         try {
-            if (!currentUserId) {
+            if (!window.currentUserId) {
                 console.error('用户 ID 未获取');
                 return;
             }
 
             // 获取未读消息数量
-            const unreadResponse = await fetch(`/api/unread_count?user_id=${currentUserId}`);
+            const unreadResponse = await fetch(`/api/unread_count?user_id=${window.currentUserId}`);
             const unreadData = await unreadResponse.json();
 
             if (unreadData.status === 'success' && unreadData.counts) {
                 updateUnreadIndicators(unreadData.counts);
             } else {
                 console.warn('轮询时未收到有效的未读消息计数数据:', unreadData);
-                // 可以选择传入空对象作为默认值
                 updateUnreadIndicators({});
             }
 
@@ -530,9 +523,8 @@ function startLongPolling(friendId) {
                 // 如果是当前选中好友，更新消息区域
                 if (friendId === currentFriendId) {
                     messages.forEach(msg => {
-                        // 检查是否是 pending 消息或新消息
                         if ((msg.temp_id && !pendingMessages.has(msg.temp_id)) || !msg.temp_id) {
-                            const isSelf = msg.from_user_id == currentUserId;
+                            const isSelf = msg.from_user_id == window.currentUserId;
                             const displayName = isSelf ? '我' : msg.from_username;
                             appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id || msg.temp_id);
                         }
@@ -542,7 +534,10 @@ function startLongPolling(friendId) {
                     markMessagesRead(friendId);
                 } else {
                     // 更新未读消息提醒
-                    updateUnreadIndicator(friendId, messages.length);
+                    const counts = {};
+                    counts[friendId] = messages.length;
+                    updateUnreadIndicators(counts);
+//                    updateUnreadIndicator(friendId, messages.length);
                 }
             }
 
@@ -585,7 +580,7 @@ function loadMessages(friendId) {
 
             messages.forEach(msg => {
                 try {
-                    const isSelf = msg.from_user_id == currentUserId;
+                    const isSelf = msg.from_user_id == window.currentUserId;
                     const displayName = isSelf ? '我' : msg.from_username;
                     appendMessage(displayName, msg.message, isSelf, msg.timestamp, msg._id);
                 } catch (e) {
@@ -667,7 +662,7 @@ function deleteFriend(button) {
                 'Content-Type': 'application/json',
                 'X-XSRFToken': xsrfToken
             },
-            body: JSON.stringify({ user_id: currentUserId, friend_id: friendId })
+            body: JSON.stringify({ user_id: window.currentUserId, friend_id: friendId })
         })
           .then(response => response.json())
           .then(data => {
