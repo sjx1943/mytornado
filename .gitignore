@@ -2,7 +2,6 @@ venv/
 .idea/
 .venv1
 
-
 # 新增以下内容
 *.pyc
 __pycache__/
