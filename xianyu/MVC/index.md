@@ -115,7 +115,7 @@ class LoginHandler(tornado.web.RequestHandler):
 2025-6-28 优化了主页未读消息的提示，目前刷新后会有未读消息的提示。且修复了currentUserId重复申明的问题。
 2025-6-30 优化了聊天页面有未读消息时好友列表的红点显示，但发现一个隐藏问题，ser和win服务的聊天消息无法相互共享，需要进入mongodb数据库进一步优化。
 且当刷新chat_room页面后控制台依旧会出现currentUserId 重复声明的报错Uncaught SyntaxError: Identifier 'currentUserId' has already been declared (at main.js?v=3b193cea1e07249c3ca8a5ceabf381bd7dc1fffad74b08ed30c9726e21bc8c0eb6249b1613b6c8a6dbb53183cc501fcbeed4eb57d38ff4389a83cc635e39dec2:1:1)
-
+2025-07-01 通过判断页面是否有product-div元素解决了重复声明的问题，但mongodb中存储的消息无故消失这个问题依然存在。
 下一步，当一方删除好友后，另一方再发送消息时，原先一方在好友列表中应重新显示有该好友，只不过聊天内容清空。
 此外，需要在private.html左侧中设计消息列表，卖家可在主页看到消息提醒，并实现消息的自动刷新。我的消息中可以查看私人消息，即卖家和买家的点对点通信。
 卖家获得提醒后可调用聊天chat控制器 相互发送聊天信息，交易成功后双方确认，卖家更新数据库中的商品数量和状态。
