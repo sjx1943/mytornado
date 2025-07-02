@@ -388,11 +388,12 @@ class DeleteMessagesHandler(tornado.web.RequestHandler):
                         {"from_user_id": user_id},
                         {"to_user_id": int(friend_id)}
                     ]
-                })
+
+         })
 
             # 删除消息
             result = yield self.mongo.chat_messages.delete_many(query)
-
+            # 确保返回正确的状态和删除数量
             self.write({
                 "status": "success",
                 "deleted_count": result.deleted_count

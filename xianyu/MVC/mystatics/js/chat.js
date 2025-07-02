@@ -361,8 +361,15 @@ function deleteMessagesFromServer(messageIds) {
             friend_id: currentFriendId
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        // 打印响应状态和响应头，方便调试
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        return response.json();
+    })
     .then(data => {
+        // 打印后端返回的数据
+        console.log('Delete response data:', data);
         if (data.status === 'success') {
             // 从 DOM 中移除已删除的消息
             messageIds.forEach(id => {
