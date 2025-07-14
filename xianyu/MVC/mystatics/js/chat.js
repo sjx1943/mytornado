@@ -257,17 +257,28 @@ function checkUnreadMessages() {
     fetch(`/api/unread_count?user_id=${window.currentUserId}`)
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success' && data.count !== undefined) {
-                // 假设后端返回的 count 是一个数字，将其转换为符合 updateUnreadIndicators 期望的格式
-                const counts = {};
-                // 这里需要根据实际情况将 count 分配到对应的好友 ID 上
-                // 示例：假设只有一个好友，好友 ID 为 1
-                const friendId = '1';
-                counts[friendId] = data.count;
+            if (data.status === 'success') {
+                // 处理不同格式的返回数据
+                let counts = {};
+                if (data.counts) {
+                    // 如果返回的是 counts 对象
+                    counts = data.counts;
+                } else if (data.count !== undefined) {
+                    // 如果返回的是单个 count 数字
+                    // 假设所有未读消息属于当前好友
+                    if (currentFriendId) {
+                        counts[currentFriendId] = data.count;
+                    } else {
+                        // 如果没有当前好友，将所有未读分配给第一个好友
+                        const firstFriend = document.querySelector('.friend-item');
+                        if (firstFriend) {
+                            counts[firstFriend.dataset.friendId] = data.count;
+                        }
+                    }
+                }
                 updateUnreadIndicators(counts);
             } else {
                 console.warn('未收到有效的未读消息计数数据:', data);
-                // 可以选择传入空对象作为默认值
                 updateUnreadIndicators({});
             }
         })
@@ -276,31 +287,37 @@ function checkUnreadMessages() {
 
 // 更新未读指示器
 function updateUnreadIndicators(counts = {}) {
-    console.log('更新未读消息指示器，未读计数:', counts); // 添加日志，方便调试
+    console.log('更新未读消息指示器，未读计数:', counts);
+
+    // 计算总未读消息数
+    let totalUnread = 0;
+
     // 更新好友列表中的未读计数
     document.querySelectorAll('.friend-item').forEach(item => {
         const friendId = item.getAttribute('data-friend-id');
         const redDot = item.querySelector('.red-dot');
         const friendCount = counts[friendId] || 0;
 
+        // 累加总未读消息数
+        totalUnread += friendCount;
+
         if (redDot) {
             if (friendCount > 0) {
                 item.classList.add('unread');
                 redDot.style.display = 'inline-block';
                 redDot.setAttribute('title', `${friendCount}条未读消息`);
-                console.log(`好友 ${friendId} 有 ${friendCount} 条未读消息，显示红点`); // 添加日志，方便调试
+                console.log(`好友 ${friendId} 有 ${friendCount} 条未读消息，显示红点`);
             } else {
                 item.classList.remove('unread');
                 redDot.style.display = 'none';
-                console.log(`好友 ${friendId} 没有未读消息，隐藏红点`); // 添加日志，方便调试
+                console.log(`好友 ${friendId} 没有未读消息，隐藏红点`);
             }
         }
     });
 
     // 更新底部菜单中的未读计数
-    const bottomMenuCount = document.getElementById('bottom-menu-unread-count');
+    const bottomMenuCount = document.getElementById('unread-count');
     if (bottomMenuCount) {
-        const totalUnread = Object.values(counts).reduce((sum, count) => sum + (count || 0), 0);
         bottomMenuCount.textContent = totalUnread > 0 ? totalUnread : '';
         bottomMenuCount.style.display = totalUnread > 0 ? 'inline-block' : 'none';
     }
@@ -329,20 +346,32 @@ function deleteSelectedMessages() {
 
 // 删除所有消息
 function deleteAllMessages() {
-    const messages = document.querySelectorAll('.message-bubble');
-    if (messages.length === 0) {
-        alert('没有消息可删除');
-        return;
-    }
-
     if (confirm('确定要删除所有消息吗？')) {
+        const messageContent = document.getElementById('message-content');
         const messageIds = [];
-        messages.forEach(msg => {
+
+        // 收集所有消息的ID
+        document.querySelectorAll('.message-bubble').forEach(msg => {
             const messageId = msg.dataset.messageId;
             if (messageId) messageIds.push(messageId);
         });
 
-        deleteMessagesFromServer(messageIds);
+        // 清空消息区域并显示提示
+        if (messageContent) {
+            messageContent.innerHTML = '';
+            const noMessages = document.createElement('div');
+            noMessages.className = 'no-messages';
+            noMessages.textContent = '暂无消息记录';
+            messageContent.appendChild(noMessages);
+        }
+
+        // 调用服务器删除
+        if (messageIds.length > 0) {
+            deleteMessagesFromServer(messageIds);
+        } else {
+            // 如果没有消息ID，也调用服务器删除，但传递空数组
+            deleteMessagesFromServer([]);
+        }
     }
 }
 
@@ -484,13 +513,14 @@ function selectFriend(friendId, element) {
         if (noChat && messageContent) {
             noChat.style.display = 'block';
             messageContent.style.display = 'none';
+            messageContent.innerHTML = ''; // 清空消息内容区域
             hideMessageInputArea();
         }
     }
 
     // 更新当前好友 ID
     currentFriendId = friendId;
-    console.log('Updated currentFriendId:', currentFriendId); // 添加日志，方便调试
+    console.log('Updated currentFriendId:', currentFriendId);
 }
 
 // 启动长轮询
@@ -514,12 +544,19 @@ function startLongPolling(friendId) {
             const unreadResponse = await fetch(`/api/unread_count?user_id=${window.currentUserId}`);
             const unreadData = await unreadResponse.json();
 
-            if (unreadData.status === 'success' && unreadData.counts) {
-                updateUnreadIndicators(unreadData.counts);
-            } else {
-                console.warn('轮询时未收到有效的未读消息计数数据:', unreadData);
-                updateUnreadIndicators({});
-            }
+            if (unreadData.status === 'success') {
+                            // 处理未读消息计数
+                            const counts = {};
+                            if (unreadData.counts) {
+                                Object.assign(counts, unreadData.counts);
+                            } else if (unreadData.count !== undefined) {
+                                counts[friendId] = unreadData.count;
+                            }
+                            updateUnreadIndicators(counts);
+                        } else {
+                            console.warn('轮询时未收到有效的未读消息计数数据:', unreadData);
+                            updateUnreadIndicators({});
+                        }
 
             const response = await fetch(`/api/messages?friend_id=${friendId}&since=${lastPollTimestamp}`);
             const messages = await response.json();
@@ -581,7 +618,10 @@ function loadMessages(friendId) {
             messageContent.innerHTML = '';
 
             if (!messages || messages.length === 0) {
-                messageContent.innerHTML = '<div class="no-messages">暂无消息记录</div>';
+                const noMessages = document.createElement('div');
+                noMessages.className = 'no-messages';
+                noMessages.textContent = '暂无消息记录';
+                messageContent.appendChild(noMessages);
                 return;
             }
 
@@ -609,24 +649,20 @@ function loadMessages(friendId) {
 function appendMessage(sender, content, isSelf, timestamp = null, messageId = null) {
     if (messageId && displayedMessageIds.has(messageId)) {
         console.log('Message already displayed, skipping:', messageId);
-        return; // 如果消息已显示则跳过
+        return;
+    }
+
+    const messageContent = document.getElementById('message-content');
+    if (!messageContent) return;
+
+    // 隐藏"暂无消息记录"提示
+    const noMessages = messageContent.querySelector('.no-messages');
+    if (noMessages) {
+        noMessages.style.display = 'none';
     }
 
     if (messageId) {
         displayedMessageIds.add(messageId); // 记录已显示的消息 ID
-    }
-
-    const messageContent = document.getElementById('message-content');
-    if (!messageContent) {
-       console.error('Message content container not found'); // 添加日志，方便调试
-       return;
-    }
-    // 确保消息区域可见
-    messageContent.style.display = 'block';
-
-    // 如果当前显示的是"未选择聊天"或"加载中"，清除它们
-    if (messageContent.querySelector('.no-chat-selected') || messageContent.querySelector('.loading')) {
-        messageContent.innerHTML = '';
     }
 
     const messageDiv = document.createElement('div');
