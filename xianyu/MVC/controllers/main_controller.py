@@ -63,24 +63,27 @@ class MainHandler(tornado.web.RequestHandler):
         return products_list
 
     def get(self):
-        user_id = self.get_secure_cookie("user_id")
+    # 从当前用户对象获取user_id
+        current_user = self.get_current_user()
+        user_id = str(current_user.id) if current_user else None
         username = self.get_secure_cookie("username")
+
         products = self.get_products()
         tags = []
         for product in products:
             if product['tag'] not in tags:
                 tags.append(product['tag'])
-        if user_id is not None:
-            user_id = user_id.decode('utf-8')
+
         if username is not None:
             username = username.decode('utf-8')
 
         product_id = products[0]['id'] if products else None
-        # print('products打印显示:')
-        # for product in products:
-        #     print(product)
 
-        self.render("main_page.html", username=username, user_id=user_id, tags=tags, products=products,
+        self.render("main_page.html",
+                    username=username,
+                    user_id=user_id,  # 使用从用户对象获取的user_id
+                    tags=tags,
+                    products=products,
                     product_id=product_id)
 
     def on_finish(self) -> None:

@@ -117,7 +117,8 @@ class LoginHandler(tornado.web.RequestHandler):
 且当刷新chat_room页面后控制台依旧会出现currentUserId 重复声明的报错Uncaught SyntaxError: Identifier 'currentUserId' has already been declared (at main.js?v=3b193cea1e07249c3ca8a5ceabf381bd7dc1fffad74b08ed30c9726e21bc8c0eb6249b1613b6c8a6dbb53183cc501fcbeed4eb57d38ff4389a83cc635e39dec2:1:1)
 2025-07-01 下午通过rebase变基的手段合并了本地提交与远程仓库的冲突并有望顺利提交，但mongodb中存储的消息无故消失这个问题依然存在，值得我好好研究。
 2025-07-02 暂时看不出mongodb中存储的消息无故消失的原因，反倒优化了一个正确删除消息但错误提示的bug。
-2025-0-14 转眼又过去半个月，mongodb中存储消息无故消失又消失了，修复了刚发送消息时“暂无消息”的提示和未读消息计数始终为1的bug。
+2025-7-14 转眼又过去半个月，mongodb中存储消息无故消失又消失了，修复了刚发送消息时“暂无消息”的提示和未读消息计数始终为1的bug。
+2025-7-15 修复了主页中当前用户ID为NaN的问题，但同时又发现foot.html区域与商品显示区域有重叠导致底部元素遮挡了商品的部分显示。
 下一步要完善添加好友与删除好友的逻辑。
 下一步，当一方删除好友后，另一方再发送消息时，原先一方在好友列表中应重新显示有该好友，只不过聊天内容清空。
 此外，需要在private.html左侧中设计消息列表，卖家可在主页看到消息提醒，并实现消息的自动刷新。我的消息中可以查看私人消息，即卖家和买家的点对点通信。

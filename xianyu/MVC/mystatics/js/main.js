@@ -5,8 +5,10 @@ const userIdFromUrl = parseInt(urlParams.get('user_id'));
 // DOM元素
 const productListDiv = document.getElementById('product-list');
 
-// 当前用户ID，优先从body的data属性获取，其次从URL获取
-window.currentUserId = document.body.getAttribute('data-user-id') || userIdFromUrl;
+// 修改获取当前用户ID的逻辑
+//window.currentUserId = document.body.getAttribute('data-user-id') || userIdFromUrl;
+const loggedInUserId = document.getElementById('logged-in-user-id');
+window.currentUserId = loggedInUserId ? parseInt(loggedInUserId.value) : null;
 
 // 加载商品信息
 function loadProducts(tag = 'all') {
@@ -43,8 +45,8 @@ function loadProducts(tag = 'all') {
                         <p>数量：${product.quantity}</p>
                         <p>标签：${product.tag}</p>
                         <p>商品上传者ID：${product.user_id}</p>
-                        <p>当前用户ID：${window.currentUserId}</p>
-                        ${product.user_id === parseInt(window.currentUserId) ?
+                        ${window.currentUserId ? `<p>当前用户ID：${window.currentUserId}</p>` : ''}
+                        ${product.user_id === window.currentUserId ?
                           `<button class="edit-product" data-id="${product.id}">编辑</button>` : ''}
                     </div>
                 `;
