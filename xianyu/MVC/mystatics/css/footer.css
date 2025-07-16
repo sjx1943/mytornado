@@ -1,79 +1,67 @@
-/* 底部导航样式 */
-.main-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    background-color: #f8f8f8;
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    border-top: 1px solid #ddd;
-    z-index: 100;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-    white-space: nowrap; /* 防止文字换行 */
-    overflow: hidden; /* 隐藏溢出的内容 */
-    text-overflow: ellipsis; /* 使用省略号表示溢出的内容 */
-    max-width: 100%; /* 设置最大宽度为100% */
-}
 
 
 .main-footer a {
     text-decoration: none;
     color: #333;
-    padding: 5px 10px;
-    margin: 0 15px;
+    padding: 5px;
+    margin: 0 5px;
     text-align: center;
     font-size: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1;
 }
 
 .main-footer a img {
-    display: block;
-    margin: 0 auto 5px;
-    max-width: 25px;
-    max-height: 25px;
-}
-
-.footer-container {
-    width: 100%;
-    margin-top: 20px;
+    width: 24px;
+    height: 24px;
+    margin-bottom: 5px;
 }
 
 .footer-info {
-    text-align: center;
+    display: block; /* 显示版权信息 */
     width: 100%;
-    padding: 5px 0;
+    text-align: center;
     font-size: 12px;
     color: #777;
     margin-top: 10px;
+    order: 1; /* 将版权信息放在最底部 */
 }
 
+.main-footer {
+    /* 修改原有样式，添加flex-wrap和flex-direction */
+    flex-wrap: wrap;
+    flex-direction: row;
+    padding-bottom: 30px; /* 为版权信息留出空间 */
+}
 
 /* 未读消息计数样式 */
-
 .unread-count {
     background-color: red;
     color: white;
     border-radius: 50%;
     padding: 2px 6px;
     font-size: 12px;
-    position: relative;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: -15px;
-    z-index: 101;
+    position: absolute;
+    top: -5px;
+    right: -5px;
     min-width: 18px;
     min-height: 18px;
     text-align: center;
     line-height: 14px;
-    display: none; /* 默认隐藏 */
+    display: none;
 }
 
+/* 响应式调整 */
+@media (max-width: 480px) {
+    .main-footer a {
+        font-size: 12px;
+        padding: 5px 2px;
+    }
 
-
-/* 容器高度调整，确保在小屏幕上也能正常显示 */
+    .main-footer a img {
+        width: 20px;
+        height: 20px;
+    }
+}

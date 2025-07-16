@@ -29,16 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 确保 currentUserId 是有效的数字
     if (typeof window.currentUserId === 'undefined') {
-        window.currentUserId = document.body.getAttribute('data-user-id') ||
-                           document.getElementById('logged-in-user-id')?.value;
+            window.currentUserId = document.body.getAttribute('data-user-id') ||
+                                 document.getElementById('logged-in-user-id')?.value;
 
-        // 确保 currentUserId 是有效的数字
-        if (window.currentUserId && !isNaN(parseInt(window.currentUserId))) {
-            window.currentUserId = parseInt(window.currentUserId);
-        } else {
-            window.currentUserId = null;
+            if (window.currentUserId && !isNaN(parseInt(window.currentUserId))) {
+                window.currentUserId = parseInt(window.currentUserId);
+            } else {
+                window.currentUserId = null;
+            }
         }
-    }
 
 
     initChat();
@@ -119,6 +118,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 初始化 WebSocket 连接
 function initWebSocket() {
+    // 确保currentUserId已定义
+    if (typeof window.currentUserId === 'undefined') {
+        window.currentUserId = document.body.getAttribute('data-user-id') ||
+                             document.getElementById('logged-in-user-id')?.value;
+
+        // 确保currentUserId是有效的数字
+        if (window.currentUserId && !isNaN(parseInt(window.currentUserId))) {
+            window.currentUserId = parseInt(window.currentUserId);
+        } else {
+            window.currentUserId = null;
+        }
+    }
+
     if (window.currentUserId) {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat_room?user_id=${window.currentUserId}`);
@@ -129,15 +141,13 @@ function initWebSocket() {
 
         ws.onmessage = function(event) {
             const data = JSON.parse(event.data);
-            console.log('Received new message:', data); // 添加日志，方便调试
-
+            console.log('Received new message:', data);
             const messageEvent = new CustomEvent('newMessage', { detail: data });
             document.dispatchEvent(messageEvent);
         };
 
         ws.onclose = function() {
             console.log("WebSocket connection closed");
-            // 尝试重新连接
             setTimeout(initWebSocket, 2000);
         };
 
@@ -146,6 +156,11 @@ function initWebSocket() {
         };
     } else {
         console.error("User ID not found, WebSocket connection cannot be established");
+        // 尝试重新获取用户ID并重连
+        setTimeout(() => {
+            console.log("Retrying to get user ID and connect WebSocket...");
+            initWebSocket();
+        }, 1000);
     }
 }
 
