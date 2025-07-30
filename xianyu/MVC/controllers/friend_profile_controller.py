@@ -15,8 +15,39 @@ Session = sessionmaker(bind=engine)
 
 class FriendProfileHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
-        self.mongo = mongo
+        self.mongo = mongo  # 确保这里正确接收了mongo连接
         self.session = scoped_session(Session)
+
+    async def post(self):
+        try:
+            data = json.loads(self.request.body)
+            friend_id = int(data.get("friend_id"))
+            user_id = int(data.get("user_id"))  # 从请求体中获取user_id
+
+            # 检查是否已经是好友
+            existing_friendship = self.session.query(Friendship).filter(
+                (Friendship.user_id == user_id) &
+                (Friendship.friend_id == friend_id)
+            ).first()
+
+            if existing_friendship:
+                self.write({"success": False, "message": "已经是好友"})
+                return
+
+            # 创建新的好友关系
+            new_friendship = Friendship(
+                user_id=user_id,
+                friend_id=friend_id
+            )
+            self.session.add(new_friendship)
+            self.session.commit()
+
+            self.write({"success": True, "message": "好友添加成功"})
+        except Exception as e:
+            self.session.rollback()
+            self.write({"success": False, "message": str(e)})
+        finally:
+            self.session.remove()
 
     @tornado.gen.coroutine
     def get(self):
@@ -63,7 +94,6 @@ class FriendProfileHandler(tornado.web.RequestHandler):
 
         except Exception as e:
             self.write(f"Error: {str(e)}")
-
 
 
 class DeleteFriendHandler(tornado.web.RequestHandler):

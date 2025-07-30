@@ -171,14 +171,29 @@ class ElseHomePageHandler(tornado.web.RequestHandler):
 
         try:
             user_id = int(user_id)
+            user = self.session.query(User).filter_by(id=user_id).first()
+            if not user:
+                self.write("User not found")
+                return
+
+            # 获取当前登录用户对象
+            current_user = None
+            current_user_id = self.get_secure_cookie("user_id")
+            if current_user_id:
+                current_user = self.session.query(User).filter_by(id=int(current_user_id)).first()
+
+            products = self.session.query(Product).filter_by(user_id=user_id).all()
+
+            self.render("else_home_page.html",
+                        products=products,
+                        username=user.username,
+                        user_id=user_id,
+                        current_user=current_user  # 直接传递User对象或None
+                        )
+
         except ValueError:
             self.write("Invalid User ID format")
-            return
-
-        user = self.session.query(User).filter_by(id=user_id).first()
-        if not user:
-            self.write("User not found")
-            return
-
-        products = self.session.query(Product).filter_by(user_id=user_id).all()
-        self.render("else_home_page.html", products=products, username=user.username)
+        except Exception as e:
+            self.write(f"Error: {str(e)}")
+        finally:
+            self.session.remove()

@@ -69,3 +69,18 @@ h1 {
     margin: 2px;
     font-size: 12px;
 }
+
+.add-friend-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 15px;
+}
+
+.add-friend-btn:hover {
+    background-color: #45a049;
+}
