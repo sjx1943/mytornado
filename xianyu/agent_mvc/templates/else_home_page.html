@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="{{ static_url('css/home.css') }}">
+</head>
+<body>
+    <!-- 添加当前用户ID的隐藏字段 -->
+    {% if current_user %}
+    <input type="hidden" id="logged-in-user-id" value="{{ current_user.id }}">
+    {% end %}
+
+    <h1>{{ username }}的闲置物品
+        {% if current_user is not None and current_user.id != user_id %}
+        <button id="add-friend-btn" data-friend-id="{{ user_id }}" class="add-friend-btn">+ 添加好友</button>
+        {% end %}
+    </h1>
+    <div class="product-list">
+        {% for product in products %}
+        <div class="product-item">
+            <a href="/product/detail/{{ product.id }}">
+                <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
+            </a>
+            <div class="product-info">
+                <p class="product-name">{{ product.name }}</p>
+                <p class="product-price">￥{{ product.price }}</p>
+                <p class="product-quantity">数量：{{ product.quantity }}</p>
+                <p class="product-upload-time">上传时间: {{ product.upload_time }}</p>
+                <p class="product-tags">
+                    {% for tag in product.tag %}
+                        <span class="tag">{{ tag }}</span>
+                    {% end %}
+                </p>
+            </div>
+        </div>
+        {% end %}
+    </div>
+
+    {% module xsrf_form_html() %}
+    <script src="{{ static_url('js/main.js') }}"></script>
+</body>
+</html>
+</html>

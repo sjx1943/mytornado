@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="{{ static_url('css/home.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/footer.css') }}">
+</head>
+<body>
+    <h1>我的闲置物品</h1>
+    <div class="product-list">
+        {% for product in products %}
+        <div class="product-item">
+            <a href="/product/detail/{{ product.id }}">
+                <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
+            </a>
+            <div class="product-info">
+                <p class="product-name">{{ product.name }}</p>
+                <p class="product-price">￥{{ product.price }}</p>
+                <p class="product-quantity">数量：{{ product.quantity }}</p>
+                <p class="product-upload-time">上传时间: {{ product.upload_time }}</p>
+                <p class="product-tags">
+                    {% for tag in product.tag %}
+                        <span class="tag">{{ tag }}</span>
+                    {% end %}
+                </p>
+            </div>
+        </div>
+        {% end %}
+    </div>
+
+    <!-- 引入底部导航栏 -->
+    {% include "foot.html" %}
+
+
+</body>
+</html>

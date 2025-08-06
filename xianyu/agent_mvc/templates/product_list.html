@@ -1,0 +1,31 @@
+<!-- File: xianyu/MVC/templates/product_list.html -->
+
+{% extends "base.html" %}
+{% block body %}
+    <div class="product-list">
+        {% for product in products %}
+            <div class="product-item">
+                <img src="{{ product['image'] }}" alt="{{ product['name'] }}" class="product-image">
+                <div class="product-info">
+                    <h2>{{ product['name'] }}</h2>
+                    <p>￥{{ product['price'] }}</p>
+                    <p>数量：{{ product['quantity'] }}</p>
+                    <p>标签：
+                        {% for tag in product['tag'].split(',') %}  <!-- Assuming tags are comma-separated -->
+                            <span class="tag">{{ tag }}</span>
+                        {% end %}
+                    </p>
+                    <p>
+                        当前用户ID：{{ user_id }} （类型：{{ user_id.__class__.__name__ }}）
+                        商品上传者ID：{{ product['user_id'] }} （类型：{{ product['user_id'].__class__.__name__ }})
+                    </p>
+                    {% if product['user_id'] == user_id %}
+                        <!-- Add any special handling for the owner of the product -->
+                    {% else %}
+                        <button class="want-button">想要</button>
+                    {% end %}
+                </div>
+            </div>
+        {% end %}
+    </div>
+{% end %}
