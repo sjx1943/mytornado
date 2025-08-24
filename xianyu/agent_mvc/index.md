@@ -1,52 +1,6 @@
 构建一个二手交易网站是一个复杂的项目，涉及多个模块和细节。在这里，我将提供一个高层次的概览和一些具体的代码示例，帮助你开始构建。请注意，这些代码示例仅仅是为了展示基本概念，实际应用中需要更多的细节处理和安全考虑。
 
-### 步骤 1: 环境准备和项目初始化
-
-1. 确保你已经安装了Python和Tornado。如果没有，请参考官方文档进行安装。
-2. 创建项目目录结构，如之前所示。
-3. 初始化Python虚拟环境并安装Tornado：`python -m venv myvenv` 和 `pip install tornado`.
-
-### 步骤 2: 数据库设计
-
-1. 选择一个数据库系统（如SQLite, MySQL, PostgreSQL）。
-2. 设计用户（User）、商品（Product）和聊天（Chat）数据模型。
-3. 使用ORM（如SQLAlchemy）或原生SQL来操作数据库。
-
-### 步骤 3: 构建模型（models）
-
-- 示例：`models/user.py`
-
-```python
-class User:
-    def __init__(self, id, username, password, email):
-        self.id = id
-        self.username = username
-        self.password = password
-        self.email = email
-
-    # 假设有一个方法来保存用户到数据库
-    def save_to_db(self):
-        pass
-```
-2024-3-3已经完成
-
-### 步骤 4: 构建控制器（controllers）
-
-- 示例：`controllers/auth_controller.py`
-
-```python
-import tornado.web
-
-class LoginHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render("login.html")
-
-    def post(self):
-        # 这里简化处理，实际应用中需要验证和安全考虑
-        username = self.get_argument("username")
-        password = self.get_argument("password")
-        # 验证用户名和密码...
-        self.redirect("/")
+### 开发日志
 ```
 2024-3-10  已经完成登陆和注册的控制器和视图设计，下一步将设计“忘记密码”功能
 2024-3-13 完成忘记密码功能，使得页面输入token后能顺利重置密码,注意分级目录的包导入问题。
