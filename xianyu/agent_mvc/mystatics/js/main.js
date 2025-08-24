@@ -121,36 +121,57 @@ function updateActiveTag(tag) {
 
 // 获取未读消息数量
 async function getUnreadMessageCount() {
+    // 确保 currentUserId 已定义且有效
+    if (!window.currentUserId) {
+        // console.log("User ID not available for unread count check.");
+        return;
+    }
     try {
         const response = await fetch('/api/unread_count');
         if (!response.ok) throw new Error('Network response was not ok');
+        
         const data = await response.json();
-        const unreadCount = data.count;
+        if (data.status !== 'success') {
+            console.error('Failed to get unread counts:', data.error);
+            return;
+        }
+
+        const totalUnread = data.total_count || 0;
         const unreadCountElement = document.getElementById('unread-count');
 
-        if (unreadCountElement) {  // 添加元素存在性检查
-            if (unreadCount > 0) {
-                unreadCountElement.textContent = unreadCount;
+        // 更新底部菜单的全局角标
+        if (unreadCountElement) {
+            if (totalUnread > 0) {
+                unreadCountElement.textContent = totalUnread;
                 unreadCountElement.style.display = 'inline-block';
             } else {
                 unreadCountElement.style.display = 'none';
             }
         }
+
+        // 发出一个全局事件，携带每个好友的未读数量
+        // 供 chat.js 监听以更新好友列表的红点
+        const event = new CustomEvent('unreadCountsUpdated', { detail: data.counts || {} });
+        document.dispatchEvent(event);
+
     } catch (error) {
         console.error('获取未读消息数量失败:', error);
     }
 }
 
-// 处理新消息事件
-function handleNewMessage() {
-    getUnreadMessageCount();
-}
+// 处理新消息事件 (这个可以移除，因为我们现在是定时轮询)
+// function handleNewMessage() {
+//     getUnreadMessageCount();
+// }
 
-// 监听新消息自定义事件
-document.addEventListener('newMessage', handleNewMessage);
+// 监听新消息自定义事件 (这个可以移除)
+// document.addEventListener('newMessage', handleNewMessage);
 
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', () => {
+    // 立即执行一次以获取初始计数
+    getUnreadMessageCount();
+
     // 商品列表加载逻辑 - 修改为检查main_page路径
     if (document.getElementById('product-list') &&
         (window.location.pathname === '/' ||
@@ -159,24 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
          window.location.pathname.includes('else_home_page'))) {
         loadProducts();
     }
-
-    // 绑定标签点击事件
-    const categoryNav = document.querySelector('.category-nav');
-    if (categoryNav) {
-        categoryNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                loadProducts(link.dataset.tag);
-            });
-        });
-    }
-
-    // 初始化添加好友按钮
-    setupAddFriendButton();
-
-    // 只在聊天页面执行未读消息检查
-    if (window.location.pathname.includes('chat_room')) {
-        getUnreadMessageCount();
-    }
+    
+    // ... (rest of the DOMContentLoaded logic)
 });
 

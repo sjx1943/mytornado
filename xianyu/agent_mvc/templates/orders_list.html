@@ -2,261 +2,73 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的订单</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <style>
-        .orders-container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        .order-tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab-button {
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #666;
-            text-decoration: none;
-        }
-        .tab-button.active {
-            color: #ff6b35;
-            border-bottom: 2px solid #ff6b35;
-        }
-        .order-item {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: #fff;
-        }
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .order-id {
-            font-weight: bold;
-            color: #333;
-        }
-        .order-status {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            color: white;
-        }
-        .status-pending { background-color: #ffa500; }
-        .status-confirmed { background-color: #4caf50; }
-        .status-shipped { background-color: #2196f3; }
-        .status-delivered { background-color: #9c27b0; }
-        .status-completed { background-color: #8bc34a; }
-        .status-cancelled { background-color: #f44336; }
-        .order-content {
-            display: flex;
-            gap: 15px;
-        }
-        .product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        .order-details {
-            flex: 1;
-        }
-        .product-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .order-info {
-            color: #666;
-            font-size: 0.9em;
-            line-height: 1.5;
-        }
-        .order-actions {
-            margin-top: 15px;
-            text-align: right;
-        }
-        .btn {
-            padding: 8px 15px;
-            margin-left: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
-        .btn-primary {
-            background-color: #ff6b35;
-            color: white;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .no-orders {
-            text-align: center;
-            color: #999;
-            margin: 50px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ static_url('css/main.css') }}">
 </head>
 <body>
-    <div class="orders-container">
-        <h2>我的订单</h2>
-        
-        <div class="order-tabs">
-            <a href="/orders?type=all" class="tab-button {% if order_type == 'all' %}active{% end %}">全部订单</a>
-            <a href="/orders?type=buying" class="tab-button {% if order_type == 'buying' %}active{% end %}">我买的</a>
-            <a href="/orders?type=selling" class="tab-button {% if order_type == 'selling' %}active{% end %}">我卖的</a>
+    <h1>我的订单</h1>
+    <div class="container">
+        <div class="tabs">
+            <a href="/orders?type=all" class="{{ 'active' if order_type == 'all' else '' }}">全部订单</a>
+            <a href="/orders?type=buying" class="{{ 'active' if order_type == 'buying' else '' }}">我购买的</a>
+            <a href="/orders?type=selling" class="{{ 'active' if order_type == 'selling' else '' }}">我卖出的</a>
         </div>
-        
-        {% if orders %}
-            {% for order_data in orders %}
-            <div class="order-item">
-                <div class="order-header">
-                    <div class="order-id">订单号：{{ order_data['order'].id }}</div>
-                    <div class="order-status status-{{ order_data['order'].status }}">
-                        {% if order_data['order'].status == 'pending' %}待确认
-                        {% elif order_data['order'].status == 'confirmed' %}已确认
-                        {% elif order_data['order'].status == 'shipped' %}已发货
-                        {% elif order_data['order'].status == 'delivered' %}已送达
-                        {% elif order_data['order'].status == 'completed' %}已完成
-                        {% elif order_data['order'].status == 'cancelled' %}已取消
-                        {% else %}{{ order_data['order'].status }}
-                        {% end %}
-                    </div>
-                </div>
-                
-                <div class="order-content">
-                    {% if order_data['product'] and order_data['product'].image %}
-                    <img src="/static/images/{{ order_data['product'].image }}" alt="商品图片" class="product-image">
-                    {% else %}
-                    <div class="product-image" style="background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999;">无图片</div>
-                    {% end %}
-                    
-                    <div class="order-details">
-                        <div class="product-name">
-                            {% if order_data['product'] %}
-                                {{ order_data['product'].name }}
-                            {% else %}
-                                商品已删除
-                            {% end %}
-                        </div>
-                        <div class="order-info">
-                            <div>数量：{{ order_data['order'].quantity }}</div>
-                            <div>单价：¥{{ order_data['order'].price }}</div>
-                            <div>总价：¥{{ order_data['order'].total_amount }}</div>
-                            <div>下单时间：{{ order_data['order'].created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
-                            {% if order_data['is_buyer'] %}
-                                <div>卖家：{{ order_data['seller'].username if order_data['seller'] else '未知' }}</div>
-                            {% else %}
-                                <div>买家：{{ order_data['buyer'].username if order_data['buyer'] else '未知' }}</div>
-                            {% end %}
-                            {% if order_data['order'].shipping_address %}
-                                <div>收货地址：{{ order_data['order'].shipping_address }}</div>
-                            {% end %}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="order-actions">
-                    <a href="/orders/{{ order_data['order'].id }}" class="btn btn-secondary">查看详情</a>
-                    
-                    {% if order_data['is_buyer'] %}
-                        {% if order_data['order'].status == 'pending' %}
-                            <button class="btn btn-danger" onclick="cancelOrder({{ order_data['order'].id }})">取消订单</button>
-                        {% elif order_data['order'].status == 'completed' %}
-                            <button class="btn btn-primary" onclick="commentProduct({{ order_data['order'].product_id }})">评价商品</button>
-                        {% end %}
-                    {% else %}
-                        {% if order_data['order'].status == 'pending' %}
-                            <button class="btn btn-primary" onclick="updateOrderStatus({{ order_data['order'].id }}, 'confirmed')">确认订单</button>
-                        {% elif order_data['order'].status == 'confirmed' %}
-                            <button class="btn btn-primary" onclick="updateOrderStatus({{ order_data['order'].id }}, 'shipped')">标记发货</button>
-                        {% elif order_data['order'].status == 'shipped' %}
-                            <button class="btn btn-primary" onclick="updateOrderStatus({{ order_data['order'].id }}, 'delivered')">标记送达</button>
-                        {% elif order_data['order'].status == 'delivered' %}
-                            <button class="btn btn-primary" onclick="updateOrderStatus({{ order_data['order'].id }}, 'completed')">完成订单</button>
-                        {% end %}
-                    {% end %}
-                </div>
-            </div>
-            {% end %}
-        {% else %}
-            <div class="no-orders">
+        <div class="order-list">
+            {% if not orders %}
                 <p>暂无订单</p>
-            </div>
-        {% end %}
+            {% else %}
+                {% for item in orders %}
+                    <div class="order-item">
+                        <div class="order-header">
+                            <span>订单号: {{ item['order'].id }}</span>
+                            <span>状态: {{ item['order'].status }}</span>
+                        </div>
+                        <div class="order-body">
+                            <img src="{{ static_url('images/' + item['product'].image) }}" alt="{{ item['product'].name }}">
+                            <div class="product-info">
+                                <a href="/product/detail/{{ item['product'].id }}">{{ item['product'].name }}</a>
+                                <p>价格: ¥{{ item['order'].price }}</p>
+                                <p>数量: {{ item['order'].quantity }}</p>
+                            </div>
+                            <div class="order-actions">
+                                {% if item['is_buyer'] and item['order'].status == 'shipped' %}
+                                    <button class="btn btn-primary confirm-btn" data-order-id="{{ item['order'].id }}">确认收货</button>
+                                {% end %}
+                            </div>
+                        </div>
+                    </div>
+                {% end %}
+            {% end %}
+        </div>
     </div>
 
     <script>
-        function updateOrderStatus(orderId, status) {
-            if (confirm('确定要更新订单状态吗？')) {
-                fetch('/orders/' + orderId, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'status=' + status + '&_xsrf=' + getCookie('_xsrf')
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('订单状态更新成功');
-                        location.reload();
-                    } else {
-                        alert('更新失败：' + data.error);
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmButtons = document.querySelectorAll('.confirm-btn');
+            confirmButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.dataset.orderId;
+                    if (confirm('您确定要确认收货吗？')) {
+                        fetch(`/api/order/${orderId}/confirm`, {
+                            method: 'POST',
+                            headers: {
+                                'X-XSRFToken': getCookie('_xsrf')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('操作成功');
+                                location.reload();
+                            } else {
+                                alert('操作失败：' + data.error);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('更新失败');
                 });
-            }
-        }
-
-        function cancelOrder(orderId) {
-            if (confirm('确定要取消订单吗？')) {
-                fetch('/orders/' + orderId, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: '_xsrf=' + getCookie('_xsrf')
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('订单取消成功');
-                        location.reload();
-                    } else {
-                        alert('取消失败：' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('取消失败');
-                });
-            }
-        }
-
-        function commentProduct(productId) {
-            // 跳转到评价页面
-            window.location.href = '/product/detail/' + productId + '#comment-section';
-        }
+            });
+        });
 
         function getCookie(name) {
             let cookieValue = null;

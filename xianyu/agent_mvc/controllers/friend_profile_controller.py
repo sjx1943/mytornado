@@ -12,6 +12,111 @@ from base.base import engine
 Session = sessionmaker(bind=engine)
 
 
+class BlockFriendHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+        self.session = scoped_session(Session)
+
+    def post(self):
+        try:
+            data = json.loads(self.request.body)
+            friend_id = int(data.get("friend_id"))
+            user_id_cookie = self.get_secure_cookie("user_id")
+            if not user_id_cookie:
+                self.write({"success": False, "message": "请先登录"})
+                return
+            
+            user_id = int(user_id_cookie.decode("utf-8"))
+            
+            # 查找好友关系
+            friendship = self.session.query(Friendship).filter(
+                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
+                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
+            ).first()
+
+            if not friendship:
+                self.write({"success": False, "message": "好友关系不存在"})
+                return
+
+            # 更新状态
+            if friendship.status == 'active':
+                friendship.status = 'blocked'
+                message = '好友已拉黑'
+            else:
+                friendship.status = 'active'
+                message = '已取消拉黑'
+            
+            self.session.commit()
+            self.write({"success": True, "message": message})
+
+        except Exception as e:
+            self.session.rollback()
+            self.write({"success": False, "message": str(e)})
+        finally:
+            self.session.remove()
+
+
+class InitiateChatHandler(tornado.web.RequestHandler):
+    def initialize(self, mongo):
+        self.mongo = mongo
+        self.session = scoped_session(Session)
+
+    def get(self):
+        try:
+            seller_id = int(self.get_argument("user_id"))
+            buyer_id_cookie = self.get_secure_cookie("user_id")
+            if not buyer_id_cookie:
+                self.redirect("/login")
+                return
+            
+            buyer_id = int(buyer_id_cookie.decode("utf-8"))
+
+            if seller_id == buyer_id:
+                # 如果是自己的商品，可以重定向到首页或提示信息
+                self.redirect("/main")
+                return
+
+            # 检查是否被拉黑
+            friendship = self.session.query(Friendship).filter(
+                ((Friendship.user_id == buyer_id) & (Friendship.friend_id == seller_id)) |
+                ((Friendship.user_id == seller_id) & (Friendship.friend_id == buyer_id))
+            ).first()
+
+            if friendship and friendship.status == 'blocked':
+                self.write("您已被对方拉黑，无法添加好友")
+                return
+
+            # 检查是否已经是好友 (A -> B)
+            existing_friendship_ab = self.session.query(Friendship).filter(
+                (Friendship.user_id == buyer_id) &
+                (Friendship.friend_id == seller_id)
+            ).first()
+
+            if not existing_friendship_ab:
+                new_friendship_ab = Friendship(user_id=buyer_id, friend_id=seller_id)
+                self.session.add(new_friendship_ab)
+
+            # 检查是否已经是好友 (B -> A)
+            existing_friendship_ba = self.session.query(Friendship).filter(
+                (Friendship.user_id == seller_id) &
+                (Friendship.friend_id == buyer_id)
+            ).first()
+
+            if not existing_friendship_ba:
+                new_friendship_ba = Friendship(user_id=seller_id, friend_id=buyer_id)
+                self.session.add(new_friendship_ba)
+            
+            self.session.commit()
+
+            # 重定向到聊天室，并带上好友ID以便自动打开聊天窗口
+            self.redirect(f"/chat_room?friend_id={seller_id}")
+
+        except Exception as e:
+            self.session.rollback()
+            self.write(f"发生错误: {e}")
+        finally:
+            self.session.remove()
+
 
 class FriendProfileHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):

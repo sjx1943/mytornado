@@ -12,12 +12,12 @@ from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
 # from controllers.message_details_controller import MessageDetailsHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
-from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler
-from controllers.chat_controller import ChatWebSocketHandler, InitiateChatHandler, ChatHandler, MessageAPIHandler, SendMessageAPIHandler, MarkMessagesReadHandler, DeleteMessagesHandler, UnreadCountHandler
-from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler
+from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler, UpdateProductStatusHandler, DeleteProductHandler
+from controllers.chat_controller import ChatWebSocketHandler, ChatHandler, MessageAPIHandler, SendMessageAPIHandler, MarkMessagesReadHandler, DeleteMessagesHandler, UnreadCountHandler
+from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler, InitiateChatHandler, BlockFriendHandler
 from controllers.search_controller import SearchHandler
 from controllers.comment_controller import CommentHandler, ProductRatingHandler
-from controllers.order_controller import OrderHandler, CreateOrderHandler
+from controllers.order_controller import OrderHandler, CreateOrderHandler, ConfirmTransactionHandler
 from motor import motor_tornado
 import redis
 from models.friendship import Friendship
@@ -44,6 +44,12 @@ def make_app():
     mongo_db = config.get('mongodb', 'database')
 
     mongo = motor_tornado.MotorClient(f'mongodb://{mongo_host}:{mongo_port}')[mongo_db]
+
+    # 为 chat_messages 集合创建索引
+    async def create_indexes():
+        await mongo.chat_messages.create_index([("from_user_id", 1), ("to_user_id", 1), ("timestamp", 1)])
+    
+    tornado.ioloop.IOLoop.current().add_callback(create_indexes)
 
     redis_client = redis.StrictRedis()
 

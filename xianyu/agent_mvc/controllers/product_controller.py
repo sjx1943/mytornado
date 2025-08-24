@@ -39,8 +39,10 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         self.session = Session()
 
     def get(self):
-        # 获取指定product_id的产品信息
-
+        user_id = self.get_secure_cookie("user_id")
+        if not user_id:
+            self.redirect("/login")
+            return
         self.render("publish_product.html")
 
     #上传商品...
@@ -195,5 +197,85 @@ class ElseHomePageHandler(tornado.web.RequestHandler):
             self.write("Invalid User ID format")
         except Exception as e:
             self.write(f"Error: {str(e)}")
+        finally:
+            self.session.remove()
+
+
+class UpdateProductStatusHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
+    def get_current_user(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
+
+    def post(self, product_id):
+        try:
+            user = self.get_current_user()
+            if not user:
+                self.write(json.dumps({'success': False, 'error': '请先登录'}))
+                return
+
+            product = self.session.query(Product).filter_by(id=product_id).first()
+            if not product:
+                self.write(json.dumps({'success': False, 'error': '商品不存在'}))
+                return
+
+            if product.user_id != user.id:
+                self.write(json.dumps({'success': False, 'error': '您没有权限修改此商品'}))
+                return
+
+            data = json.loads(self.request.body)
+            new_status = data.get("status")
+            if new_status not in ["在售", "已下架"]:
+                self.write(json.dumps({'success': False, 'error': '无效的商品状态'}))
+                return
+
+            product.status = new_status
+            self.session.commit()
+            self.write(json.dumps({'success': True, 'message': '商品状态更新成功'}))
+
+        except Exception as e:
+            self.session.rollback()
+            self.write(json.dumps({'success': False, 'error': str(e)}))
+        finally:
+            self.session.remove()
+
+
+class DeleteProductHandler(tornado.web.RequestHandler):
+    def initialize(self):
+        self.session = scoped_session(Session)
+
+    def get_current_user(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
+
+    def post(self, product_id):
+        try:
+            user = self.get_current_user()
+            if not user:
+                self.write(json.dumps({'success': False, 'error': '请先登录'}))
+                return
+
+            product = self.session.query(Product).filter_by(id=product_id).first()
+            if not product:
+                self.write(json.dumps({'success': False, 'error': '商品不存在'}))
+                return
+
+            if product.user_id != user.id:
+                self.write(json.dumps({'success': False, 'error': '您没有权限删除此商品'}))
+                return
+
+            self.session.delete(product)
+            self.session.commit()
+            self.write(json.dumps({'success': True, 'message': '商品删除成功'}))
+
+        except Exception as e:
+            self.session.rollback()
+            self.write(json.dumps({'success': False, 'error': str(e)}))
         finally:
             self.session.remove()

@@ -1,39 +1,52 @@
 
 
+/* Footer 容器 */
+.main-footer {
+    display: flex;
+    flex-wrap: wrap; /* 允许内容换行 */
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    z-index: 1000;
+    padding-top: 5px; /* 顶部留出一些空间 */
+}
+
+/* 菜单项 */
 .main-footer a {
     text-decoration: none;
     color: #333;
-    padding: 5px;
-    margin: 0 5px;
     text-align: center;
-    font-size: 14px;
+    font-size: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
+    justify-content: center;
+    flex: 1; /* 每个图标占据相同空间 */
+    min-width: 60px; /* 避免在小屏幕上过度挤压 */
+    padding: 5px 0;
 }
 
+/* 菜单图标 */
 .main-footer a img {
     width: 24px;
     height: 24px;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
+/* 版权信息 */
 .footer-info {
-    display: block; /* 显示版权信息 */
-    width: 100%;
+    display: block; /* 确保它是一个块级元素 */
+    width: 100%; /* 占据整行宽度以实现换行 */
     text-align: center;
-    font-size: 12px;
-    color: #777;
-    margin-top: 10px;
-    order: 1; /* 将版权信息放在最底部 */
-}
-
-.main-footer {
-    /* 修改原有样式，添加flex-wrap和flex-direction */
-    flex-wrap: wrap;
-    flex-direction: row;
-    padding-bottom: 30px; /* 为版权信息留出空间 */
+    font-size: 10px;
+    color: #999;
+    padding: 5px 0;
+    background-color: #f8f9fa; /* 给一个稍微不同的背景色以区分 */
 }
 
 /* 未读消息计数样式 */
@@ -41,27 +54,27 @@
     background-color: red;
     color: white;
     border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
+    padding: 1px 5px;
+    font-size: 11px;
     position: absolute;
-    top: -5px;
-    right: -5px;
-    min-width: 18px;
-    min-height: 18px;
+    top: 5px;
+    /* 通过计算或媒体查询来微调 right 值 */
+    right: calc(25% + 10px); /* 假设有4个item，'我的'在最右，'消息'在它左边 */
+    min-width: 16px;
     text-align: center;
     line-height: 14px;
-    display: none;
+    display: none; /* 默认隐藏 */
 }
 
 /* 响应式调整 */
 @media (max-width: 480px) {
     .main-footer a {
-        font-size: 12px;
-        padding: 5px 2px;
+        font-size: 11px;
     }
 
     .main-footer a img {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
     }
 }
+

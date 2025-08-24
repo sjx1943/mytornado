@@ -294,19 +294,41 @@ class MessageAPIHandler(tornado.web.RequestHandler):
 class SendMessageAPIHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
         self.mongo = mongo
+        self.session = scoped_session(Session)
 
     @tornado.gen.coroutine
     def post(self):
         try:
             user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
             data = json.loads(self.request.body)
+            friend_id = int(data["friend_id"])
+
+            # 检查是否被拉黑
+            friendship = self.session.query(Friendship).filter(
+                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
+                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
+            ).first()
+
+            if friendship and friendship.status == 'blocked':
+                self.write({"status": "error", "error": "您已被对方拉黑，无法发送消息"})
+                return
+            
+            # 检查对方是否已将自己删除，如果是，则重新添加
+            reverse_friendship = self.session.query(Friendship).filter(
+                (Friendship.user_id == friend_id) & (Friendship.friend_id == user_id)
+            ).first()
+
+            if not reverse_friendship:
+                new_friendship = Friendship(user_id=friend_id, friend_id=user_id)
+                self.session.add(new_friendship)
+                self.session.commit()
 
             temp_id = data.get("tempId")
 
             message = {
                 "from_user_id": user_id,
                 "from_username": self.get_secure_cookie("username").decode("utf-8"),
-                "to_user_id": int(data["friend_id"]),
+                "to_user_id": friend_id,
                 "message": data["message"],
                 "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "status": "unread",
@@ -318,7 +340,7 @@ class SendMessageAPIHandler(tornado.web.RequestHandler):
             message_id = str(result.inserted_id)
 
             # 检查目标用户是否在线且WebSocket连接正常
-            target_user_id = int(data["friend_id"])
+            target_user_id = friend_id
             if target_user_id in connections and connections[target_user_id].ws_connection:
                 message_data = message.copy()
                 message_data["_id"] = message_id
@@ -337,6 +359,8 @@ class SendMessageAPIHandler(tornado.web.RequestHandler):
             })
         except Exception as e:
             self.write({"status": "error", "error": str(e)})
+        finally:
+            self.session.remove()
 
 #点击感兴趣的商品，触发聊天
 class InitiateChatHandler(tornado.web.RequestHandler):
@@ -409,32 +433,27 @@ class UnreadCountHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def get(self):
         try:
-            user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
-            # 查询所有好友的未读消息数量
+            user_id_cookie = self.get_secure_cookie("user_id")
+            if not user_id_cookie:
+                self.write({"status": "error", "error": "User not logged in"})
+                return
+
+            user_id = int(user_id_cookie.decode("utf-8"))
+            
             pipeline = [
-                {
-                    "$match": {
-                        "to_user_id": user_id,
-                        "status": "unread"
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": "$from_user_id",
-                        "count": {"$sum": 1}
-                    }
-                }
+                {"$match": {"to_user_id": user_id, "status": "unread"}},
+                {"$group": {"_id": "$from_user_id", "count": {"$sum": 1}}}
             ]
 
             results = yield self.mongo.chat_messages.aggregate(pipeline).to_list(length=None)
-            total_count = sum(result["count"] for result in results)  # 计算总未读消息数
+            
+            counts_by_friend = {res["_id"]: res["count"] for res in results}
+            total_count = sum(counts_by_friend.values())
 
             self.write({
                 "status": "success",
-                "count": total_count
+                "total_count": total_count,
+                "counts": counts_by_friend
             })
         except Exception as e:
-            self.write({
-                "status": "error",
-                "error": str(e)
-            })
+            self.write({"status": "error", "error": str(e)})

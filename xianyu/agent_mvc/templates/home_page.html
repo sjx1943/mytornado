@@ -9,24 +9,100 @@
     <h1>我的闲置物品</h1>
     <div class="product-list">
         {% for product in products %}
-        <div class="product-item">
-            <a href="/product/detail/{{ product.id }}">
-                <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
-            </a>
-            <div class="product-info">
-                <p class="product-name">{{ product.name }}</p>
-                <p class="product-price">￥{{ product.price }}</p>
-                <p class="product-quantity">数量：{{ product.quantity }}</p>
-                <p class="product-upload-time">上传时间: {{ product.upload_time }}</p>
-                <p class="product-tags">
-                    {% for tag in product.tag %}
-                        <span class="tag">{{ tag }}</span>
-                    {% end %}
-                </p>
+            <div class="product-item">
+                <a href="/product/detail/{{ product.id }}">
+                    <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}">
+                    <p>{{ product.name }}</p>
+                    <p>价格: {{ product.price }}</p>
+                    <p>数量: {{ product.quantity }}</p>
+                </a>
+                <button class="btn btn-secondary status-btn" data-product-id="{{ product.id }}" data-status="{{ '已下架' if product.status == '在售' else '在售' }}">
+                    {{ '下架' if product.status == '在售' else '上架' }}
+                </button>
+                <button class="btn btn-danger delete-btn" data-product-id="{{ product.id }}">删除</button>
             </div>
-        </div>
         {% end %}
     </div>
+    {% include "foot.html" %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 处理状态变更按钮点击
+            document.querySelectorAll('.status-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    const newStatus = this.dataset.status;
+                    updateProductStatus(productId, newStatus);
+                });
+            });
+
+            // 处理删除按钮点击
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    if (confirm('您确定要删除此商品吗？')) {
+                        deleteProduct(productId);
+                    }
+                });
+            });
+        });
+
+        function updateProductStatus(productId, status) {
+            fetch(`/api/product/${productId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRFToken': getCookie('_xsrf')
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('操作成功');
+                    location.reload();
+                } else {
+                    alert('操作失败：' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteProduct(productId) {
+            fetch(`/api/product/${productId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'X-XSRFToken': getCookie('_xsrf')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('商品已删除');
+                    location.reload();
+                } else {
+                    alert('删除失败：' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
 
     <!-- 引入底部导航栏 -->
     {% include "foot.html" %}

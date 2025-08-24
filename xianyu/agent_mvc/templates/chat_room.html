@@ -42,6 +42,7 @@
                 <span class="friend-name">{{ friend['username'] }}</span>
                 <span class="red-dot"></span>
                 <button class="delete-friend" data-friend-id="{{ friend['id'] }}">X</button>
+                <button class="block-friend" data-friend-id="{{ friend['id'] }}">拉黑</button>
             </div>
             {% end %}
             {% else %}

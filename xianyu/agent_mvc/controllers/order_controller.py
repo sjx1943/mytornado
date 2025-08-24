@@ -271,3 +271,57 @@ class CreateOrderHandler(tornado.web.RequestHandler):
 
     def on_finish(self):
         self.session.close()
+
+
+class ConfirmTransactionHandler(tornado.web.RequestHandler):
+    """确认交易处理器"""
+
+    def initialize(self):
+        self.session = Session()
+
+    def get_current_user(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
+
+    def post(self, order_id):
+        try:
+            user = self.get_current_user()
+            if not user:
+                self.write(json.dumps({'success': False, 'error': '请先登录'}))
+                return
+
+            order = self.session.query(Order).filter_by(id=order_id).first()
+            if not order:
+                self.write(json.dumps({'success': False, 'error': '订单不存在'}))
+                return
+
+            # 只有买家可以确认收货
+            if order.buyer_id != user.id:
+                self.write(json.dumps({'success': False, 'error': '只有买家可以确认收货'}))
+                return
+            
+            if order.status != 'shipped':
+                self.write(json.dumps({'success': False, 'error': '订单状态不是已发货，无法确认收货'}))
+                return
+
+            order.status = 'completed'
+            order.completed_at = datetime.now()
+
+            # 更新商品库存
+            product = self.session.query(Product).filter_by(id=order.product_id).first()
+            if product:
+                product.quantity -= order.quantity
+                if product.quantity <= 0:
+                    product.status = "已售完"
+
+            self.session.commit()
+
+            self.write(json.dumps({'success': True, 'message': '交易确认成功'}))
+
+        except Exception as e:
+            self.session.rollback()
+            self.write(json.dumps({'success': False, 'error': str(e)}))
+        finally:
+            self.session.close()

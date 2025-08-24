@@ -86,6 +86,16 @@ class CommentHandler(tornado.web.RequestHandler):
                 self.write(json.dumps({'success': False, 'error': '商品不存在'}))
                 return
 
+            # 检查是否被拉黑
+            friendship = self.session.query(Friendship).filter(
+                ((Friendship.user_id == user.id) & (Friendship.friend_id == product.user_id)) |
+                ((Friendship.user_id == product.user_id) & (Friendship.friend_id == user.id))
+            ).first()
+
+            if friendship and friendship.status == 'blocked':
+                self.write(json.dumps({'success': False, 'error': '您已被卖家拉黑，无法评价'}))
+                return
+
             # 检查用户是否已经评价过这个商品
             existing_comment = self.session.query(Comment).filter_by(
                 user_id=user.id, 
@@ -118,7 +128,7 @@ class CommentHandler(tornado.web.RequestHandler):
             self.write(json.dumps({'success': False, 'error': str(e)}))
 
     def delete(self, comment_id):
-        """删除评价（仅限评价作者或管理员）"""
+        """删除评价（仅限评价作者或商品所有者）"""
         try:
             user = self.get_current_user()
             if not user:
@@ -130,9 +140,14 @@ class CommentHandler(tornado.web.RequestHandler):
                 self.write(json.dumps({'success': False, 'error': '评价不存在'}))
                 return
 
-            # 只有评价作者可以删除自己的评价
-            if comment.user_id != user.id:
-                self.write(json.dumps({'success': False, 'error': '只能删除自己的评价'}))
+            product = self.session.query(Product).filter_by(id=comment.product_id).first()
+            if not product:
+                self.write(json.dumps({'success': False, 'error': '评价关联的商品不存在'}))
+                return
+
+            # 评价作者或商品所有者可以删除
+            if comment.user_id != user.id and product.user_id != user.id:
+                self.write(json.dumps({'success': False, 'error': '您没有权限删除此评价'}))
                 return
 
             self.session.delete(comment)
