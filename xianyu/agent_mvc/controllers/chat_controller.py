@@ -366,13 +366,44 @@ class SendMessageAPIHandler(tornado.web.RequestHandler):
 class InitiateChatHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
         self.mongo = mongo
+        self.session = scoped_session(Session)
 
-    @coroutine
-    def get(self):
-        user_id = self.get_argument("user_id")
-        product_id = self.get_argument("product_id")
-        # Your logic to initiate chat
-        self.redirect(f"/chat_room?user_id={user_id}&product_id={product_id}")
+    @tornado.web.authenticated
+    async def get(self):
+        try:
+            seller_id_str = self.get_argument("user_id", None)
+            if not seller_id_str or not seller_id_str.isdigit():
+                self.send_error(400, reason="无效的卖家ID")
+                return
+
+            seller_id = int(seller_id_str)
+            current_user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+
+            if seller_id == current_user_id:
+                self.redirect("/chat_room")
+                return
+
+            friendship_model = FriendshipModel(self.session)
+            
+            # 使用 add_friend_if_not_exists 确保双向好友关系
+            success = friendship_model.add_friend_if_not_exists(current_user_id, seller_id)
+
+            if success:
+                # 重定向到聊天室并附带friend_id，以便JS自动选择
+                self.redirect(f"/chat_room?friend_id={seller_id}")
+            else:
+                # 如果添加好友失败，可以跳转到聊天室但不指定好友
+                self.redirect("/chat_room")
+
+        except Exception as e:
+            logging.error(f"发起聊天失败: {e}")
+            self.redirect("/chat_room") # 出错时重定向到主聊天页
+        finally:
+            self.session.remove()
+
+    def on_finish(self):
+        if hasattr(self, 'session'):
+            self.session.remove()
 
 
 class DeleteMessagesHandler(tornado.web.RequestHandler):
