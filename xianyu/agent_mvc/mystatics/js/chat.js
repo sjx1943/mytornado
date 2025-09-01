@@ -46,13 +46,36 @@ function initChatEventListeners() {
 
     friendList.forEach(item => {
         item.addEventListener('click', function(e) {
-            if (e.target.closest('.delete-friend, .block-friend')) return;
+            const target = e.target;
+
+            // Handle delete button click
+            if (target.classList.contains('delete-friend')) {
+                e.stopPropagation();
+                const friendId = target.dataset.friendId;
+                if (confirm('你确定要删除该好友吗？')) {
+                    deleteFriend(friendId);
+                }
+                return;
+            }
+
+            // Handle block button click
+            if (target.classList.contains('block-friend')) {
+                e.stopPropagation();
+                const friendId = target.dataset.friendId;
+                if (confirm('你确定要拉黑该好友吗？')) {
+                    blockFriend(friendId);
+                }
+                return;
+            }
+
+            // If not clicking buttons, select the friend for chat
             selectFriend(this.dataset.friendId, this);
         });
     });
 
     initContextMenu(); // Initialize context menu listeners
 }
+
 
 function selectFriend(friendId, element) {
     currentFriendId = friendId;
@@ -70,7 +93,7 @@ function selectFriend(friendId, element) {
 
 function startChatPolling() {
     if (chatPollingInterval) clearInterval(chatPollingInterval);
-    fetchNewData(); 
+    fetchNewData();
     chatPollingInterval = setInterval(fetchNewData, 3000);
 }
 
@@ -121,7 +144,7 @@ function loadMessages(friendId) {
 function appendMessage(sender, content, isSelf, timestamp, messageId) {
     const messageContent = document.getElementById('message-content');
     if (!messageContent || document.querySelector(`.message-bubble[data-message-id="${messageId}"]`)) return;
-    
+
     const noMessages = messageContent.querySelector('.no-messages');
     if (noMessages) noMessages.remove();
 
@@ -145,7 +168,7 @@ function sendMessage() {
     const message = messageInput.value.trim();
     if (!message || !currentFriendId) return;
     messageInput.value = '';
-    
+
     fetch('/api/send_message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-XSRFToken': getCookie('_xsrf') },
@@ -196,7 +219,7 @@ function initContextMenu() {
         if (targetMessage) {
             e.preventDefault();
             targetMessage.classList.toggle('selected');
-            
+
             contextMenu.style.display = 'block';
             contextMenu.style.left = `${e.pageX}px`;
             contextMenu.style.top = `${e.pageY}px`;
@@ -242,5 +265,72 @@ function deleteMessagesFromServer(messageIds) {
                 document.getElementById('message-content').innerHTML = '<div class="no-messages">暂无消息</div>';
             }
         }
+    });
+}
+
+// --- Friend Management Functions ---
+
+function deleteFriend(friendId) {
+    fetch('/api/delete_friend', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRFToken': getCookie('_xsrf')
+        },
+        body: JSON.stringify({ friend_id: friendId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('好友删除成功');
+            const friendElement = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
+            if (friendElement) {
+                friendElement.remove();
+            }
+            if (currentFriendId === friendId) {
+                document.getElementById('message-content').innerHTML = '<div class="no-chat-selected" id="no-chat-message">未选择聊天</div>';
+                hideMessageInputArea();
+                stopChatPolling();
+                currentFriendId = null;
+            }
+        } else {
+            alert('删除失败: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting friend:', error);
+        alert('删除好友时发生错误');
+    });
+}
+
+function blockFriend(friendId) {
+    fetch('/api/block_friend', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRFToken': getCookie('_xsrf')
+        },
+        body: JSON.stringify({ friend_id: friendId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('好友拉黑成功');
+            const friendElement = document.querySelector(`.friend-item[data-friend-id="${friendId}"]`);
+            if (friendElement) {
+                friendElement.classList.add('blocked');
+                const blockButton = friendElement.querySelector('.block-friend');
+                if (blockButton) {
+                    blockButton.textContent = '已拉黑';
+                    blockButton.disabled = true;
+                }
+            }
+        } else {
+            alert('拉黑失败: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error blocking friend:', error);
+        alert('拉黑好友时发生错误');
     });
 }

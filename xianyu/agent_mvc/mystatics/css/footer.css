@@ -29,6 +29,7 @@
     flex: 1; /* 每个图标占据相同空间 */
     min-width: 60px; /* 避免在小屏幕上过度挤压 */
     padding: 5px 0;
+    position: relative; /* 添加此行 */
 }
 
 /* 菜单图标 */
@@ -57,9 +58,9 @@
     padding: 1px 5px;
     font-size: 11px;
     position: absolute;
-    top: 5px;
-    /* 通过计算或媒体查询来微调 right 值 */
-    right: calc(25% + 10px); /* 假设有4个item，'我的'在最右，'消息'在它左边 */
+    top: 17px; /* 定位到图标的垂直中心 */
+    left: 50%; /* 定位到图标的水平中心 */
+    transform: translate(-50%, -50%); /* 将自身中心对齐到指定位置 */
     min-width: 16px;
     text-align: center;
     line-height: 14px;

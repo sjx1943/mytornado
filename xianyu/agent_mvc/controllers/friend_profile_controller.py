@@ -23,7 +23,8 @@ class BlockFriendHandler(tornado.web.RequestHandler):
             friend_id = int(data.get("friend_id"))
             user_id_cookie = self.get_secure_cookie("user_id")
             if not user_id_cookie:
-                self.write({"success": False, "message": "请先登录"})
+                self.set_status(401)
+                self.write({"status": "error", "message": "请先登录"})
                 return
             
             user_id = int(user_id_cookie.decode("utf-8"))
@@ -35,7 +36,8 @@ class BlockFriendHandler(tornado.web.RequestHandler):
             ).first()
 
             if not friendship:
-                self.write({"success": False, "message": "好友关系不存在"})
+                self.set_status(404)
+                self.write({"status": "error", "message": "好友关系不存在"})
                 return
 
             # 更新状态
@@ -47,11 +49,12 @@ class BlockFriendHandler(tornado.web.RequestHandler):
                 message = '已取消拉黑'
             
             self.session.commit()
-            self.write({"success": True, "message": message})
+            self.write({"status": "success", "message": message})
 
         except Exception as e:
             self.session.rollback()
-            self.write({"success": False, "message": str(e)})
+            self.set_status(500)
+            self.write({"status": "error", "message": str(e)})
         finally:
             self.session.remove()
 
@@ -206,26 +209,33 @@ class DeleteFriendHandler(tornado.web.RequestHandler):
         self.mongo = mongo
         self.session = scoped_session(Session)
 
-    def post(self):
+    async def post(self):
         try:
-            # 解析请求数据
             data = json.loads(self.request.body)
             friend_id = int(data.get("friend_id"))
-            user_id = int(data.get("user_id")) # 从请求体中获取 user_id
-            # user_id = int(self.get_secure_cookie("user_id").decode("utf-8"))
+            user_id_cookie = self.get_secure_cookie("user_id")
 
-            # 验证参数
-            if not friend_id or not user_id:
-                self.write({"status": "error", "error": "缺少必要参数"})
+            if not user_id_cookie:
+                self.set_status(401)
+                self.write({"status": "error", "message": "请先登录"})
                 return
 
-            # 删除好友关系
+            user_id = int(user_id_cookie.decode("utf-8"))
+
+            # 验证参数
+            if not friend_id:
+                self.set_status(400)
+                self.write({"status": "error", "message": "缺少必要参数: friend_id"})
+                return
+
+            # 双向删除好友关系
             self.session.query(Friendship).filter(
-                (Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)
+                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
+                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
             ).delete(synchronize_session=False)
 
             # 同步删除MongoDB中的消息
-            self.mongo.chat_messages.delete_many({
+            await self.mongo.chat_messages.delete_many({
                 "$or": [
                     {"from_user_id": user_id, "to_user_id": friend_id},
                     {"from_user_id": friend_id, "to_user_id": user_id}
@@ -233,11 +243,12 @@ class DeleteFriendHandler(tornado.web.RequestHandler):
             })
 
             self.session.commit()
-            self.write({"status": "success"})
+            self.write({"status": "success", "message": "好友删除成功"})
 
         except Exception as e:
             self.session.rollback()
-            self.write({"status": "error", "error": str(e)})
+            self.set_status(500)
+            self.write({"status": "error", "message": str(e)})
 
         finally:
             self.session.remove()
