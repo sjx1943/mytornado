@@ -246,7 +246,6 @@
         
         <!-- 评价区域 -->
         <div class="comments-section" id="comment-section">
-            <h3>用户评价</h3>
             
             {% if user_id and product.user_id != user_id %}
             <button id="write-review-btn" class="btn btn-secondary" style="margin-bottom: 20px;">发表评价</button>
@@ -347,7 +346,7 @@
                         } else {
                             commentsList.innerHTML = data.comments.map(comment => {
                                 const deleteButtonHtml = (currentUserId === productOwnerId)
-                                    ? `<button class="btn btn-secondary delete-comment-btn" data-comment-id="${comment.id}" style="float: right;">删除</button>`
+                                    ? `<button class="btn btn-danger btn-sm delete-comment-btn" data-comment-id="${comment.id}" style="float: right; padding: 2px 8px; font-size: 12px;">删除</button>`
                                     : '';
 
                                 return `

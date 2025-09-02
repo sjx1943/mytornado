@@ -16,7 +16,7 @@ class Comment(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('xu_user.id'), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
-    content = Column(String(500), nullable=False)
+    text = Column(String(500), nullable=False)
     rating = Column(Float, nullable=False, default=5.0)  # 评分 1-5
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -25,13 +25,13 @@ class Comment(Base):
     # user = relationship('User', back_populates='comments')
     # product = relationship('Product', back_populates='comments')
 
-    def __init__(self, user_id, product_id, content, rating=5.0):
+    def __init__(self, user_id, product_id, text, rating=5.0):
         self.user_id = user_id
         self.product_id = product_id
-        self.content = content
+        self.text = text
         self.rating = rating
 
     def __repr__(self):
         return f"<Comment(id={self.id}, user_id={self.user_id}, product_id={self.product_id}, rating={self.rating})>"
 
-# Base.metadata.create_all(engine)
+#Base.metadata.create_all(engine)

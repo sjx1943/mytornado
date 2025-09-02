@@ -3,7 +3,6 @@
 #吉他 指弹练习指法生成
 
 import random
-import tornado
 
 
 def generate_random_numbers():
