@@ -178,11 +178,11 @@ class ElseHomePageHandler(tornado.web.RequestHandler):
                 self.write("User not found")
                 return
 
-            # 获取当前登录用户对象
-            current_user = None
-            current_user_id = self.get_secure_cookie("user_id")
-            if current_user_id:
-                current_user = self.session.query(User).filter_by(id=int(current_user_id)).first()
+            # 获取当前登录用户ID
+            current_user_id_val = None
+            current_user_cookie = self.get_secure_cookie("user_id")
+            if current_user_cookie:
+                current_user_id_val = int(current_user_cookie)
 
             products = self.session.query(Product).filter_by(user_id=user_id).all()
 
@@ -190,7 +190,7 @@ class ElseHomePageHandler(tornado.web.RequestHandler):
                         products=products,
                         username=user.username,
                         user_id=user_id,
-                        current_user=current_user  # 直接传递User对象或None
+                        current_user_id=current_user_id_val
                         )
 
         except ValueError:

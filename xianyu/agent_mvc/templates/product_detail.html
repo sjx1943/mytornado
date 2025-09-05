@@ -204,11 +204,11 @@
                 </div>
                 
                 <div class="seller-info">
-                    <strong>卖家信息：</strong>
+                    <strong>卖家主页：</strong>
                     {% if product.user_id == user_id %}
                         <a href="/home_page" class="seller-link">{{ uploader.username }}（我的店铺）</a>
                     {% else %}
-                        <a href="/else_home_page?user_id={{ product.user_id }}" class="seller-link">{{ uploader.username }}</a>
+                        <a href="/profile/{{ product.user_id }}" class="seller-link">{{ uploader.username }}</a>
                     {% end %}
                 </div>
                 

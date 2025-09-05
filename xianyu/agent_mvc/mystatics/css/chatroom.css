@@ -359,3 +359,9 @@ body, html {
     background: #f5f5f5;
     border: none;
 }
+
+/* 拉黑状态的视觉提示 */
+.friend-item[data-status="blocked"] .friend-name {
+    color: #999;
+    text-decoration: line-through;
+}

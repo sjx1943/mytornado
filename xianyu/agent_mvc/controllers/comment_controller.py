@@ -76,18 +76,21 @@ class CommentHandler(tornado.web.RequestHandler):
             content = self.get_argument("content")
             rating = float(self.get_argument("rating", 5.0))
 
+            from models.blacklist import Blacklist
+
+# ... (inside CommentHandler.post method)
             product = self.session.query(Product).filter_by(id=product_id).first()
             if not product:
                 self.write(json.dumps({'success': False, 'error': '商品不存在'}))
                 return
 
-            # 检查是否被拉黑 (保留此逻辑)
-            friendship = self.session.query(Friendship).filter(
-                ((Friendship.user_id == user.id) & (Friendship.friend_id == product.user_id)) |
-                ((Friendship.user_id == product.user_id) & (Friendship.friend_id == user.id))
+            # Check if the product owner has blocked the commenter
+            is_blocked = self.session.query(Blacklist).filter_by(
+                blocker_id=product.user_id,
+                blocked_id=user.id
             ).first()
 
-            if friendship and friendship.status == 'blocked':
+            if is_blocked:
                 self.write(json.dumps({'success': False, 'error': '您已被卖家拉黑，无法评价'}))
                 return
 

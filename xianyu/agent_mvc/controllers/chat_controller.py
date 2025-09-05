@@ -15,6 +15,8 @@ from tornado.websocket import WebSocketHandler
 import logging
 from bson.objectid import ObjectId
 from models.friendship import Friendship
+from models.blacklist import Blacklist
+
 Session = sessionmaker(bind=engine)
 connections = {}
 
@@ -112,6 +114,21 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             if not all([target_user_id, message_content]):
                 self.write_message(json.dumps({"error": "缺少必要参数"}))
                 return
+
+            # 定向检查拉黑状态
+            session = scoped_session(Session)
+            try:
+                # 检查发送方是否已拉黑接收方
+                if session.query(Blacklist).filter_by(blocker_id=from_user_id, blocked_id=target_user_id).first():
+                    self.write_message(json.dumps({"status": "error", "error": "您已将对方拉黑，无法发送消息"}))
+                    return
+
+                # 检查接收方是否已拉黑发送方
+                if session.query(Blacklist).filter_by(blocker_id=target_user_id, blocked_id=from_user_id).first():
+                    self.write_message(json.dumps({"status": "error", "error": "您已被对方拉黑，无法发送消息"}))
+                    return
+            finally:
+                session.remove()
 
             # 使用中国时区
             china_tz = datetime.timezone(datetime.timedelta(hours=8))
@@ -216,16 +233,19 @@ class ChatHandler(tornado.web.RequestHandler):
             self.session.rollback()
             logging.error(f"提交好友关系失败: {e}")
 
-        # 第三步：查询更新后的好友列表
+        # Step 3: Query the updated friend list
         friends = []
         friendships = self.session.query(Friendship).filter_by(user_id=user_id).all()
 
         for friendship in friendships:
             friend = self.session.query(User).filter_by(id=friendship.friend_id).first()
             if friend:
+                # Check if the friend is blocked by the current user
+                is_blocked = self.session.query(Blacklist).filter_by(blocker_id=user_id, blocked_id=friend.id).first() is not None
                 friends.append({
                     'id': friend.id,
-                    'username': friend.username
+                    'username': friend.username,
+                    'status': 'blocked' if is_blocked else 'active'
                 })
 
         self.render("chat_room.html",
@@ -303,13 +323,14 @@ class SendMessageAPIHandler(tornado.web.RequestHandler):
             data = json.loads(self.request.body)
             friend_id = int(data["friend_id"])
 
-            # 检查是否被拉黑
-            friendship = self.session.query(Friendship).filter(
-                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
-                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
-            ).first()
+            # 定向检查拉黑状态
+            # 检查发送方是否已拉黑接收方
+            if self.session.query(Blacklist).filter_by(blocker_id=user_id, blocked_id=friend_id).first():
+                self.write({"status": "error", "error": "您已将对方拉黑，无法发送消息"})
+                return
 
-            if friendship and friendship.status == 'blocked':
+            # 检查接收方是否已拉黑发送方
+            if self.session.query(Blacklist).filter_by(blocker_id=friend_id, blocked_id=user_id).first():
                 self.write({"status": "error", "error": "您已被对方拉黑，无法发送消息"})
                 return
             

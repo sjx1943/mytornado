@@ -1,0 +1,15 @@
+{
+  "context": {
+    "includeDirectories": ["./docs"]
+  },
+  "aliases": {
+    "cr": "review -role='You are a senior Python developer with expertise in web frameworks like Tornado, WebSocket communication, and database optimization. Your review should focus on code quality, performance, security, and adherence to best practices.' -context=@git:staged",
+    "finish_today": "作为AI助手，我的目标是完成今日的收尾工作。我将执行以下四项操作：\n1. 我会请求您列出今日完成的待办事项，并据此更新GEMINI.md中的待办列表。\n2. 我会向您请求今日开发进程的一句话总结，然后将其写入@docs/index.md中，对应今日日期（xxxx-x-x）后面。\n3. 我将利用“cr”命令执行提交前的代码审查。\n4. 我将以“ser {{今日日期}}”作为信息创建本地提交，并将其推送至远程仓库。"
+  },
+  "tools": {
+    "guitar_tab_generator": {
+      "command": ["python", "tools/guitar.py"],
+      "description": "这个工具能生成吉他的基础爬格子谱子。"
+    }
+  }
+}

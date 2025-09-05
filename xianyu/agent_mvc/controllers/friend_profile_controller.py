@@ -12,6 +12,8 @@ from base.base import engine
 Session = sessionmaker(bind=engine)
 
 
+from models.blacklist import Blacklist
+
 class BlockFriendHandler(tornado.web.RequestHandler):
     def initialize(self, mongo):
         self.mongo = mongo
@@ -20,33 +22,31 @@ class BlockFriendHandler(tornado.web.RequestHandler):
     def post(self):
         try:
             data = json.loads(self.request.body)
-            friend_id = int(data.get("friend_id"))
+            blocked_id = int(data.get("friend_id"))
             user_id_cookie = self.get_secure_cookie("user_id")
+
             if not user_id_cookie:
                 self.set_status(401)
                 self.write({"status": "error", "message": "请先登录"})
                 return
             
-            user_id = int(user_id_cookie.decode("utf-8"))
-            
-            # 查找好友关系
-            friendship = self.session.query(Friendship).filter(
-                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
-                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
+            blocker_id = int(user_id_cookie.decode("utf-8"))
+
+            # Check if the block entry already exists
+            existing_block = self.session.query(Blacklist).filter_by(
+                blocker_id=blocker_id,
+                blocked_id=blocked_id
             ).first()
 
-            if not friendship:
-                self.set_status(404)
-                self.write({"status": "error", "message": "好友关系不存在"})
-                return
-
-            # 更新状态
-            if friendship.status == 'active':
-                friendship.status = 'blocked'
-                message = '好友已拉黑'
+            if existing_block:
+                # If it exists, unblock the user by deleting the entry
+                self.session.delete(existing_block)
+                message = "已取消拉黑"
             else:
-                friendship.status = 'active'
-                message = '已取消拉黑'
+                # If it doesn't exist, block the user by creating a new entry
+                new_block = Blacklist(blocker_id=blocker_id, blocked_id=blocked_id)
+                self.session.add(new_block)
+                message = "好友已拉黑"
             
             self.session.commit()
             self.write({"status": "success", "message": message})
@@ -132,6 +132,16 @@ class FriendProfileHandler(tornado.web.RequestHandler):
             friend_id = int(data.get("friend_id"))
             user_id = int(data.get("user_id"))  # 从请求体中获取user_id
 
+            # Check if a block exists in either direction
+            is_blocked = self.session.query(Blacklist).filter(
+                ((Blacklist.blocker_id == user_id) & (Blacklist.blocked_id == friend_id)) |
+                ((Blacklist.blocker_id == friend_id) & (Blacklist.blocked_id == user_id))
+            ).first()
+
+            if is_blocked:
+                self.write({"success": False, "message": "操作失败，无法添加好友"})
+                return
+
             # 检查是否已经是好友
             existing_friendship = self.session.query(Friendship).filter(
                 (Friendship.user_id == user_id) &
@@ -158,13 +168,17 @@ class FriendProfileHandler(tornado.web.RequestHandler):
             self.session.remove()
 
     @tornado.gen.coroutine
-    def get(self):
-        friend_id = self.get_argument("friend_id", None)
+    def get(self, friend_id):
         user_id_cookie = self.get_secure_cookie("user_id")
         user_id = int(user_id_cookie.decode("utf-8")) if user_id_cookie else None
 
         if not friend_id:
             self.write("Invalid friend id")
+            return
+        
+        # 如果查看的是自己的主页，重定向到/home_page
+        if user_id and int(friend_id) == user_id:
+            self.redirect("/home_page")
             return
 
         try:
@@ -175,7 +189,17 @@ class FriendProfileHandler(tornado.web.RequestHandler):
                 self.write("Friend not found")
                 return
 
-            # 获取聊天消息
+            # Check friendship status
+            friendship = self.session.query(Friendship).filter(
+                (Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)
+            ).first()
+            is_friend = friendship is not None
+
+            # Check blacklist status (two-way check)
+            i_am_blocking = self.session.query(Blacklist).filter_by(blocker_id=user_id, blocked_id=friend_id).first() is not None
+            i_am_blocked = self.session.query(Blacklist).filter_by(blocker_id=friend_id, blocked_id=user_id).first() is not None
+
+            # Fetch chat messages
             messages = yield self.mongo.chat_messages.find({
                 "$or": [
                     {"from_user_id": user_id, "to_user_id": friend_id},
@@ -183,21 +207,24 @@ class FriendProfileHandler(tornado.web.RequestHandler):
                 ]
             }).sort("timestamp", 1).to_list(length=None)
 
-            # 格式化消息
+            # Format messages
             for msg in messages:
                 msg['_id'] = str(msg['_id'])
-                if isinstance(msg['timestamp'], datetime.datetime):
+                if isinstance(msg['timestamp'], datetime):
                     msg['timestamp'] = msg['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
 
-            # 获取好友产品
+            # Fetch friend's products
             products = self.session.query(Product).filter(Product.user_id == friend.id).all()
 
-            self.render("chat_room.html",
+            self.render("profile.html",
                         current_user=self.get_secure_cookie("username").decode("utf-8"),
-                        user_id=user_id,
+                        current_user_id=user_id,
                         friend=friend,
                         messages=messages,
-                        products=products
+                        products=products,
+                        is_friend=is_friend,
+                        i_am_blocking=i_am_blocking,
+                        i_am_blocked=i_am_blocked
                         )
 
         except Exception as e:

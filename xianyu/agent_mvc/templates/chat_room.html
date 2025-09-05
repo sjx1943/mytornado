@@ -34,15 +34,13 @@
     <!-- 中间区域 -->
     <div class="middle-section">
         <!-- 好友列表 -->
-        <div class="friend-list">
+        <div class="friend-list" id="friend-list-container">
             <div class="friend-list-header">我的好友</div>
             {% if friends %}
             {% for friend in friends %}
-            <div class="friend-item" data-friend-id="{{ friend['id'] }}">
+            <div class="friend-item" data-friend-id="{{ friend['id'] }}" data-status="{{ friend['status'] }}">
                 <span class="friend-name">{{ friend['username'] }}</span>
                 <span class="red-dot"></span>
-                <button class="delete-friend" data-friend-id="{{ friend['id'] }}">X</button>
-                <button class="block-friend" data-friend-id="{{ friend['id'] }}">拉黑</button>
             </div>
             {% end %}
             {% else %}
@@ -51,11 +49,20 @@
         </div>
 
         <!-- 消息区域 -->
-        <!-- 在body标签内添加右键菜单 -->
-        <div id="context-menu" class="context-menu">
+        <!-- 消息右键菜单 -->
+        <div id="message-context-menu" class="context-menu">
             <ul>
                 <li id="delete-selected">删除选中消息</li>
                 <li id="delete-all">删除所有消息</li>
+            </ul>
+        </div>
+        
+        <!-- 好友列表右键菜单 -->
+        <div id="friend-context-menu" class="context-menu">
+            <ul>
+                <li id="friend-menu-profile">查看主页</li>
+                <li id="friend-menu-block">拉黑</li>
+                <li id="friend-menu-delete">删除好友</li>
             </ul>
         </div>
 

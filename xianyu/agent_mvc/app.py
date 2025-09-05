@@ -57,7 +57,7 @@ def make_app():
         (r"/", MainHandler),
         (r"/main", MainHandler),
         (r"/home_page", HomePageHandler),
-        (r"/else_home_page", ElseHomePageHandler),
+        (r"/profile/([0-9]+)", FriendProfileHandler, dict(mongo=mongo)),
 
         (r"/login", LoginHandler),
         (r"/register", RegisterHandler),
@@ -84,7 +84,7 @@ def make_app():
         (r"/chat_room", ChatHandler, dict(mongo=mongo)),
         (r"/ws/chat_room", ChatWebSocketHandler, dict(mongo=mongo)),
         (r"/initiate_chat", InitiateChatHandler, dict(mongo=mongo)),
-        (r"/friend_profile", FriendProfileHandler, dict(mongo=mongo)),
+        (r"/api/add_friend", FriendProfileHandler, dict(mongo=mongo)),
         (r"/api/delete_friend", DeleteFriendHandler,dict(mongo=mongo)),
         (r"/api/block_friend", BlockFriendHandler, dict(mongo=mongo)),
         (r"/api/delete_messages", DeleteMessagesHandler, dict(mongo=mongo)),

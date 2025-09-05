@@ -28,6 +28,18 @@
         </div>
         {% end %}
     </div>
-    <a href="/chat_room?user_id={{ user_id }}">返回消息列表</a>
+    <div class="actions">
+        {% if i_am_blocked %}
+            <p class="blocked-message">您已被该用户拉黑。</p>
+        {% elif i_am_blocking %}
+            <button id="block-friend-btn" data-friend-id="{{ friend.id }}">取消拉黑</button>
+        {% elif is_friend %}
+            <button id="block-friend-btn" data-friend-id="{{ friend.id }}">拉黑</button>
+        {% else %}
+            <button id="add-friend-btn" data-friend-id="{{ friend.id }}" data-user-id="{{ current_user_id }}">添加好友</button>
+        {% end %}
+    </div>
+    <a href="/chat_room?user_id={{ current_user_id }}">返回消息列表</a>
+    <script src="{{ static_url('js/userInfo.js') }}"></script>
 </body>
 </html>
