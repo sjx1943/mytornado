@@ -255,22 +255,18 @@ class DeleteFriendHandler(tornado.web.RequestHandler):
                 self.write({"status": "error", "message": "缺少必要参数: friend_id"})
                 return
 
-            # 双向删除好友关系
-            self.session.query(Friendship).filter(
-                ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
-                ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
-            ).delete(synchronize_session=False)
+            # 单向删除好友关系
+            friendship_to_delete = self.session.query(Friendship).filter(
+                (Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)
+            ).first()
 
-            # 同步删除MongoDB中的消息
-            await self.mongo.chat_messages.delete_many({
-                "$or": [
-                    {"from_user_id": user_id, "to_user_id": friend_id},
-                    {"from_user_id": friend_id, "to_user_id": user_id}
-                ]
-            })
-
-            self.session.commit()
-            self.write({"status": "success", "message": "好友删除成功"})
+            if friendship_to_delete:
+                self.session.delete(friendship_to_delete)
+                self.session.commit()
+                self.write({"status": "success", "message": "好友删除成功"})
+            else:
+                self.set_status(404)
+                self.write({"status": "error", "message": "好友关系不存在"})
 
         except Exception as e:
             self.session.rollback()

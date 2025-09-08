@@ -39,20 +39,19 @@ class OrderHandler(tornado.web.RequestHandler):
 
             if order_id:
                 # 获取特定订单详情
-                order = self.session.query(Order).filter_by(id=order_id).first()
-                if not order:
+                order_details = self.session.query(Order, Product, User).join(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id).filter(Order.id == order_id).first()
+                
+                if not order_details:
                     self.write("订单不存在")
                     return
                 
+                order, product, buyer = order_details
+                seller = self.session.query(User).filter_by(id=product.user_id).first()
+
                 # 检查权限（只有买家或卖家能查看）
-                if order.buyer_id != user.id and order.seller_id != user.id:
+                if user.id != buyer.id and user.id != seller.id:
                     self.write("无权限查看此订单")
                     return
-                
-                # 获取相关信息
-                product = self.session.query(Product).filter_by(id=order.product_id).first()
-                buyer = self.session.query(User).filter_by(id=order.buyer_id).first()
-                seller = self.session.query(User).filter_by(id=order.seller_id).first()
                 
                 self.render('order_detail.html', 
                            order=order, 
@@ -64,28 +63,28 @@ class OrderHandler(tornado.web.RequestHandler):
                 # 获取用户的订单列表
                 order_type = self.get_argument("type", "all")  # all, buying, selling
                 
+                query = self.session.query(Order, Product, User).join(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id)
+
                 if order_type == "buying":
-                    orders = self.session.query(Order).filter_by(buyer_id=user.id).order_by(desc(Order.created_at)).all()
+                    query = query.filter(Order.user_id == user.id)
                 elif order_type == "selling":
-                    orders = self.session.query(Order).filter_by(seller_id=user.id).order_by(desc(Order.created_at)).all()
+                    query = query.filter(Product.user_id == user.id)
                 else:
-                    orders = self.session.query(Order).filter(
-                        or_(Order.buyer_id == user.id, Order.seller_id == user.id)
-                    ).order_by(desc(Order.created_at)).all()
+                    query = query.filter(or_(Order.user_id == user.id, Product.user_id == user.id))
+                
+                orders_result = query.order_by(desc(Order.created_at)).all()
                 
                 # 获取订单相关信息
                 orders_data = []
-                for order in orders:
-                    product = self.session.query(Product).filter_by(id=order.product_id).first()
-                    buyer = self.session.query(User).filter_by(id=order.buyer_id).first()
-                    seller = self.session.query(User).filter_by(id=order.seller_id).first()
+                for order, product, buyer in orders_result:
+                    seller = self.session.query(User).filter_by(id=product.user_id).first()
                     
                     orders_data.append({
                         'order': order,
                         'product': product,
                         'buyer': buyer,
                         'seller': seller,
-                        'is_buyer': order.buyer_id == user.id
+                        'is_buyer': order.user_id == user.id
                     })
                 
                 self.render('orders_list.html', orders=orders_data, order_type=order_type, current_user=user)
@@ -126,21 +125,17 @@ class OrderHandler(tornado.web.RequestHandler):
             # 创建订单
             new_order = Order(
                 product_id=product_id,
-                buyer_id=user.id,
-                seller_id=product.user_id,
+                user_id=user.id,
                 quantity=quantity,
-                price=product.price,
-                shipping_address=shipping_address,
-                contact_phone=contact_phone,
                 order_note=order_note
             )
             
             self.session.add(new_order)
             
-            # 更新商品库存
-            product.quantity -= quantity
-            if product.quantity == 0:
-                product.status = "已售完"
+            # # 更新商品库存 - 逻辑移至确认收货步骤
+            # product.quantity -= quantity
+            # if product.quantity == 0:
+            #     product.status = "已售完"
             
             self.session.commit()
             
@@ -168,7 +163,8 @@ class OrderHandler(tornado.web.RequestHandler):
                 return
 
             # 只有卖家可以更新订单状态
-            if order.seller_id != user.id:
+            product = self.session.query(Product).filter_by(id=order.product_id).first()
+            if not product or product.user_id != user.id:
                 self.write(json.dumps({'success': False, 'error': '只有卖家可以更新订单状态'}))
                 return
 
@@ -210,7 +206,7 @@ class OrderHandler(tornado.web.RequestHandler):
                 return
 
             # 只有买家可以取消订单，且订单状态必须是pending
-            if order.buyer_id != user.id:
+            if order.user_id != user.id:
                 self.write(json.dumps({'success': False, 'error': '只有买家可以取消订单'}))
                 return
                 
@@ -298,7 +294,7 @@ class ConfirmTransactionHandler(tornado.web.RequestHandler):
                 return
 
             # 只有买家可以确认收货
-            if order.buyer_id != user.id:
+            if order.user_id != user.id:
                 self.write(json.dumps({'success': False, 'error': '只有买家可以确认收货'}))
                 return
             

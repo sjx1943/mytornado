@@ -334,15 +334,24 @@ class SendMessageAPIHandler(tornado.web.RequestHandler):
                 self.write({"status": "error", "error": "您已被对方拉黑，无法发送消息"})
                 return
             
-            # 检查对方是否已将自己删除，如果是，则重新添加
+            # 检查对方是否已将自己删除，如果是，则恢复好友关系并清空聊天记录
             reverse_friendship = self.session.query(Friendship).filter(
                 (Friendship.user_id == friend_id) & (Friendship.friend_id == user_id)
             ).first()
 
             if not reverse_friendship:
+                # 恢复好友关系
                 new_friendship = Friendship(user_id=friend_id, friend_id=user_id)
                 self.session.add(new_friendship)
                 self.session.commit()
+                
+                # 同时清空双方的聊天记录
+                yield self.mongo.chat_messages.delete_many({
+                    "$or": [
+                        {"from_user_id": user_id, "to_user_id": friend_id},
+                        {"from_user_id": friend_id, "to_user_id": user_id}
+                    ]
+                })
 
             temp_id = data.get("tempId")
 

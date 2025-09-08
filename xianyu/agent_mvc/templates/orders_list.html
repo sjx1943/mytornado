@@ -27,7 +27,7 @@
                             <img src="{{ static_url('images/' + item['product'].image) }}" alt="{{ item['product'].name }}">
                             <div class="product-info">
                                 <a href="/product/detail/{{ item['product'].id }}">{{ item['product'].name }}</a>
-                                <p>价格: ¥{{ item['order'].price }}</p>
+                                <p>价格: ¥{{ item['product'].price }}</p>
                                 <p>数量: {{ item['order'].quantity }}</p>
                             </div>
                             <div class="order-actions">

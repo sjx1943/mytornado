@@ -9,9 +9,49 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-function scrollToBottom() {
+function scrollToBottom(smooth = false) {
     const container = document.getElementById('message-content-container');
-    if(container) container.scrollTop = container.scrollHeight;
+    if (container) {
+        if (smooth) {
+            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        } else {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+}
+
+function showNewMessageNotification() {
+    let notification = document.getElementById('new-message-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'new-message-notification';
+        notification.textContent = '↓ 新消息';
+        notification.style.cssText = `
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+        `;
+        document.querySelector('.message-area').appendChild(notification);
+        notification.addEventListener('click', () => {
+            scrollToBottom(true);
+            notification.style.display = 'none';
+        });
+    }
+    notification.style.display = 'block';
+}
+
+function hideNewMessageNotification() {
+    const notification = document.getElementById('new-message-notification');
+    if (notification) {
+        notification.style.display = 'none';
+    }
 }
 
 // --- Core Application Logic ---
@@ -38,8 +78,80 @@ function initEventListeners() {
         });
     });
 
+    document.getElementById('toggle-friend-list')?.addEventListener('click', () => {
+        document.getElementById('friend-list-container').classList.toggle('collapsed');
+    });
+
+    const container = document.getElementById('message-content-container');
+    if (container) {
+        container.addEventListener('scroll', () => {
+            if (container.scrollHeight - container.clientHeight <= container.scrollTop + 1) {
+                hideNewMessageNotification();
+            }
+        }, { passive: true });
+    }
+
     initFriendListContextMenu();
     initMessageContextMenu();
+    initAutoResizeAndDrag(); // Initialize new features
+}
+
+function initAutoResizeAndDrag() {
+    const friendList = document.getElementById('friend-list-container');
+    const dragHandle = document.getElementById('drag-handle');
+    const BREAKPOINT = 992; // Bootstrap's lg breakpoint
+
+    // Debounce function to limit resize event firing
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Auto-collapse based on window size
+    const handleResize = () => {
+        if (window.innerWidth < BREAKPOINT) {
+            friendList.classList.add('collapsed');
+        } else {
+            friendList.classList.remove('collapsed');
+        }
+    };
+
+    window.addEventListener('resize', debounce(handleResize, 100));
+    handleResize(); // Initial check
+
+    // Drag-to-resize logic
+    if (dragHandle) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            document.body.classList.add('is-resizing');
+
+            const startX = e.clientX;
+            const startWidth = friendList.offsetWidth;
+
+            const doDrag = function(e) {
+                const newWidth = startWidth + e.clientX - startX;
+                // Get min/max from CSS properties
+                const minWidth = parseInt(window.getComputedStyle(friendList).minWidth, 10);
+                const maxWidth = parseInt(window.getComputedStyle(friendList).maxWidth, 10);
+
+                if (newWidth > minWidth && newWidth < maxWidth) {
+                    friendList.style.width = `${newWidth}px`;
+                }
+            };
+
+            const stopDrag = function() {
+                document.body.classList.remove('is-resizing');
+                document.removeEventListener('mousemove', doDrag);
+                document.removeEventListener('mouseup', stopDrag);
+            };
+
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+        });
+    }
 }
 
 function selectFriend(friendId, element) {
@@ -52,6 +164,7 @@ function selectFriend(friendId, element) {
 
     loadMessages(friendId).then(() => {
         markMessagesRead(friendId);
+        scrollToBottom(); // When selecting a friend, always scroll to the bottom.
         startChatPolling();
     });
 }
@@ -78,8 +191,10 @@ function fetchNewData() {
 
 function fetchNewMessagesForCurrentChat() {
     if (!currentFriendId) return;
+
     loadMessages(currentFriendId).then(() => {
         markMessagesRead(currentFriendId);
+        scrollToBottom(true); // Always scroll to bottom smoothly on new message
     });
 }
 
@@ -97,29 +212,53 @@ function loadMessages(friendId) {
                     appendMessage(isSelf ? '我' : msg.from_username, msg.message, isSelf, msg.timestamp, msg._id);
                 });
             }
-            scrollToBottom();
+            // Ensure we scroll to the bottom after messages are loaded and rendered
+            setTimeout(() => scrollToBottom(), 0);
         });
 }
 
 function appendMessage(sender, content, isSelf, timestamp, messageId) {
     const messageContent = document.getElementById('message-content');
-    if (!messageContent || document.querySelector(`.message-bubble[data-message-id="${messageId}"]`)) return;
+    // 如果消息已经存在，则不重复添加
+    if (!messageContent || document.querySelector(`.message[data-message-id="${messageId}"]`)) return;
 
     const noMessages = messageContent.querySelector('.no-messages');
     if (noMessages) noMessages.remove();
 
+    // 创建一个包裹层来处理对齐
+    const msgWrapper = document.createElement('div');
+    msgWrapper.className = isSelf ? 'message-wrapper sent' : 'message-wrapper received';
+    
+    // 创建消息气泡本身
     const msgDiv = document.createElement('div');
-    msgDiv.className = isSelf ? 'message-bubble self' : 'message-bubble';
+    msgDiv.className = 'message';
     msgDiv.dataset.messageId = messageId;
-    msgDiv.innerHTML = `
-        <div class="message-info">
-            <span class="sender">${sender}</span>
-            <span class="time">${timestamp}</span>
-        </div>
-        <div class="message-text">${content}</div>
-    `;
-    messageContent.appendChild(msgDiv);
-    scrollToBottom();
+
+    // 创建消息文本内容
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-text';
+    contentDiv.textContent = content; // 使用 textContent 来防止XSS
+
+    // 创建时间戳
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'message-time';
+    // 格式化时间戳，只显示时和分
+    try {
+        const date = new Date(timestamp);
+        if (!isNaN(date)) {
+            timeSpan.textContent = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        } else {
+            timeSpan.textContent = timestamp; // 如果格式不对，显示原始字符串
+        }
+    } catch (e) {
+        timeSpan.textContent = timestamp; // 解析出错，显示原始字符串
+    }
+
+    msgDiv.appendChild(contentDiv);
+    msgDiv.appendChild(timeSpan);
+    msgWrapper.appendChild(msgDiv);
+    
+    messageContent.appendChild(msgWrapper);
 }
 
 function sendMessage() {

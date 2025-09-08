@@ -6,7 +6,10 @@
     <link rel="stylesheet" href="{{ static_url('css/footer.css') }}">
 </head>
 <body>
-    <h1>我的闲置物品</h1>
+    <div class="header-actions">
+        <h1>我的闲置物品</h1>
+        <a href="/orders" class="btn btn-primary">我的订单</a>
+    </div>
     <div class="product-list">
         {% for product in products %}
             <div class="product-item">
