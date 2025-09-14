@@ -12,7 +12,7 @@ from tornado.web import Application, RequestHandler, UIModule, StaticFileHandler
 from controllers.main_controller import MainHandler, MyStaticFileHandler
 # from controllers.message_details_controller import MessageDetailsHandler
 from controllers.auth_controller import LoginHandler, RegisterHandler, ForgotPasswordHandler, ResetPasswordHandler, Loginmodule, Registmodule, Forgotmodule
-from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler, UpdateProductStatusHandler, DeleteProductHandler
+from controllers.product_controller import ProductUploadHandler, HomePageHandler, ProductDetailHandler, ProductListHandler, ElseHomePageHandler, UpdateProductStatusHandler, DeleteProductHandler, PhysicalDeleteProductHandler, AdminDashboardHandler
 from controllers.chat_controller import ChatWebSocketHandler, ChatHandler, MessageAPIHandler, SendMessageAPIHandler, MarkMessagesReadHandler, DeleteMessagesHandler, UnreadCountHandler
 from controllers.friend_profile_controller import FriendProfileHandler, DeleteFriendHandler, InitiateChatHandler, BlockFriendHandler
 from controllers.search_controller import SearchHandler
@@ -67,6 +67,9 @@ def make_app():
         (r"/product_list", ProductListHandler),
         (r"/product/detail/([0-9]+)", ProductDetailHandler),
         
+        # 管理员面板
+        (r"/admin/dashboard", AdminDashboardHandler),
+        
         # 评价相关路由
         (r"/api/comments", CommentHandler),
         (r"/api/comments/([0-9]+)", CommentHandler),
@@ -76,6 +79,12 @@ def make_app():
         (r"/orders", OrderHandler),
         (r"/orders/([0-9]+)", OrderHandler),
         (r"/create_order", CreateOrderHandler),
+        (r"/api/order/([0-9]+)/confirm", ConfirmTransactionHandler),
+
+        # 商品状态相关路由
+        (r"/api/product/([0-9]+)/status", UpdateProductStatusHandler),
+        (r"/api/product/([0-9]+)/delete", DeleteProductHandler),
+        (r"/api/admin/product/([0-9]+)/physical_delete", PhysicalDeleteProductHandler, dict(app_settings=settings)),
         
         # 聊天和消息相关路由
         (r"/api/messages", MessageAPIHandler, dict(mongo=mongo)),

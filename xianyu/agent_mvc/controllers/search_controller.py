@@ -18,11 +18,10 @@ class SearchHandler(tornado.web.RequestHandler):
             logging.info(f"搜索查询: {query}")
 
             # 使用 LIKE 进行模糊搜索
-            search_results = self.session.query(Product).filter(
-                Product.name.like(f"%{query}%") |
-                Product.description.like(f"%{query}%") |
-                Product.tag.like(f"%{query}%")
-            ).all()
+            query = self.session.query(Product).filter(
+            Product.name.like(f'%{keyword}%'),
+            Product.status != '已删除'
+        )
 
             # 将结果转换为 JSON 格式
             results = []

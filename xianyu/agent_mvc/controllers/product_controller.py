@@ -7,6 +7,8 @@ from base.base import engine
 from models.user import User
 import json
 import re
+from models.comment import Comment
+from models.order import Order
 
 Session = sessionmaker(bind=engine)
 
@@ -23,6 +25,12 @@ class ProductDetailHandler(tornado.web.RequestHandler):
     def get(self, product_id):
 
         product = self.session.query(Product).filter_by(id=product_id).first()
+        
+        if not product or product.status == '已删除':
+            self.set_status(404)
+            self.write("商品不存在或已被删除")
+            return
+            
         uploader = self.session.query(User).filter_by(id=product.user_id).first()
         user = self.get_current_user()
 
@@ -116,11 +124,15 @@ class ProductListHandler(tornado.web.RequestHandler):
         self.session = scoped_session(Session)
 
     def get(self):
-        tags= self.get_arguments("tag")  # 获取多个tag参数
-        if tags:
-            products = self.session.query(Product).filter(Product.tag.in_(tags)).all()
-        else:
-            products = self.session.query(Product).all()
+        tags = self.get_arguments("tag")
+        query = self.session.query(Product).filter(
+            Product.status == '在售',
+            Product.quantity > 0
+        )
+        if tags and 'all' not in tags:
+            query = query.filter(Product.tag.in_(tags))
+        
+        products = query.all()
 
         products_list = [
             {
@@ -151,7 +163,11 @@ class HomePageHandler(tornado.web.RequestHandler):
         if user_id:
             user_id = user_id.decode('utf-8')
             user = self.session.query(User).filter_by(id=user_id).first()
-            products_list = self.session.query(Product).filter_by(user_id=user_id).all()
+            products_list = self.session.query(Product).filter(
+                Product.user_id == user_id,
+                Product.status == '在售',
+                Product.quantity > 0
+            ).all()
 
             # 修改这行，添加 user_id 参数
             self.render("home_page.html", products=products_list, username=user.username, user_id=user_id)
@@ -245,8 +261,9 @@ class UpdateProductStatusHandler(tornado.web.RequestHandler):
 
 
 class DeleteProductHandler(tornado.web.RequestHandler):
+    """软删除商品处理器"""
     def initialize(self):
-        self.session = scoped_session(Session)
+        self.session = Session()
 
     def get_current_user(self):
         user_id = self.get_secure_cookie("user_id")
@@ -261,21 +278,98 @@ class DeleteProductHandler(tornado.web.RequestHandler):
                 self.write(json.dumps({'success': False, 'error': '请先登录'}))
                 return
 
-            product = self.session.query(Product).filter_by(id=product_id).first()
+            product = self.session.query(Product).filter_by(id=product_id, user_id=user.id).first()
             if not product:
-                self.write(json.dumps({'success': False, 'error': '商品不存在'}))
+                self.write(json.dumps({'success': False, 'error': '商品不存在或无权限'}))
                 return
 
-            if product.user_id != user.id:
-                self.write(json.dumps({'success': False, 'error': '您没有权限删除此商品'}))
-                return
-
-            self.session.delete(product)
+            product.status = '已删除'
             self.session.commit()
-            self.write(json.dumps({'success': True, 'message': '商品删除成功'}))
+            self.write(json.dumps({'success': True, 'message': '商品已删除'}))
 
         except Exception as e:
             self.session.rollback()
             self.write(json.dumps({'success': False, 'error': str(e)}))
         finally:
-            self.session.remove()
+            self.session.close()
+
+class PhysicalDeleteProductHandler(tornado.web.RequestHandler):
+    """
+    物理删除商品处理器（高风险操作）
+    """
+    def initialize(self, app_settings):
+        self.app_settings = app_settings
+        self.session = Session()
+
+    def get_current_user(self):
+        # 在实际应用中，这里应该增加管理员权限校验
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
+
+    def post(self, product_id):
+        try:
+            user = self.get_current_user()
+            if not user: # 应该添加管理员验证
+                self.write(json.dumps({'success': False, 'error': '权限不足'}))
+                return
+
+            product = self.session.query(Product).filter_by(id=product_id).first()
+            if not product:
+                self.write(json.dumps({'success': False, 'error': '商品不存在'}))
+                return
+
+            # 1. 检查是否存在不可删除的关联数据（如订单）
+            order_exists = self.session.query(Order).filter_by(product_id=product.id).first()
+            if order_exists:
+                self.write(json.dumps({
+                    'success': False,
+                    'error': '无法删除，因为该商品存在关联的订单记录。请先将商品状态设为“已删除”。'
+                }))
+                return
+
+            # 2. 删除可删除的关联数据
+            self.session.query(Comment).filter_by(product_id=product.id).delete()
+            
+            # 3. 删除图片文件
+            if product.image:
+                image_path = os.path.join(self.app_settings["upload_path"], product.image)
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+
+            # 4. 删除商品本身
+            self.session.delete(product)
+            
+            self.session.commit()
+            self.write(json.dumps({'success': True, 'message': '商品已从数据库中永久删除'}))
+
+        except Exception as e:
+            self.session.rollback()
+            self.write(json.dumps({'success': False, 'error': f'操作失败: {str(e)}'}))
+        finally:
+            self.session.close()
+
+class AdminDashboardHandler(tornado.web.RequestHandler):
+    """管理员仪表盘处理器"""
+    def initialize(self):
+        self.session = Session()
+
+    def get_current_user(self):
+        # 在实际应用中，这里应该增加管理员权限校验
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            return self.session.query(User).filter_by(id=int(user_id)).first()
+        return None
+
+    def get(self):
+        user = self.get_current_user()
+        if not user: # 应该添加管理员验证
+            self.redirect("/login")
+            return
+        
+        deleted_products = self.session.query(Product).filter_by(status='已删除').all()
+        self.render("admin_dashboard.html", products=deleted_products)
+
+    def on_finish(self):
+        self.session.close()

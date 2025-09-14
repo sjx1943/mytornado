@@ -61,17 +61,35 @@ class OrderHandler(tornado.web.RequestHandler):
                            current_user=user)
             else:
                 # 获取用户的订单列表
-                order_type = self.get_argument("type", "all")  # all, buying, selling
+                order_type = self.get_argument("type", "all")  # all, buying, selling, cancelled
+                keyword = self.get_argument("keyword", "")
+                date_str = self.get_argument("date", "")
                 
+                # 基础查询，关联订单、商品、买家信息
                 query = self.session.query(Order, Product, User).join(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id)
 
+                # 根据订单类型筛选
                 if order_type == "buying":
-                    query = query.filter(Order.user_id == user.id)
+                    query = query.filter(Order.user_id == user.id, Order.status != 'cancelled')
                 elif order_type == "selling":
-                    query = query.filter(Product.user_id == user.id)
-                else:
-                    query = query.filter(or_(Order.user_id == user.id, Product.user_id == user.id))
-                
+                    query = query.filter(Product.user_id == user.id, Order.status != 'cancelled')
+                elif order_type == "cancelled":
+                    query = query.filter(or_(Order.user_id == user.id, Product.user_id == user.id), Order.status == 'cancelled')
+                else: # "all"
+                    query = query.filter(or_(Order.user_id == user.id, Product.user_id == user.id), Order.status != 'cancelled')
+
+                # 根据关键词搜索
+                if keyword:
+                    query = query.filter(Product.name.ilike(f"%{keyword}%"))
+
+                # 根据日期搜索
+                if date_str:
+                    try:
+                        search_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        query = query.filter(func.date(Order.created_at) == search_date)
+                    except ValueError:
+                        pass  # 忽略无效的日期格式
+
                 orders_result = query.order_by(desc(Order.created_at)).all()
                 
                 # 获取订单相关信息
@@ -87,7 +105,12 @@ class OrderHandler(tornado.web.RequestHandler):
                         'is_buyer': order.user_id == user.id
                     })
                 
-                self.render('orders_list.html', orders=orders_data, order_type=order_type, current_user=user)
+                self.render('orders_list.html', 
+                            orders=orders_data, 
+                            order_type=order_type, 
+                            current_user=user,
+                            keyword=keyword,
+                            date=date_str)
                 
         except Exception as e:
             self.write(f"获取订单失败: {str(e)}")
@@ -169,16 +192,22 @@ class OrderHandler(tornado.web.RequestHandler):
                 return
 
             new_status = self.get_argument("status")
-            valid_statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'completed', 'cancelled']
+            valid_statuses = ['confirmed', 'shipped'] 
             
             if new_status not in valid_statuses:
-                self.write(json.dumps({'success': False, 'error': '无效的订单状态'}))
+                self.write(json.dumps({'success': False, 'error': '无效的操作'}))
+                return
+
+            # 验证订单状态转换逻辑
+            if new_status == 'confirmed' and order.status != 'pending':
+                self.write(json.dumps({'success': False, 'error': '只有待确认的订单才能被确认'}))
+                return
+            
+            if new_status == 'shipped' and order.status != 'confirmed':
+                self.write(json.dumps({'success': False, 'error': '只有已确认的订单才能发货'}))
                 return
 
             order.status = new_status
-            
-            if new_status == 'completed':
-                order.completed_at = datetime.now()
             
             self.session.commit()
             
@@ -310,7 +339,7 @@ class ConfirmTransactionHandler(tornado.web.RequestHandler):
             if product:
                 product.quantity -= order.quantity
                 if product.quantity <= 0:
-                    product.status = "已售完"
+                    product.status = "已下架"
 
             self.session.commit()
 

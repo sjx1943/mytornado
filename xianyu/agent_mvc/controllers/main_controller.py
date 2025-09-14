@@ -2,6 +2,7 @@ from itertools import product
 from typing import Optional, Awaitable
 from models.product import Product
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy import desc
 from base.base import engine
 import tornado
 from models.user import User
@@ -41,10 +42,13 @@ class MainHandler(tornado.web.RequestHandler):
             raise tornado.web.Finish()
 
     def get_products(self):
-        # 获取商品列表...
-        products = self.session.query(Product).all()
+        # 获取商品列表，确保只显示在售且数量大于0的商品
+        products = self.session.query(Product).filter(
+            Product.status == '在售',
+            Product.quantity > 0
+        ).order_by(desc(Product.upload_time)).all()
 
-        logging.info(f"Retrieved {len(products)} products from the 数据库.")
+        logging.info(f"查询到 {len(products)} 件符合条件的商品。")
 
         products_list = [
             {
