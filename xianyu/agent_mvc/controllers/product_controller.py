@@ -163,14 +163,16 @@ class HomePageHandler(tornado.web.RequestHandler):
         if user_id:
             user_id = user_id.decode('utf-8')
             user = self.session.query(User).filter_by(id=user_id).first()
-            products_list = self.session.query(Product).filter(
-                Product.user_id == user_id,
-                Product.status == '在售',
-                Product.quantity > 0
-            ).all()
+            
+            # 获取用户的所有商品
+            all_products = self.session.query(Product).filter(
+                Product.user_id == user_id
+            ).order_by(Product.upload_time.desc()).all()
 
-            # 修改这行，添加 user_id 参数
-            self.render("home_page.html", products=products_list, username=user.username, user_id=user_id)
+            self.render("home_page.html", 
+                        products=all_products, 
+                        username=user.username, 
+                        user_id=user_id)
         else:
             self.redirect("/login")
 
@@ -245,9 +247,24 @@ class UpdateProductStatusHandler(tornado.web.RequestHandler):
 
             data = json.loads(self.request.body)
             new_status = data.get("status")
+            new_quantity = data.get("quantity")
+
             if new_status not in ["在售", "已下架"]:
                 self.write(json.dumps({'success': False, 'error': '无效的商品状态'}))
                 return
+
+            # 如果是重新上架，必须确保数量大于0
+            if new_status == "在售":
+                if new_quantity is None:
+                    # 如果前端没有传递数量，就检查现有数量
+                    if product.quantity <= 0:
+                        self.write(json.dumps({'success': False, 'error': '商品数量为0，请先更新数量再上架'}))
+                        return
+                elif int(new_quantity) <= 0:
+                    self.write(json.dumps({'success': False, 'error': '上架失败，商品数量必须大于0'}))
+                    return
+                else:
+                    product.quantity = int(new_quantity)
 
             product.status = new_status
             self.session.commit()

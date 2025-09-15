@@ -8,6 +8,7 @@
 (完成). 交易成功后，双方确认交易，买家更新数据库中的商品数量和状态。商品数量为0时，商品自动下架，用户在“我的”页面可以对上传商品进行状态变更、上下架或删除。
 (完成). 缺少订单闭环逻辑，卖家无法对买家创建的订单进行下一步的操作，导致一直为pending状态，无法区分订单状态（创建、完成、取消等），导致最后商品数量未随交易准确更新。
 (完成). 主页上会显示数量为“0”或“已下架”的商品。
+(完成). 缺少对“已下架”、商品数量为0、已软删除商品的管理UI，导致这部分商品对商品上传者也不可见，只能在数据库表中检索到对应的商品。
 8. 首页“编辑“按钮点击无响应，可以考虑删除或增加相应自有商品的编辑功能。
 9. 增加游客访问逻辑，游客可以查看商品详情、发布商品、查看活动信息等，但不能发布评论、购买商品、添加好友等。
 10. 下单后的弹出的错误贴这里。
@@ -95,7 +96,7 @@ class ProductHandler(BaseHandler):  # 控制器类使用PascalCase
 - HTML模板使用 templates/ 目录，遵循 Tornado 模板语法
 - CSS/JS 存放于 mystatics/，使用模块化开发
 - 微信小程序页面存放于 miniprogram/pages/，遵循小程序开发规范
-
+- UI optimization strategy is to use a responsive, multi-column grid layout with card-based design. Each card should have uniformly sized images (using `object-fit: cover`), clear status indicators, and distinct sections for information and actions to ensure a clean, consistent, and user-friendly interface.
 
 ## 项目结构
 
