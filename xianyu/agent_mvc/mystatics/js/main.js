@@ -47,7 +47,7 @@ function loadProducts(tag = 'all') {
                         <p>商品上传者ID：${product.user_id}</p>
                         ${window.currentUserId ? `<p>当前用户ID：${window.currentUserId}</p>` : ''}
                         ${product.user_id === window.currentUserId ?
-                          `<button class="edit-product" data-id="${product.id}">编辑</button>` : ''}
+                          `<a href="/product/edit/${product.id}" class="edit-product button-link">编辑</a>` : ''}
                     </div>
                 `;
                 productListDiv.appendChild(productDiv);

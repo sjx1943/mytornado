@@ -119,6 +119,90 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         self.session.close()
 
 
+class ProductEditHandler(tornado.web.RequestHandler):
+    def initialize(self, app_settings):
+        self.app_settings = app_settings
+        self.session = Session()
+
+    def get_current_user(self):
+        user_id = self.get_secure_cookie("user_id")
+        if user_id:
+            # Make sure to decode user_id and convert to int for consistent comparison
+            return self.session.query(User).filter_by(id=int(user_id.decode('utf-8'))).first()
+        return None
+
+    async def get(self, product_id):
+        user = self.get_current_user()
+        if not user:
+            self.redirect("/login")
+            return
+
+        product = self.session.query(Product).filter_by(id=product_id).first()
+
+        if not product:
+            self.set_status(404)
+            self.write("商品不存在")
+            return
+
+        # Verify ownership
+        if product.user_id != user.id:
+            self.set_status(403)
+            self.write("您没有权限编辑此商品")
+            return
+
+        self.render("publish_product.html", product=product)
+
+    async def post(self, product_id):
+        user = self.get_current_user()
+        if not user:
+            self.set_status(401)
+            self.write("请先登录")
+            return
+
+        product = self.session.query(Product).filter_by(id=product_id).first()
+
+        if not product:
+            self.set_status(404)
+            self.write("商品不存在")
+            return
+
+        if product.user_id != user.id:
+            self.set_status(403)
+            self.write("您没有权限编辑此商品")
+            return
+
+        # Get updated data from form
+        data = {
+            'name': self.get_argument("name"),
+            'description': self.get_argument("description"),
+            'price': float(self.get_argument("price")),
+            'quantity': int(self.get_argument("quantity")),
+            'tag': self.get_argument("tag")
+        }
+
+        # Handle optional image update
+        images = self.request.files.get("images", [])
+        if images and images[0]:
+            image = images[0]
+            filename = image["filename"]
+            filepath = os.path.join(self.app_settings["static_path"], "images", filename)
+            with open(filepath, "wb") as f:
+                f.write(image["body"])
+            data['image'] = filename
+
+        # Update product in database
+        updated_product = await Product.update_product(self.session, int(product_id), data)
+
+        if updated_product:
+            self.redirect("/home_page") # Redirect to user's product management page
+        else:
+            self.set_status(500)
+            self.write("更新商品失败")
+
+    def on_finish(self):
+        self.session.close()
+
+
 class ProductListHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.session = scoped_session(Session)

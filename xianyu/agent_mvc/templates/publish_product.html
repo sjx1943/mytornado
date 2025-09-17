@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Publish Product</title>
+    <title>{% if product %}编辑商品{% else %}发布商品{% end %}</title>
+    <link rel="stylesheet" href="{{ static_url('css/main.css') }}">
 </head>
 <body>
-    <h1>Publish Product</h1>
-        <form action="/product/upload" method="post" enctype="multipart/form-data">
+    <h1>{% if product %}编辑商品{% else %}发布商品{% end %}</h1>
+    <form action="{% if product %}/product/edit/{{ product.id }}{% else %}/product/upload{% end %}" method="post" enctype="multipart/form-data">
         {% module xsrf_form_html() %}
         <label for="name">商品名称:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+        <input type="text" id="name" name="name" value="{{ product.name if product else '' }}" required><br><br>
 
         <label for="description">商品描述:</label><br>
-        <textarea id="description" name="description" required></textarea><br><br>
+        <textarea id="description" name="description" required>{{ product.description if product else '' }}</textarea><br><br>
 
         <label for="price">价格:</label><br>
-        <input type="number" id="price" name="price" step="0.01" required><br><br>
+        <input type="number" id="price" name="price" step="0.01" value="{{ product.price if product else '' }}" required><br><br>
 
         <label for="quantity">数量:</label><br>
-        <input type="number" id="quantity" name="quantity" required><br><br>
+        <input type="number" id="quantity" name="quantity" value="{{ product.quantity if product else '' }}" required><br><br>
+
+        <label for="tag">标签:</label><br>
+        <input type="text" id="tag" name="tag" value="{{ product.tag if product else '' }}" required><br><br>
 
         <label for="image">商品图片:</label><br>
-        <input type="file" id="image" name="image" accept="image/*" required><br><br>
+        {% if product %}
+            <p>当前图片: <img src="{{ static_url('images/' + product.image) }}" alt="{{ product.name }}" width="100"></p>
+            <p>如需更换，请上传新图片:</p>
+        {% end %}
+        <input type="file" id="image" name="images" accept="image/*" {% if not product %}required{% end %}><br><br>
 
-        <input type="submit" value="发布">
+        <input type="submit" value="{% if product %}更新商品{% else %}发布商品{% end %}">
     </form>
     {% include "foot.html" %}
-</body>
 </body>
 </html>

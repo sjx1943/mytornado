@@ -42,6 +42,22 @@ class Product(Base):
         else:
             return None
 
+    @classmethod
+    async def update_product(cls, session: Session, product_id: int, data: dict):
+        """更新商品信息"""
+        try:
+            product = session.query(cls).filter_by(id=product_id).first()
+            if product:
+                for key, value in data.items():
+                    setattr(product, key, value)
+                session.commit()
+                return product
+            return None
+        except Exception as e:
+            session.rollback()
+            print(f"Error updating product: {e}")
+            return None
+
     def __repr__(self):
         return f"<Product(id={self.id}, name={self.name}, price={self.price}, user_id={self.user_id}, tag={self.tag})>"
 
