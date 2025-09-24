@@ -23,6 +23,7 @@ class Product(Base):
     quantity = Column(Integer)
     status = Column(String(64))
     upload_time = Column(DateTime, server_default=func.now())   #本期新增
+    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
 
     def __init__(self, name, description, price, user_id, tag, image, quantity, status):
         self.name = name
@@ -66,7 +67,12 @@ class ProductImage(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String(255), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    product = relationship("Product", back_populates="images")
+
+    def __init__(self, filename, product_id):
+        self.filename = filename
+        self.product_id = product_id
 
 # Create the products table after xu_user table
-# if __name__ == '__main__':
-#     Base.metadata.create_all(engine)
+#if __name__ == '__main__':
+#    Base.metadata.create_all(engine)

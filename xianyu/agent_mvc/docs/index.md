@@ -83,28 +83,11 @@
 2025-9-14:修复了订单逻辑和商品展示逻辑。
 2025-09-15 重构并优化了‘我的商品’页面的UI布局和管理逻辑。
 2025-09-17 实现了用户在主页上编辑自己发布商品的功能。
+2025-09-23 修复了游客浏览的逻辑，完成了多图片上传功能的开发和多个前端Bug的修复。
+2025-09-24 删除了/MVC，修复了消息右键删除菜单的问题，但右键菜单位置有待优化。
+
 源代码见：https://github.com/sjx1943/mytornado/tree/master/xianyu/agent_mvc
-为节省token，尽量只返回有修改过的文件。
 
-### 步骤 5: 创建视图（views/templates）
-
-- 示例：`views/login.html`
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-    <form action="/login" method="post">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-        
-    </form>
-</body>
-</html>
 ```
 
 ### 步骤 6: 设置路由和启动应用

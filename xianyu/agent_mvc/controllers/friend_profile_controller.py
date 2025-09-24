@@ -128,9 +128,15 @@ class FriendProfileHandler(tornado.web.RequestHandler):
 
     async def post(self):
         try:
+            user_id_cookie = self.get_secure_cookie("user_id")
+            if not user_id_cookie:
+                self.set_status(401)
+                self.write({"success": False, "message": "请先登录"})
+                return
+
+            user_id = int(user_id_cookie.decode("utf-8"))
             data = json.loads(self.request.body)
             friend_id = int(data.get("friend_id"))
-            user_id = int(data.get("user_id"))  # 从请求体中获取user_id
 
             # Check if a block exists in either direction
             is_blocked = self.session.query(Blacklist).filter(

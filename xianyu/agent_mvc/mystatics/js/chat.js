@@ -308,13 +308,36 @@ function initMessageContextMenu() {
     document.addEventListener('click', () => contextMenu.style.display = 'none');
 
     messageContent.addEventListener('contextmenu', function(e) {
-        const targetMessage = e.target.closest('.message-bubble');
+        const targetMessage = e.target.closest('.message');
         if (targetMessage) {
             e.preventDefault();
             targetMessage.classList.toggle('selected');
+            
+            // Calculate menu position based on message element and container boundaries
+            const messageRect = targetMessage.getBoundingClientRect();
+            const containerRect = messageContent.getBoundingClientRect();
+            
+            // Default to right side of message
+            let menuLeft = messageRect.right + 5;
+            
+            // Check if menu would go beyond right boundary
+            if (menuLeft + contextMenu.offsetWidth > containerRect.right) {
+                // Position menu to the left of message instead
+                menuLeft = messageRect.left - contextMenu.offsetWidth - 5;
+            }
+            
+            // Ensure menu stays within container horizontally
+            menuLeft = Math.max(containerRect.left, Math.min(menuLeft, containerRect.right - contextMenu.offsetWidth));
+            
+            // Position menu vertically at center of message
+            let menuTop = messageRect.top + (messageRect.height / 2) - (contextMenu.offsetHeight / 2);
+            
+            // Ensure menu stays within container vertically
+            menuTop = Math.max(containerRect.top, Math.min(menuTop, containerRect.bottom - contextMenu.offsetHeight));
+            
             contextMenu.style.display = 'block';
-            contextMenu.style.left = `${e.pageX}px`;
-            contextMenu.style.top = `${e.pageY}px`;
+            contextMenu.style.left = `${menuLeft}px`;
+            contextMenu.style.top = `${menuTop}px`;
         }
     });
 
@@ -374,7 +397,7 @@ function initFriendListContextMenu() {
 
 
 function deleteSelectedMessages() {
-    const selected = document.querySelectorAll('.message-bubble.selected');
+    const selected = document.querySelectorAll('.message.selected');
     if (selected.length === 0) return;
     if (confirm(`确定删除选中的 ${selected.length} 条消息吗？`)) {
         const messageIds = Array.from(selected).map(msg => msg.dataset.messageId);
@@ -384,7 +407,7 @@ function deleteSelectedMessages() {
 
 function deleteAllMessages() {
     if (confirm(`确定删除与该好友的所有聊天记录吗？`)) {
-        const allMessages = document.querySelectorAll('.message-bubble');
+        const allMessages = document.querySelectorAll('.message');
         const messageIds = Array.from(allMessages).map(msg => msg.dataset.messageId);
         deleteMessagesFromServer(messageIds);
     }
@@ -401,10 +424,11 @@ function deleteMessagesFromServer(messageIds) {
     .then(data => {
         if (data.status === 'success') {
             messageIds.forEach(id => {
-                document.querySelector(`.message-bubble[data-message-id="${id}"]`)?.remove();
+                document.querySelector(`.message[data-message-id="${id}"]`)?.remove();
             });
-            if (document.querySelectorAll('.message-bubble').length === 0) {
-                document.getElementById('message-content').innerHTML = '<div class="no-messages">暂无消息</div>';
+            // Reload messages for current friend instead of showing "暂无消息"
+            if (currentFriendId) {
+                loadMessages(currentFriendId);
             }
         }
     });

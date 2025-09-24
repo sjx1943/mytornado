@@ -23,7 +23,6 @@ class ProductDetailHandler(tornado.web.RequestHandler):
         return None
 
     def get(self, product_id):
-
         product = self.session.query(Product).filter_by(id=product_id).first()
         
         if not product or product.status == '已删除':
@@ -33,13 +32,19 @@ class ProductDetailHandler(tornado.web.RequestHandler):
             
         uploader = self.session.query(User).filter_by(id=product.user_id).first()
         user = self.get_current_user()
+        images = self.session.query(ProductImage).filter_by(product_id=product_id).all()
 
         if user:
             user_id = user.id
         else:
             user_id = None
 
-        self.render('product_detail.html', product=product, uploader=uploader, user_id=user_id, product_id=product_id)
+        self.render('product_detail.html', 
+                  product=product, 
+                  uploader=uploader, 
+                  user_id=user_id, 
+                  product_id=product_id,
+                  images=images)
 
 class ProductUploadHandler(tornado.web.RequestHandler):
     def initialize(self, app_settings):
@@ -51,62 +56,74 @@ class ProductUploadHandler(tornado.web.RequestHandler):
         if not user_id:
             self.redirect("/login")
             return
-        self.render("publish_product.html")
+        self.render("publish_product.html", product=None)
 
     #上传商品...
     def post(self):
-        # Retrieve product data from the request
-        name = self.get_argument("name")
-        description = self.get_argument("description")
-        price = float(self.get_argument("price"))
-        quantity = int(self.get_argument("quantity"))
-        tag = self.get_argument("tag")  # Get the tag from the form
-        images = self.request.files.get("images", [])
-
-        if not images:
-            self.set_status(400)
-            self.write({"error": "Missing 'image' argument"})
-            return
-
-        # Retrieve the user_id from the current logged-in user
         user_id = self.get_secure_cookie("user_id")
-        if user_id is None:
-            self.set_status(400)
-            self.write({'error': 'User not logged in'})
+        if not user_id:
+            self.set_status(401)
+            self.write({'error': '请先登录'})
             return
 
-        # Validate product data
-        if self.validate_product_data(name, description, price, images, quantity):
-            # Create a new product without image
+        try:
+            name = self.get_argument("name")
+            description = self.get_argument("description")
+            price = float(self.get_argument("price"))
+            quantity = int(self.get_argument("quantity"))
+            tag = self.get_argument("tag")
+            images = self.request.files.get("images", [])
+
+            if not images:
+                self.set_status(400)
+                self.write({"error": "请至少上传一张图片"})
+                return
+            
+            if len(images) > 9:
+                self.set_status(400)
+                self.write({"error": "最多只能上传9张图片"})
+                return
+
+            # 1. 创建商品，初始没有封面图
             new_product = Product(
                 name=name,
                 description=description,
                 price=price,
-                user_id=user_id,
-                tag=tag,  # Use the tag from the form
-                image="",  # Temporarily set image as an empty string
+                user_id=int(user_id.decode('utf-8')),
+                tag=tag,
+                image="",  # 稍后设置
                 quantity=quantity,
                 status="在售"
             )
             self.session.add(new_product)
-            self.session.commit()
+            self.session.flush()  # 使用 flush 来获取 new_product.id
 
-            # Save images and update the product image field
-            for image in images:
-                filename = image["filename"]
-                filepath = os.path.join(self.app_settings["static_path"], "images", filename)
+            # 2. 处理并保存图片
+            image_filenames = []
+            for i, image in enumerate(images):
+                filename = f"{new_product.id}_{i}_{image['filename']}"
+                filepath = os.path.join(self.app_settings["upload_path"], filename)
                 with open(filepath, "wb") as f:
                     f.write(image["body"])
-                new_product.image = filename
-                self.session.add(new_product)
-                self.session.commit()
+                
+                # 将所有图片信息存入 ProductImage 表
+                product_image = ProductImage(filename=filename, product_id=new_product.id)
+                self.session.add(product_image)
+                image_filenames.append(filename)
 
-            self.write(json.dumps({'product_id': new_product.id}))
-        else:
-            self.set_status(400)
-            self.write({'error': 'Invalid product data'})
+            # 3. 将第一张图片设为封面
+            if image_filenames:
+                new_product.image = image_filenames[0]
 
-        self.redirect("/home_page")
+            self.session.commit()
+            self.redirect(f"/product/detail/{new_product.id}")
+
+        except Exception as e:
+            self.session.rollback()
+            self.set_status(500)
+            self.write({'error': f'上传失败: {str(e)}'})
+        finally:
+            self.session.close()
 
     def validate_product_data(self, name, description, price, images, quantity):
             # 验证产品数据是否合法
@@ -138,7 +155,7 @@ class ProductEditHandler(tornado.web.RequestHandler):
             return
 
         product = self.session.query(Product).filter_by(id=product_id).first()
-
+        
         if not product:
             self.set_status(404)
             self.write("商品不存在")
@@ -150,57 +167,107 @@ class ProductEditHandler(tornado.web.RequestHandler):
             self.write("您没有权限编辑此商品")
             return
 
-        self.render("publish_product.html", product=product)
+        # 获取商品的图片
+        images = self.session.query(ProductImage).filter_by(product_id=product_id).all()
+
+        self.render("publish_product.html", product=product, images=images)
 
     async def post(self, product_id):
         user = self.get_current_user()
         if not user:
             self.set_status(401)
-            self.write("请先登录")
+            self.write(json.dumps({'error': '请先登录'}))
             return
 
         product = self.session.query(Product).filter_by(id=product_id).first()
-
         if not product:
             self.set_status(404)
-            self.write("商品不存在")
+            self.write(json.dumps({'error': '商品不存在'}))
             return
 
         if product.user_id != user.id:
             self.set_status(403)
-            self.write("您没有权限编辑此商品")
+            self.write(json.dumps({'error': '您没有权限编辑此商品'}))
             return
 
-        # Get updated data from form
-        data = {
-            'name': self.get_argument("name"),
-            'description': self.get_argument("description"),
-            'price': float(self.get_argument("price")),
-            'quantity': int(self.get_argument("quantity")),
-            'tag': self.get_argument("tag")
-        }
+        try:
+            # 1. 更新商品文本信息
+            product.name = self.get_argument("name")
+            product.description = self.get_argument("description")
+            product.price = float(self.get_argument("price"))
+            product.quantity = int(self.get_argument("quantity"))
+            product.tag = self.get_argument("tag")
 
-        # Handle optional image update
-        images = self.request.files.get("images", [])
-        if images and images[0]:
-            image = images[0]
-            filename = image["filename"]
-            filepath = os.path.join(self.app_settings["static_path"], "images", filename)
-            with open(filepath, "wb") as f:
-                f.write(image["body"])
-            data['image'] = filename
+            # 2. 处理图片删除
+            delete_ids = self.get_arguments("delete_images")
+            if delete_ids:
+                # 查询要删除的图片对象
+                images_to_delete = self.session.query(ProductImage).filter(ProductImage.id.in_([int(id) for id in delete_ids])).all()
+                
+                is_cover_deleted = False
+                for img in images_to_delete:
+                    # 检查删除的是否是封面图
+                    if product.image == img.filename:
+                        is_cover_deleted = True
 
-        # Update product in database
-        updated_product = await Product.update_product(self.session, int(product_id), data)
+                    # 从文件系统删除
+                    image_path = os.path.join(self.app_settings["upload_path"], img.filename)
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+                    
+                    # 从数据库删除
+                    self.session.delete(img)
+                
+                # 如果封面被删了，需要重新指定一个
+                if is_cover_deleted:
+                    remaining_image = self.session.query(ProductImage).filter(
+                        ProductImage.product_id == product.id,
+                        ~ProductImage.id.in_([int(id) for id in delete_ids])
+                    ).first()
+                    
+                    if remaining_image:
+                        product.image = remaining_image.filename
+                    else:
+                        product.image = "" # 没有剩余图片了
 
-        if updated_product:
-            self.redirect("/home_page") # Redirect to user's product management page
-        else:
+            # 3. 处理新上传的图片
+            new_images = self.request.files.get("images", [])
+            if new_images:
+                # 获取当前最大索引，以避免文件名冲突
+                last_image = self.session.query(ProductImage).filter_by(product_id=product.id).order_by(ProductImage.id.desc()).first()
+                start_index = 0
+                if last_image and '_' in last_image.filename:
+                    try:
+                        # 从 "productid_index_filename" 中解析出 index
+                        start_index = int(last_image.filename.split('_')[1]) + 1
+                    except (ValueError, IndexError):
+                        start_index = self.session.query(ProductImage).filter_by(product_id=product.id).count()
+
+                for i, image in enumerate(new_images, start=start_index):
+                    filename = f"{product.id}_{i}_{image['filename']}"
+                    filepath = os.path.join(self.app_settings["upload_path"], filename)
+                    with open(filepath, "wb") as f:
+                        f.write(image["body"])
+                    
+                    product_image = ProductImage(filename=filename, product_id=product.id)
+                    self.session.add(product_image)
+
+                # 如果之前没有封面图，将新上传的第一张设为封面
+                if not product.image:
+                    first_new_image = self.session.query(ProductImage).filter_by(product_id=product.id).first()
+                    if first_new_image:
+                        product.image = first_new_image.filename
+
+
+            self.session.commit()
+            self.redirect(f"/product/detail/{product.id}")
+
+        except Exception as e:
+            self.session.rollback()
             self.set_status(500)
-            self.write("更新商品失败")
-
-    def on_finish(self):
-        self.session.close()
+            self.write(json.dumps({'error': f'更新失败: {str(e)}'}))
+        finally:
+            self.session.close()
 
 
 class ProductListHandler(tornado.web.RequestHandler):
