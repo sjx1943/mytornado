@@ -38,18 +38,26 @@ class OrderHandler(tornado.web.RequestHandler):
                 return
 
             if order_id:
-                # 获取特定订单详情
-                order_details = self.session.query(Order, Product, User).join(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id).filter(Order.id == order_id).first()
+                # 获取特定订单详情, 使用 outerjoin 确保商品被删除的订单也能显示
+                order_details = self.session.query(Order, Product, User).outerjoin(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id).filter(Order.id == order_id).first()
                 
                 if not order_details:
                     self.write("订单不存在")
                     return
                 
                 order, product, buyer = order_details
-                seller = self.session.query(User).filter_by(id=product.user_id).first()
+                seller = None
+                if product:
+                    seller = self.session.query(User).filter_by(id=product.user_id).first()
 
                 # 检查权限（只有买家或卖家能查看）
-                if user.id != buyer.id and user.id != seller.id:
+                can_view = False
+                if user.id == buyer.id:
+                    can_view = True
+                elif seller and user.id == seller.id:
+                    can_view = True
+
+                if not can_view:
                     self.write("无权限查看此订单")
                     return
                 
@@ -65,8 +73,8 @@ class OrderHandler(tornado.web.RequestHandler):
                 keyword = self.get_argument("keyword", "")
                 date_str = self.get_argument("date", "")
                 
-                # 基础查询，关联订单、商品、买家信息
-                query = self.session.query(Order, Product, User).join(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id)
+                # 基础查询，使用 outerjoin 确保商品被删除的订单也能显示
+                query = self.session.query(Order, Product, User).outerjoin(Product, Order.product_id == Product.id).join(User, Order.user_id == User.id)
 
                 # 根据订单类型筛选
                 if order_type == "buying":
@@ -150,6 +158,7 @@ class OrderHandler(tornado.web.RequestHandler):
                 product_id=product_id,
                 user_id=user.id,
                 quantity=quantity,
+                product_name=product.name,  # 保存当前商品名称快照
                 order_note=order_note
             )
             

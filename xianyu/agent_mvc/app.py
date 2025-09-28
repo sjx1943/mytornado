@@ -120,5 +120,5 @@ if __name__ == "__main__":
     
     app = make_app()
     app.listen(args.port)
-    print(f"后端已在端口 {args.port} 启动")
+    print(f"后端已在端口 {args.port} 启动,可通过远程开发工具运行服务")
     tornado.ioloop.IOLoop.current().start()

@@ -446,14 +446,23 @@ class DeleteProductHandler(tornado.web.RequestHandler):
                 self.write(json.dumps({'success': False, 'error': '请先登录'}))
                 return
 
-            product = self.session.query(Product).filter_by(id=product_id, user_id=user.id).first()
-            if not product:
-                self.write(json.dumps({'success': False, 'error': '商品不存在或无权限'}))
+            # 检查是否存在未完成的关联订单
+            uncompleted_order = self.session.query(Order).filter(
+                Order.product_id == product_id,
+                Order.status.notin_(['已完成', '已取消'])
+            ).first()
+
+            if uncompleted_order:
+                self.write(json.dumps({'success': False, 'error': '操作失败，该商品尚有关联的未完成订单。'}))
                 return
 
-            product.status = '已删除'
-            self.session.commit()
-            self.write(json.dumps({'success': True, 'message': '商品已删除'}))
+            product = self.session.query(Product).filter_by(id=product_id, user_id=user.id).first()
+            if product:
+                product.status = '已删除'
+                self.session.commit()
+                self.write(json.dumps({'success': True}))
+            else:
+                self.write(json.dumps({'success': False, 'error': '商品不存在或权限不足'}))
 
         except Exception as e:
             self.session.rollback()
@@ -479,7 +488,9 @@ class PhysicalDeleteProductHandler(tornado.web.RequestHandler):
     def post(self, product_id):
         try:
             user = self.get_current_user()
-            if not user: # 应该添加管理员验证
+            # 增加管理员验证，只允许特定用户访问
+            if not user or user.username != 'sjx1943':
+                self.set_status(403)
                 self.write(json.dumps({'success': False, 'error': '权限不足'}))
                 return
 
@@ -488,29 +499,29 @@ class PhysicalDeleteProductHandler(tornado.web.RequestHandler):
                 self.write(json.dumps({'success': False, 'error': '商品不存在'}))
                 return
 
-            # 1. 检查是否存在不可删除的关联数据（如订单）
-            order_exists = self.session.query(Order).filter_by(product_id=product.id).first()
-            if order_exists:
-                self.write(json.dumps({
-                    'success': False,
-                    'error': '无法删除，因为该商品存在关联的订单记录。请先将商品状态设为“已删除”。'
-                }))
+            # 确保只有软删除状态的商品才能被物理删除
+            if product.status != '已删除':
+                self.write(json.dumps({'success': False, 'error': '操作失败，该商品不处于“已删除”状态。'}))
                 return
 
-            # 2. 删除可删除的关联数据
-            self.session.query(Comment).filter_by(product_id=product.id).delete()
-            
-            # 3. 删除图片文件
-            if product.image:
-                image_path = os.path.join(self.app_settings["upload_path"], product.image)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
+            # 在删除商品前，解除其与所有订单的关联
+            self.session.query(Order).filter_by(product_id=product_id).update({"product_id": None})
 
-            # 4. 删除商品本身
-            self.session.delete(product)
+            # 删除商品图片
+            images = self.session.query(ProductImage).filter_by(product_id=product_id).all()
+            for image in images:
+                try:
+                    image_path = os.path.join(self.settings['upload_path'], image.image_url)
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+                except Exception as e:
+                    print(f"删除图片失败: {e}") # 记录日志
             
+            # 删除商品和关联图片记录
+            self.session.query(ProductImage).filter_by(product_id=product_id).delete()
+            self.session.delete(product)
             self.session.commit()
-            self.write(json.dumps({'success': True, 'message': '商品已从数据库中永久删除'}))
+            self.write(json.dumps({'success': True}))
 
         except Exception as e:
             self.session.rollback()
@@ -532,8 +543,10 @@ class AdminDashboardHandler(tornado.web.RequestHandler):
 
     def get(self):
         user = self.get_current_user()
-        if not user: # 应该添加管理员验证
-            self.redirect("/login")
+        # 增加管理员验证，只允许特定用户访问
+        if not user or user.username != 'sjx1943':
+            self.set_header('Content-Type', 'text/html; charset=UTF-8')
+            self.write("<script>alert('暂无相关权限'); window.history.back();</script>")
             return
         
         deleted_products = self.session.query(Product).filter_by(status='已删除').all()

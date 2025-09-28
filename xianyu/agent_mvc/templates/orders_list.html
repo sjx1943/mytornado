@@ -42,12 +42,21 @@
                             <span>状态: {{ status_map.get(item['order'].status, item['order'].status) }}</span>
                         </div>
                         <div class="order-body">
-                            <img src="{{ static_url('images/' + item['product'].image) }}" alt="{{ item['product'].name }}">
-                            <div class="product-info">
-                                <a href="/orders/{{ item['order'].id }}">{{ item['product'].name }}</a>
-                                <p>价格: ¥{{ item['product'].price }}</p>
-                                <p>数量: {{ item['order'].quantity }}</p>
-                            </div>
+                            {% if item['product'] %}
+                                <img src="{{ static_url('images/' + item['product'].image) }}" alt="{{ item['product'].name }}">
+                                <div class="product-info">
+                                    <a href="/orders/{{ item['order'].id }}">{{ item['product'].name }}</a>
+                                    <p>价格: ¥{{ item['product'].price }}</p>
+                                    <p>数量: {{ item['order'].quantity }}</p>
+                                </div>
+                            {% else %}
+                                <img src="{{ static_url('images/placeholder.png') }}" alt="商品已下架">
+                                <div class="product-info">
+                                    <a href="/orders/{{ item['order'].id }}">{{ item['order'].product_name }} (商品已下架)</a>
+                                    <p>价格: N/A</p>
+                                    <p>数量: {{ item['order'].quantity }}</p>
+                                </div>
+                            {% end %}
                             <div class="order-actions">
                                 <!-- 买家操作 -->
                                 {% if item['is_buyer'] %}
