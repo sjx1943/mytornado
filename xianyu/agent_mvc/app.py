@@ -38,10 +38,10 @@ def make_app():
     config = configparser.ConfigParser()
     config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
 
-    # 获取 MongoDB 连接信息
-    mongo_host = config.get('mongodb', 'host')
-    mongo_port = config.getint('mongodb', 'port')
-    mongo_db = config.get('mongodb', 'database')
+    # 优先从环境变量获取MongoDB连接信息，否则从配置文件读取
+    mongo_host = os.environ.get('MONGODB_HOST', config.get('mongodb', 'host'))
+    mongo_port = int(os.environ.get('MONGODB_PORT', config.getint('mongodb', 'port')))
+    mongo_db = os.environ.get('MONGODB_DATABASE', config.get('mongodb', 'database'))
 
     mongo = motor_tornado.MotorClient(f'mongodb://{mongo_host}:{mongo_port}')[mongo_db]
 

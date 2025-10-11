@@ -27,12 +27,14 @@
 git clone git@github.com:sjx1943/mytornado.git
 cd mytornado/xianyu/agent_mvc
 
-# 修改配置文件（数据库密码等）
-vim docker-compose.yml
+# 注意：为避免端口冲突，默认端口已调整。
+# Nginx: 8088, 8444 | MongoDB: 27019 | Redis: 6381
+# 如仍有冲突，请自行修改 docker-compose.yml 文件。
 
 # 启动服务
-docker-compose up -d
+docker compose up -d --build
 ```
+**网络问题提示**: 如果Docker构建过程中出现网络错误（如无法解析域名），请在 `Dockerfile` 中将 `apt-get` 的软件源更换为国内镜像源（如 `mirrors.aliyun.com`）。
 
 #### 方式二：本地手动部署
 # 创建虚拟环境并激活
@@ -88,7 +90,7 @@ class ProductHandler(BaseHandler):  # 控制器类使用PascalCase
 ├── .venv/                # 虚拟环境（不提交git）
 ├── .env                  # 环境变量（不提交git）
 ├── config.ini            # 项目配置文件
-├── requirements.txt      # Python依赖
+├── requirements.txt      # Python依赖 (包含cryptography, beautifulsoup4)
 ├── Dockerfile            # Docker配置
 ├── docker-compose.yml    # Docker Compose配置
 ├── nginx.conf            # Nginx反向代理配置
@@ -117,11 +119,11 @@ class ProductHandler(BaseHandler):  # 控制器类使用PascalCase
 
 # .env 文件
 # .env 文件配置示例
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=your_secure_password
-MYSQL_DB=xianyu_db
+MYSQ_HOST=localhost
+MYSQ_PORT=3306
+MYSQ_USER=root
+MYSQ_PASSWORD=your_secure_password
+MYSQ_DB=xianyu_db
 
 MONGODB_URI=mongodb://localhost:27017/chat_db
 REDIS_URL=redis://localhost:6379/0
@@ -141,7 +143,7 @@ LOG_LEVEL=INFO
 - 先单独测试智能体，再组合成团队
 - 使用async/await处理所有操作
 - 正确关闭模型客户端连接
-- 环境变量管理敏感信息
+- **优先使用环境变量**管理敏感信息，支持容器化部署。
 - 虚拟环境不提交到版本控制
 
 ### 数据完整性
@@ -198,7 +200,7 @@ LOG_LEVEL=INFO
 ### 3. 测试策略与工具
 
 1.  **后端API测试 (集成测试)**
-    - **工具**: `pytest` + `requests`
+    - **工具**: `pytest` + `requests` + `beautifulsoup4`
     - **策略**: 针对所有对外暴露的API接口编写测试用例，覆盖正常的业务场景、异常参数和边界条件。重点测试涉及多服务（MySQL, MongoDB, Redis）交互的接口。
 
 2.  **小程序端E2E测试 (端到端测试)**
@@ -228,6 +230,16 @@ LOG_LEVEL=INFO
 | | 2. 触发需登录操作 | 点击购买/评论/聊天时，提示登录 | P1 |
 
 ### 5. 测试执行与持续集成
-- **环境**: 准备独立的测试环境，使用与生产环境配置一致的数据库和服务器。
-- **执行**: 在每次代码合并到主分支前，自动触发所有API测试用例。小程序E2E测试可在每日构建时执行。
+- **环境**: 通过 `docker-compose.test.yml` 启动一个独立的、容器化的测试环境。
+- **执行**:
+  ```bash
+  # 确保本地虚拟环境已安装 pytest, requests, beautifulsoup4
+  pip install pytest requests beautifulsoup4
+
+  # 运行完整的测试流程
+  docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build && \
+  sleep 15 && \
+  pytest tests/test_api.py && \
+  docker compose -f docker-compose.yml -f docker-compose.test.yml down
+  ```
 - **CI/CD**: 建议将API测试集成到GitHub Actions等CI/CD流程中，确保代码质量。
