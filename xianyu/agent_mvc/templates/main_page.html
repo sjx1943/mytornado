@@ -31,7 +31,7 @@
             {% end %}
         </nav>
 
-        <div class="product-list" id="product-list">
+        <div class="product-list" id="product-list" style="padding-bottom: 60px;">
             <!-- 商品列表将通过 JavaScript 动态加载 -->
         </div>
     </div>
@@ -39,6 +39,6 @@
     {% include "foot.html" %}
 </div>
 
-<script type="module" src="{{ static_url('js/main.js') }}"></script>
+<script src="{{ static_url('js/main.js') }}"></script>
 <script src="{{ static_url('js/search.js') }}"></script>
 {% end %}

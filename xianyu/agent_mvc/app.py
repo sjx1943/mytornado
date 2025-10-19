@@ -23,6 +23,12 @@ import redis
 from models.friendship import Friendship
 from models.user import User
 
+# 404 Handler
+class NotFoundHandler(RequestHandler):
+    def prepare(self):
+        self.set_status(404)
+        self.render("404.html")
+
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), "mystatics"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
@@ -105,7 +111,9 @@ def make_app():
         ui_modules={'loginmodule': Loginmodule,
                     'registmodule': Registmodule,
                     'forgotmodule': Forgotmodule
-                    }, debug = True,
+                    }, 
+        debug = True,
+        default_handler_class=NotFoundHandler,
         **settings
     )
 
@@ -115,7 +123,7 @@ if __name__ == "__main__":
     
     # 解析命令行参数
     parser = argparse.ArgumentParser(description='Tornado Application')
-    parser.add_argument('--port', type=int, default=8000, help='Port to listen on')
+    parser.add_argument('--port', type=int, default=9000, help='Port to listen on')
     args = parser.parse_args()
     
     app = make_app()

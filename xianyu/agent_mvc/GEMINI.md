@@ -146,6 +146,11 @@ LOG_LEVEL=INFO
 - **优先使用环境变量**管理敏感信息，支持容器化部署。
 - 虚拟环境不提交到版本控制
 
+#### 前端开发最佳实践
+- **JavaScript模块作用域**: 当使用 `<script type="module">` 加载脚本时，其内部定义的函数和变量会存在于独立的模块作用域中，而非全局`window`对象。这会导致在HTML中通过内联事件处理器（如 `onclick="..."`）直接调用这些函数时，出现 `ReferenceError: function is not defined` 的错误。
+- **事件处理推荐方案**: 为避免上述作用域问题，推荐在JavaScript脚本内部使用 `element.addEventListener('click', functionName)` 的方式来绑定事件。这种方法将事件监听器直接附加到DOM元素上，无需将处理函数暴露到全局作用域，是更现代且健壮的事件处理方式。
+
+
 ### 数据完整性
 - **订单与商品解耦**: 为确保核心交易记录的永久性，订单（`orders`）与商品（`products`）采用“快照 + 软关联”模式。
   - **快照**: 创建订单时，必须将当时的商品核心信息（如 `product_name`）作为独立字段复制到 `orders` 表中。
